@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>My Orders | Biriyani Bliss</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,700;0,900;1,700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+{% load custom_filters %}
+<script>
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          primary: "#ee862b",
+          "primary-dark": "#c96f1a",
+          "bg-light": "#f8f7f6",
+          "bg-dark": "#221810",
+        },
+        fontFamily: { display: ["Be Vietnam Pro"] },
+        borderRadius: { DEFAULT: "1rem", lg: "2rem", xl: "3rem", full: "9999px" },
+      },
+    },
+  };
+</script>
+<style>
+  * { scroll-behavior: smooth; }
+
+  body {
+    background-color: #f8f7f6;
+    font-family: "Be Vietnam Pro", sans-serif;
+    background-image: radial-gradient(circle at 2px 2px, rgba(238,134,43,0.05) 1px, transparent 0);
+    background-size: 24px 24px;
+  }
+
+  /* ---- Hamburger ---- */
+  .hamburger span {
+    display: block; width: 24px; height: 2px;
+    background: #ee862b; border-radius: 4px;
+    transition: all 0.3s ease;
+    transform-origin: center;
+  }
+  .hamburger.open span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+  .hamburger.open span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+  /* ---- Mobile nav ---- */
+  #mobile-nav {
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.4s ease, opacity 0.3s ease;
+    opacity: 0;
+  }
+  #mobile-nav.open { max-height: 600px; opacity: 1; }
+
+  /* ---- Order cards ---- */
+  .order-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .order-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(238,134,43,0.15);
+  }
+
+  /* ---- Status badges animation ---- */
+  .status-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  /* ---- Section fade-in ---- */
+  .section-block { animation: fadeUp 0.5s ease both; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---- Scrollbar ---- */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #ee862b55; border-radius: 99px; }
+
+  /* ---- Empty state animation ---- */
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  /* ---- Filter tabs ---- */
+  .filter-tab {
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+  .filter-tab.active {
+    background: #ee862b;
+    color: #1e1b18;
+    font-weight: 800;
+  }
+  .filter-tab:not(.active):hover {
+    background: rgba(238,134,43,0.15);
+    color: #ee862b;
+  }
+</style>
+</head>
+<body class="text-slate-900 min-h-screen">
+
+<!-- ======================================================
+     HEADER / NAV
+====================================================== -->
+<header class="sticky top-0 z-50 w-full border-b border-amber-500/10 bg-[#f8f7f6]/90 backdrop-blur-md">
+  <div class="max-w-7xl mx-auto px-4 md:px-8 lg:px-16 py-4 flex items-center justify-between gap-4">
+
+    <!-- Logo -->
+    <a href="{% url 'public_dashboard' %}" class="flex items-center gap-2 text-amber-500 shrink-0">
+      <span class="material-symbols-outlined text-4xl">restaurant</span>
+      <h2 class="text-xl font-black uppercase tracking-tight leading-none">Biriyani<br/><span class="text-slate-800 text-base font-bold tracking-widest">BLISS</span></h2>
+    </a>
+
+    <!-- Desktop Nav -->
+    <nav class="hidden lg:flex items-center gap-8">
+      <a href="{% url 'public_dashboard' %}" class="flex items-center gap-1 text-sm font-medium hover:text-amber-500 transition-colors">
+        <span class="material-symbols-outlined text-lg">home</span> Home
+      </a>
+      <a href="{% url 'menu' %}" class="flex items-center gap-1 text-sm font-medium hover:text-amber-500 transition-colors">
+        <span class="material-symbols-outlined text-lg">menu_book</span> Menu
+      </a>
+      <a href="{% url 'public_dashboard' %}#how-to-order" class="flex items-center gap-1 text-sm font-medium hover:text-amber-500 transition-colors">
+        <span class="material-symbols-outlined text-lg">fact_check</span> How to Order
+      </a>
+      <a href="{% url 'public_dashboard' %}#offers" class="flex items-center gap-1 text-sm font-medium hover:text-amber-500 transition-colors">
+        <span class="material-symbols-outlined text-lg">local_offer</span> Offers
+      </a>
+      <a href="{% url 'order_list' %}" class="flex items-center gap-1 text-sm font-bold text-amber-500 border-b-2 border-amber-500 pb-1">
+        <span class="material-symbols-outlined text-lg">receipt_long</span> My Orders
+      </a>
+      <a href="{% url 'logout' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-amber-500/10 font-medium transition-colors">
+        <span class="material-symbols-outlined text-amber-500">logout</span> Logout
+      </a>
+    </nav>
+
+    <!-- Right actions -->
+    <div class="flex items-center gap-3">
+      <!-- Cart (with count) -->
+      <button id="cart-btn" onclick="window.location.href='{% url 'menu' %}'" class="relative flex size-10 items-center justify-center rounded-full bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-white transition-all">
+        <span class="material-symbols-outlined">shopping_cart</span>
+        <span id="cart-count" class="absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full bg-red-500 text-[10px] text-white font-black">0</span>
+      </button>
+      <!-- Profile -->
+      <a href="#" class="hidden md:flex size-10 items-center justify-center rounded-full bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-white transition-all">
+        <span class="material-symbols-outlined">person</span>
+      </a>
+      <!-- Hamburger -->
+      <button id="hamburger" class="hamburger flex flex-col gap-[6px] items-center justify-center size-10 rounded-full bg-amber-500/10 lg:hidden" onclick="toggleNav()">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Mobile Nav Drawer -->
+  <div id="mobile-nav" class="lg:hidden bg-[#f8f7f6] border-t border-amber-500/10 px-4">
+    <div class="py-4 space-y-1">
+      <a href="{% url 'public_dashboard' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-amber-500/10 font-medium transition-colors">
+        <span class="material-symbols-outlined text-amber-500">home</span> Home
+      </a>
+      <a href="{% url 'menu' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-amber-500/10 font-medium transition-colors">
+        <span class="material-symbols-outlined text-amber-500">menu_book</span> Menu
+      </a>
+      <a href="{% url 'public_dashboard' %}#how-to-order" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-amber-500/10 font-medium transition-colors">
+        <span class="material-symbols-outlined text-amber-500">fact_check</span> How to Order
+      </a>
+      <a href="{% url 'public_dashboard' %}#offers" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-amber-500/10 font-medium transition-colors">
+        <span class="material-symbols-outlined text-amber-500">local_offer</span> Offers
+      </a>
+      <a href="{% url 'order_list' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-amber-500/10 text-amber-600 font-bold transition-colors">
+        <span class="material-symbols-outlined text-amber-500">receipt_long</span> My Orders
+      </a>
+      <div class="pt-2 border-t border-amber-500/10 mt-2">
+        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-amber-500/10 font-medium transition-colors" onclick="window.location.href='{% url 'menu' %}'; return false;">
+          <span class="material-symbols-outlined text-amber-500">shopping_cart</span> Cart <span class="ml-auto bg-red-500 text-white text-xs font-black px-2 py-0.5 rounded-full" id="cart-count-mobile">0</span>
+        </a>
+      </div>
+      <a href="{% url 'logout' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-amber-500/10 font-medium transition-colors">
+        <span class="material-symbols-outlined text-amber-500">logout</span> Logout
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- ======================================================
+     PAGE HERO
+====================================================== -->
+<section class="relative overflow-hidden bg-gradient-to-br from-[#221810] to-[#3a2a1a] py-16 px-4 md:px-16 text-white">
+  <div class="absolute inset-0 opacity-10" style="background-image: url('data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5 L55 30 L30 55 L5 30 Z' fill='%23ee862b' fill-opacity='0.3'/%3E%3C/svg%3E'); background-size: 60px 60px;"></div>
+  <div class="relative max-w-7xl mx-auto">
+    <div class="flex flex-col md:flex-row items-center justify-between gap-8">
+      <div>
+        <span class="inline-block px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 text-xs font-bold uppercase tracking-widest mb-4">
+          Your Food Journey
+        </span>
+        <h1 class="text-4xl md:text-5xl font-black leading-tight mb-3">
+          My <span class="text-amber-400 italic">Orders</span>
+        </h1>
+        <p class="text-slate-300 max-w-lg leading-relaxed">
+          Track, reorder, and relive your delicious Biriyani Bliss experiences.
+        </p>
+      </div>
+      
+      <!-- Stats Cards -->
+      <div class="flex gap-4 text-center shrink-0">
+        <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl px-6 py-4">
+          <p class="text-3xl font-black text-amber-400">{{ orders|length }}</p>
+          <p class="text-xs text-slate-400 mt-1">Total Orders</p>
+        </div>
+        <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl px-6 py-4">
+          <p class="text-3xl font-black text-amber-400">
+            {% with delivered_count=orders|dictsort:"status"|length %}
+              {{ orders|dictsort:"status"|length }}
+            {% endwith %}
+          </p>
+          <p class="text-xs text-slate-400 mt-1">Delivered</p>
+        </div>
+        <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl px-6 py-4">
+          <p class="text-3xl font-black text-amber-400">
+            {% with highest=orders|dictsort:"total_amount"|last %}
+              ₹{{ highest.total_amount|default:"0"|floatformat:0 }}
+            {% endwith %}
+          </p>
+          <p class="text-xs text-slate-400 mt-1">Highest Order</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================
+     FILTER TABS
+====================================================== -->
+<div class="sticky top-[72px] z-40 bg-[#f8f7f6]/95 backdrop-blur-md border-b border-amber-500/10 px-4 md:px-8 py-4 no-print">
+  <div class="max-w-7xl mx-auto">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+      <!-- Filter Tabs -->
+      <div class="flex gap-2 overflow-x-auto no-scrollbar">
+        <button class="filter-tab active whitespace-nowrap px-5 py-2.5 rounded-full bg-amber-500/10 text-sm font-bold" onclick="filterOrders('all', this)">
+          🍛 All Orders
+        </button>
+        <button class="filter-tab whitespace-nowrap px-5 py-2.5 rounded-full bg-amber-500/10 text-sm font-bold" onclick="filterOrders('pending', this)">
+          ⏳ Pending
+        </button>
+        <button class="filter-tab whitespace-nowrap px-5 py-2.5 rounded-full bg-amber-500/10 text-sm font-bold" onclick="filterOrders('confirmed', this)">
+          ✅ Confirmed
+        </button>
+        <button class="filter-tab whitespace-nowrap px-5 py-2.5 rounded-full bg-amber-500/10 text-sm font-bold" onclick="filterOrders('preparing', this)">
+          👨‍🍳 Preparing
+        </button>
+        <button class="filter-tab whitespace-nowrap px-5 py-2.5 rounded-full bg-amber-500/10 text-sm font-bold" onclick="filterOrders('out_for_delivery', this)">
+          🛵 Out for Delivery
+        </button>
+        <button class="filter-tab whitespace-nowrap px-5 py-2.5 rounded-full bg-amber-500/10 text-sm font-bold" onclick="filterOrders('delivered', this)">
+          ✅ Delivered
+        </button>
+        <button class="filter-tab whitespace-nowrap px-5 py-2.5 rounded-full bg-amber-500/10 text-sm font-bold" onclick="filterOrders('cancelled', this)">
+          ❌ Cancelled
+        </button>
+      </div>
+      
+      <!-- Search -->
+      <div class="relative">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-amber-400 text-lg">search</span>
+        <input id="search-orders" type="text" placeholder="Search by order # or item..."
+          class="h-11 pl-10 pr-4 rounded-full border-none bg-amber-500/10 focus:ring-2 focus:ring-amber-400 placeholder:text-amber-400/50 text-sm w-64"/>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================================================
+     ORDERS LIST
+====================================================== -->
+<main class="max-w-7xl mx-auto px-4 md:px-8 lg:px-16 py-10">
+  
+  <!-- Loading State (hidden by default) -->
+  <div id="loading-spinner" class="hidden flex-col items-center justify-center py-20">
+    <div class="spinner w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full mb-4"></div>
+    <p class="text-slate-500">Loading your orders...</p>
+  </div>
+
+  <!-- No Orders Empty State -->
+  {% if not orders %}
+  <div class="text-center py-16 section-block">
+    <div class="inline-flex items-center justify-center size-32 rounded-full bg-amber-100 mb-6 animate-float">
+      <span class="material-symbols-outlined text-5xl text-amber-500">receipt_long</span>
+    </div>
+    <h2 class="text-2xl font-black mb-2">No Orders Yet</h2>
+    <p class="text-slate-500 mb-8">Looks like you haven't ordered anything yet. Time to try our delicious biriyani!</p>
+    <a href="{% url 'menu' %}" class="inline-flex items-center gap-2 px-8 py-4 bg-amber-500 hover:bg-amber-600 text-slate-900 rounded-full font-black transition-all shadow-lg">
+      <span class="material-symbols-outlined">restaurant_menu</span>
+      Browse Menu
+    </a>
+  </div>
+  {% endif %}
+
+  <!-- Orders Grid -->
+  <div id="orders-container" class="space-y-6">
+    {% for order in orders %}
+    <div class="order-card bg-white rounded-3xl border border-amber-500/10 shadow-lg overflow-hidden section-block" 
+         data-status="{{ order.status }}" 
+         data-order-id="{{ order.id }}"
+         data-search="{{ order.id }} {% for item in order.order_items.all %}{% if item.name %}{{ item.name }}{% elif item.menu_item %}{{ item.menu_item.name }}{% else %}Item{% endif %} {% endfor %}">
+      
+      <!-- Order Header -->
+      <div class="bg-gradient-to-r from-amber-50 to-orange-50 px-6 py-4 border-b border-amber-500/10">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <!-- Order Info -->
+          <div class="flex items-center gap-4">
+            <div class="size-12 rounded-full bg-amber-500/20 flex items-center justify-center">
+              <span class="material-symbols-outlined text-amber-600 text-2xl">receipt</span>
+            </div>
+            <div>
+              <div class="flex items-center gap-3 flex-wrap">
+                <h3 class="font-black text-lg">Order #{{ order.id }}</h3>
+                <span class="text-xs text-slate-500">{{ order.created_at|date:"d M Y, h:i A" }}</span>
+              </div>
+              <div class="flex items-center gap-2 mt-1">
+                <!-- Status Badge -->
+                {% if order.status == 'pending' %}
+                  <span class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-bold flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm">pending</span> Pending
+                  </span>
+                {% elif order.status == 'confirmed' %}
+                  <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm">check_circle</span> Confirmed
+                  </span>
+                {% elif order.status == 'preparing' %}
+                  <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-bold flex items-center gap-1 status-pulse">
+                    <span class="material-symbols-outlined text-sm">cooking</span> Preparing
+                  </span>
+                {% elif order.status == 'ready' %}
+                  <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm">delivery_dining</span> Ready
+                  </span>
+                {% elif order.status == 'out_for_delivery' %}
+                  <span class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-bold flex items-center gap-1 status-pulse">
+                    <span class="material-symbols-outlined text-sm">motorcycle</span> Out for Delivery
+                  </span>
+                {% elif order.status == 'delivered' %}
+                  <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm">checklist</span> Delivered
+                  </span>
+                {% elif order.status == 'cancelled' %}
+                  <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm">cancel</span> Cancelled
+                  </span>
+                {% endif %}
+                
+                <!-- Payment Method -->
+                <span class="text-xs text-slate-500 flex items-center gap-1">
+                  <span class="material-symbols-outlined text-sm">credit_card</span> COD
+                </span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Order Total -->
+          <div class="text-right">
+            <p class="text-xs text-slate-500">Total Amount</p>
+            <p class="text-2xl font-black text-amber-600">₹{{ order.total_amount|floatformat:2 }}</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Order Body -->
+      <div class="p-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Items List -->
+          <div class="lg:col-span-2">
+            <h4 class="font-bold text-sm mb-3 flex items-center gap-2">
+              <span class="material-symbols-outlined text-amber-500 text-base">shopping_bag</span>
+              Items ({{ order.order_items.count }})
+            </h4>
+            <div class="space-y-2">
+              {% for item in order.order_items.all %}
+              <div class="flex items-center justify-between p-3 bg-amber-50/30 rounded-xl">
+                <div class="flex items-center gap-3">
+                  <div class="size-8 rounded-lg bg-amber-200/30 flex items-center justify-center text-amber-500">
+                    <span class="material-symbols-outlined text-sm">restaurant</span>
+                  </div>
+                  <div>
+                    <p class="font-bold text-sm">
+                      {% if item.name %}
+                        {{ item.name }}
+                      {% elif item.menu_item and item.menu_item.name %}
+                        {{ item.menu_item.name }}
+                      {% else %}
+                        Biriyani Item
+                      {% endif %}
+                    </p>
+                    <p class="text-xs text-slate-500">Qty: {{ item.quantity }}</p>
+                  </div>
+                </div>
+                <p class="font-bold text-amber-600 text-sm">₹{{ item.price|floatformat:2 }}</p>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          
+          <!-- Delivery Info -->
+          <div>
+            <h4 class="font-bold text-sm mb-3 flex items-center gap-2">
+              <span class="material-symbols-outlined text-amber-500 text-base">local_shipping</span>
+              Delivery Details
+            </h4>
+            <div class="space-y-3 bg-slate-50 p-4 rounded-xl">
+              <div class="flex items-start gap-2 text-sm">
+                <span class="material-symbols-outlined text-amber-500 text-base mt-0.5">location_on</span>
+                <span class="text-slate-600">{{ order.delivery_address|truncatechars:50 }}</span>
+              </div>
+              <div class="flex items-center gap-2 text-sm">
+                <span class="material-symbols-outlined text-amber-500 text-base">phone</span>
+                <span class="text-slate-600">{{ order.phone_number }}</span>
+              </div>
+              {% if order.order_notes %}
+              <div class="flex items-start gap-2 text-sm">
+                <span class="material-symbols-outlined text-amber-500 text-base mt-0.5">edit_note</span>
+                <span class="text-slate-600 italic">"{{ order.order_notes|truncatechars:40 }}"</span>
+              </div>
+              {% endif %}
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="flex gap-2 mt-4">
+              <a href="{% url 'order_confirmation' order.id %}" class="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-amber-500/10 text-amber-600 rounded-xl text-xs font-bold hover:bg-amber-500 hover:text-white transition-all">
+                <span class="material-symbols-outlined text-sm">visibility</span>
+                View Details
+              </a>
+              
+              {% if order.status != 'cancelled' and order.status != 'delivered' %}
+              <button onclick="trackOrder({{ order.id }})" class="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-blue-500/10 text-blue-600 rounded-xl text-xs font-bold hover:bg-blue-500 hover:text-white transition-all">
+                <span class="material-symbols-outlined text-sm">location_on</span>
+                Track
+              </button>
+              {% endif %}
+              
+              {% if order.status == 'delivered' %}
+              <button onclick="reorderItems({{ order.id }})" class="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-green-500/10 text-green-600 rounded-xl text-xs font-bold hover:bg-green-500 hover:text-white transition-all">
+                <span class="material-symbols-outlined text-sm">repeat</span>
+                Reorder
+              </button>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Order Footer -->
+      <div class="bg-slate-50/50 px-6 py-3 border-t border-amber-500/10 flex flex-wrap items-center justify-between gap-4 text-xs text-slate-500">
+        <div class="flex items-center gap-4">
+          <span class="flex items-center gap-1">
+            <span class="material-symbols-outlined text-sm">schedule</span>
+            Ordered: {{ order.created_at|timesince }} ago
+          </span>
+          {% with latest_tracking=order.tracking.last %}
+            {% if latest_tracking %}
+            <span class="flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">update</span>
+              Last updated: {{ latest_tracking.timestamp|timesince }} ago
+            </span>
+            {% endif %}
+          {% endwith %}
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="flex items-center gap-1">
+            <span class="material-symbols-outlined text-sm text-green-600">delivery_dining</span>
+            Free Delivery
+          </span>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  
+  <!-- No Results Message (for filter/search) -->
+  <div id="no-results" class="hidden text-center py-16">
+    <span class="material-symbols-outlined text-6xl text-amber-300">search_off</span>
+    <p class="text-xl font-bold mt-4">No matching orders found</p>
+    <p class="text-slate-500 mt-2">Try a different filter or search term.</p>
+    <button onclick="resetFilters()" class="mt-4 px-6 py-2 bg-amber-500 text-white rounded-full text-sm font-bold hover:bg-amber-600 transition-all">
+      Clear Filters
+    </button>
+  </div>
+  
+  <!-- Pagination (if needed) -->
+  {% if orders.paginator and orders.paginator.num_pages > 1 %}
+  <div class="flex justify-center mt-8 gap-2 no-print">
+    {% if orders.has_previous %}
+    <a href="?page={{ orders.previous_page_number }}" class="size-10 rounded-full bg-white border border-amber-500/20 flex items-center justify-center hover:bg-amber-500 hover:text-white transition-all">
+      <span class="material-symbols-outlined">chevron_left</span>
+    </a>
+    {% endif %}
+    
+    {% for num in orders.paginator.page_range %}
+      {% if num == orders.number %}
+      <span class="size-10 rounded-full bg-amber-500 text-white flex items-center justify-center font-bold">{{ num }}</span>
+      {% else %}
+      <a href="?page={{ num }}" class="size-10 rounded-full bg-white border border-amber-500/20 flex items-center justify-center hover:bg-amber-500 hover:text-white transition-all">{{ num }}</a>
+      {% endif %}
+    {% endfor %}
+    
+    {% if orders.has_next %}
+    <a href="?page={{ orders.next_page_number }}" class="size-10 rounded-full bg-white border border-amber-500/20 flex items-center justify-center hover:bg-amber-500 hover:text-white transition-all">
+      <span class="material-symbols-outlined">chevron_right</span>
+    </a>
+    {% endif %}
+  </div>
+  {% endif %}
+  
+</main>
+
+<!-- ======================================================
+     TRACKING MODAL
+====================================================== -->
+<div id="tracking-modal" class="fixed inset-0 z-50 hidden items-center justify-center" style="background-color: rgba(0,0,0,0.5); backdrop-filter: blur(4px);">
+  <div class="bg-white rounded-3xl max-w-md w-full mx-4 overflow-hidden shadow-2xl">
+    <div class="bg-gradient-to-r from-amber-500 to-orange-500 p-6 text-white">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xl font-black flex items-center gap-2">
+          <span class="material-symbols-outlined">location_on</span>
+          Track Order
+        </h3>
+        <button onclick="closeTrackingModal()" class="size-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <p class="text-sm opacity-90 mt-1" id="tracking-order-number">Order #</p>
+    </div>
+    <div class="p-6">
+      <!-- Live Tracking Info -->
+      <div id="tracking-content" class="space-y-4">
+        <div class="flex items-center justify-center py-8">
+          <div class="spinner w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full"></div>
+        </div>
+      </div>
+      
+      <div class="flex gap-2 mt-6">
+        <button onclick="closeTrackingModal()" class="flex-1 px-4 py-3 bg-slate-100 hover:bg-slate-200 rounded-xl font-bold transition-all">
+          Close
+        </button>
+        <a href="#" id="tracking-details-link" class="flex-1 px-4 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-center transition-all">
+          View Full Details
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================================================
+     FOOTER
+====================================================== -->
+<footer class="bg-[#221810] text-slate-300 py-12 px-4 md:px-16 border-t border-amber-500/20 mt-8">
+  <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+    <div class="flex items-center gap-2 text-amber-500">
+      <span class="material-symbols-outlined text-3xl">restaurant</span>
+      <h2 class="text-lg font-black uppercase tracking-tight">Biriyani Bliss</h2>
+    </div>
+    <div class="flex flex-wrap gap-6 text-sm justify-center">
+      <a href="{% url 'public_dashboard' %}" class="hover:text-amber-400 transition-colors">Home</a>
+      <a href="{% url 'menu' %}" class="hover:text-amber-400 transition-colors">Menu</a>
+      <a href="{% url 'public_dashboard' %}#how-to-order" class="hover:text-amber-400 transition-colors">How to Order</a>
+      <a href="{% url 'public_dashboard' %}#offers" class="hover:text-amber-400 transition-colors">Offers</a>
+      <a href="{% url 'order_list' %}" class="text-amber-400 font-bold">My Orders</a>
+    </div>
+    <p class="text-xs text-slate-500">© 2024 Biriyani Bliss. All rights reserved.</p>
+  </div>
+</footer>
+
+<script>
+  // ── CSRF Token ──
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+  const csrftoken = getCookie('csrftoken');
+
+  // ── Hamburger ──
+  function toggleNav() {
+    const nav = document.getElementById('mobile-nav');
+    const btn = document.getElementById('hamburger');
+    if (nav) nav.classList.toggle('open');
+    if (btn) btn.classList.toggle('open');
+  }
+
+  // ── Update Cart Count from localStorage ──
+  function updateCartCount() {
+    const cart = JSON.parse(localStorage.getItem('cartItems') || '[]');
+    const count = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+    document.getElementById('cart-count').textContent = count;
+    const mobileCount = document.getElementById('cart-count-mobile');
+    if (mobileCount) mobileCount.textContent = count;
+  }
+
+  // ── Filter Orders by Status ──
+  function filterOrders(status, btn) {
+    // Update active tab
+    document.querySelectorAll('.filter-tab').forEach(tab => tab.classList.remove('active'));
+    btn.classList.add('active');
+    
+    const orders = document.querySelectorAll('[data-status]');
+    let visibleCount = 0;
+    
+    orders.forEach(order => {
+      if (status === 'all' || order.dataset.status === status) {
+        order.style.display = '';
+        visibleCount++;
+      } else {
+        order.style.display = 'none';
+      }
+    });
+    
+    // Show/hide no results message
+    const noResults = document.getElementById('no-results');
+    if (visibleCount === 0) {
+      noResults.classList.remove('hidden');
+    } else {
+      noResults.classList.add('hidden');
+    }
+  }
+
+  // ── Search Orders ──
+  function searchOrders() {
+    const searchInput = document.getElementById('search-orders');
+    const searchTerm = searchInput.value.toLowerCase().trim();
+    const orders = document.querySelectorAll('[data-search]');
+    let visibleCount = 0;
+    
+    orders.forEach(order => {
+      const searchText = order.dataset.search.toLowerCase();
+      if (searchTerm === '' || searchText.includes(searchTerm)) {
+        // Also check current filter status
+        const activeTab = document.querySelector('.filter-tab.active');
+        const filterText = activeTab ? activeTab.textContent.toLowerCase() : '';
+        const currentFilter = filterText.includes('all') ? 'all' : 
+                             filterText.split(' ')[1]?.toLowerCase() || 'all';
+        
+        if (currentFilter === 'all' || currentFilter === order.dataset.status) {
+          order.style.display = '';
+          visibleCount++;
+        } else {
+          order.style.display = 'none';
+        }
+      } else {
+        order.style.display = 'none';
+      }
+    });
+    
+    // Show/hide no results message
+    const noResults = document.getElementById('no-results');
+    if (visibleCount === 0) {
+      noResults.classList.remove('hidden');
+    } else {
+      noResults.classList.add('hidden');
+    }
+  }
+
+  // ── Reset Filters ──
+  function resetFilters() {
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+      if (tab.textContent.includes('All')) {
+        tab.classList.add('active');
+      } else {
+        tab.classList.remove('active');
+      }
+    });
+    
+    document.getElementById('search-orders').value = '';
+    
+    document.querySelectorAll('[data-status]').forEach(order => {
+      order.style.display = '';
+    });
+    
+    document.getElementById('no-results').classList.add('hidden');
+  }
+
+  // ── Track Order (open modal) ──
+  function trackOrder(orderId) {
+    const modal = document.getElementById('tracking-modal');
+    const orderNumber = document.getElementById('tracking-order-number');
+    const content = document.getElementById('tracking-content');
+    const detailsLink = document.getElementById('tracking-details-link');
+    
+    orderNumber.textContent = `Order #${orderId}`;
+    detailsLink.href = `/User/order/${orderId}/confirmation/`;
+    
+    // Fetch tracking info
+    fetch(`/User/api/order/${orderId}/status/`)
+      .then(response => response.json())
+      .then(data => {
+        let html = `
+          <div class="text-center mb-4">
+            <span class="inline-block px-4 py-2 rounded-full text-sm font-bold" 
+                  style="background: ${getStatusColor(data.status)}20; color: ${getStatusColor(data.status)}">
+              ${data.status_display}
+            </span>
+          </div>
+          <div class="space-y-3">
+        `;
+        
+        if (data.tracking && data.tracking.length > 0) {
+          data.tracking.forEach(track => {
+            html += `
+              <div class="flex items-start gap-3">
+                <div class="size-8 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-amber-600 text-sm">circle</span>
+                </div>
+                <div>
+                  <p class="font-bold text-sm">${track.status}</p>
+                  <p class="text-xs text-slate-500">${new Date(track.timestamp).toLocaleString()}</p>
+                  ${track.notes ? `<p class="text-xs text-slate-600 mt-1">${track.notes}</p>` : ''}
+                </div>
+              </div>
+            `;
+          });
+        } else {
+          html += '<p class="text-center text-slate-500 py-4">No tracking updates yet.</p>';
+        }
+        
+        html += '</div>';
+        content.innerHTML = html;
+      })
+      .catch(error => {
+        content.innerHTML = '<p class="text-center text-red-500 py-4">Failed to load tracking info.</p>';
+      });
+    
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+
+  function getStatusColor(status) {
+    const colors = {
+      'pending': '#eab308',
+      'confirmed': '#3b82f6',
+      'preparing': '#a855f7',
+      'ready': '#22c55e',
+      'out_for_delivery': '#f97316',
+      'delivered': '#22c55e',
+      'cancelled': '#ef4444'
+    };
+    return colors[status] || '#ee862b';
+  }
+
+  function closeTrackingModal() {
+    document.getElementById('tracking-modal').classList.add('hidden');
+    document.getElementById('tracking-modal').classList.remove('flex');
+  }
+
+  // ── Reorder Items ──
+  function reorderItems(orderId) {
+    // This would need to fetch order items and add to cart
+    // For now, redirect to order confirmation
+    window.location.href = `/User/order/${orderId}/confirmation/`;
+  }
+
+  // ── Initialize on Load ──
+  document.addEventListener('DOMContentLoaded', () => {
+    updateCartCount();
+    
+    // Add search listener
+    const searchInput = document.getElementById('search-orders');
+    if (searchInput) {
+      searchInput.addEventListener('input', searchOrders);
+    }
+    
+    // Close modal on outside click
+    const modal = document.getElementById('tracking-modal');
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        closeTrackingModal();
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

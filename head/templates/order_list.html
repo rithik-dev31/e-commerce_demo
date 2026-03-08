@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Management - Biriyani Bliss Admin</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,700;0,900;1,700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#ee862b",
+              "primary-dark": "#c96f1a",
+              "secondary": "#f4a460",
+              "accent": "#d4691e",
+              "background-light": "#f8f7f6",
+              "background-dark": "#221810",
+              "spice-gold": "#f59e0b",
+              "spice-red": "#dc2626",
+            },
+            fontFamily: { "display": ["Be Vietnam Pro"] },
+            borderRadius: { "DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px" },
+            animation: {
+              "fade-in": "fadeIn 0.5s ease both",
+              "slide-up": "slideUp 0.6s ease both",
+              "pulse-glow": "pulseGlow 2s ease-in-out infinite",
+            },
+            keyframes: {
+              fadeIn: { "0%": { opacity: "0" }, "100%": { opacity: "1" } },
+              slideUp: { "0%": { opacity: "0", transform: "translateY(20px)" }, "100%": { opacity: "1", transform: "translateY(0)" } },
+              pulseGlow: { "0%, 100%": { boxShadow: "0 0 0 0 rgba(238,134,43,0.7)" }, "50%": { boxShadow: "0 0 0 10px rgba(238,134,43,0)" } },
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font-family: "Be Vietnam Pro", sans-serif; background: linear-gradient(135deg, #f8f7f6 0%, #faf8f6 100%); }
+      
+      .spice-texture {
+        background-image: radial-gradient(circle at 2px 2px, rgba(238,134,43,0.03) 1px, transparent 0);
+        background-size: 24px 24px;
+      }
+
+      .header-gradient {
+        background: linear-gradient(135deg, #ee862b 0%, #f4a460 50%, #fbbf24 100%);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .header-gradient::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.15), transparent);
+        pointer-events: none;
+      }
+
+      .nav-link {
+        position: relative;
+        transition: all 0.3s ease;
+      }
+
+      .nav-link::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.8);
+        transition: width 0.3s ease;
+      }
+
+      .nav-link:hover::after {
+        width: 100%;
+      }
+
+      /* ---- Hamburger ---- */
+      .hamburger span {
+        display: block;
+        width: 24px;
+        height: 2px;
+        background: white;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+        transform-origin: center;
+      }
+
+      .hamburger.open span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+      .hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+      .hamburger.open span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+      /* ---- Mobile nav ---- */
+      #mobile-nav {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s ease, opacity 0.3s ease;
+        opacity: 0;
+      }
+
+      #mobile-nav.open {
+        max-height: 500px;
+        opacity: 1;
+      }
+
+      .status-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.75rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        transition: all 0.3s ease;
+      }
+
+      .badge-pending { background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #7c2d12; }
+      .badge-confirmed { background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%); color: #fff; }
+      .badge-preparing { background: linear-gradient(135deg, #fb923c 0%, #f97316 100%); color: #fff; }
+      .badge-ready { background: linear-gradient(135deg, #34d399 0%, #10b981 100%); color: #fff; }
+      .badge-out-for-delivery { background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%); color: #fff; }
+      .badge-delivered { background: linear-gradient(135deg, #6ee7b7 0%, #14b8a6 100%); color: #fff; }
+      .badge-cancelled { background: linear-gradient(135deg, #fca5a5 0%, #ef4444 100%); color: #fff; }
+
+      .status-badge:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(238, 134, 43, 0.3);
+      }
+
+      .table-row {
+        transition: all 0.3s ease;
+        animation: slideUp 0.5s ease both;
+      }
+
+      .table-row:hover {
+        background-color: rgba(238, 134, 43, 0.05);
+        transform: scale(1.01);
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #ee862b 0%, #f4a460 100%);
+        color: white;
+        transition: all 0.3s ease;
+        border: none;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.2);
+        transition: left 0.3s ease;
+      }
+
+      .btn-primary:hover::before { left: 100%; }
+      .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(238, 134, 43, 0.3); }
+
+      .divider-spice {
+        background: linear-gradient(90deg, transparent 0%, rgba(238, 134, 43, 0.3) 50%, transparent 100%);
+        height: 1px;
+      }
+
+      .stat-card {
+        background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 100%);
+        border: 1px solid rgba(238, 134, 43, 0.15);
+        transition: all 0.3s ease;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(238, 134, 43, 0.15);
+      }
+
+      .modal-overlay {
+        backdrop-filter: blur(5px);
+        background: rgba(0, 0, 0, 0.5);
+      }
+
+      .item-tag {
+        display: inline-block;
+        background: linear-gradient(135deg, rgba(238, 134, 43, 0.1) 0%, rgba(244, 164, 96, 0.1) 100%);
+        border: 1px solid rgba(238, 134, 43, 0.2);
+        border-radius: 0.5rem;
+        padding: 0.25rem 0.75rem;
+        font-size: 0.75rem;
+        margin-right: 0.25rem;
+        margin-bottom: 0.25rem;
+        transition: all 0.2s ease;
+      }
+
+      .item-tag:hover {
+        background: linear-gradient(135deg, rgba(238, 134, 43, 0.2) 0%, rgba(244, 164, 96, 0.2) 100%);
+        border-color: rgba(238, 134, 43, 0.4);
+      }
+
+      [style*="animation-delay"] {
+        animation-fill-mode: both;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      @keyframes slideUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      @media (max-width: 768px) {
+        .table-row:hover {
+          transform: none;
+        }
+      }
+    </style>
+</head>
+<body class="spice-texture">
+<div class="min-h-screen">
+  <!-- ===== HEADER ===== -->
+  <header class="header-gradient sticky top-0 z-50 shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 md:px-8 lg:px-12 py-4">
+      <div class="flex justify-between items-center gap-4">
+        <!-- Logo & Brand -->
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30">
+            <span class="material-symbols-outlined text-2xl text-white">shopping_cart</span>
+          </div>
+          <div class="hidden sm:block">
+            <h1 class="text-lg md:text-xl font-black text-white tracking-tight leading-none">Biriyani Bliss</h1>
+            <p class="text-xs text-white/80 font-semibold">Orders</p>
+          </div>
+        </div>
+
+        <!-- Desktop Nav -->
+        <nav class="hidden lg:flex items-center gap-1">
+          <a href="/Biriyani_Bliss_Admin/dashboard/" class="nav-link text-white/90 hover:text-white px-3 py-2 text-sm font-bold flex items-center gap-1 transition-colors">
+            <span class="material-symbols-outlined text-lg">home</span>
+            Dashboard
+          </a>
+          <a href="/Biriyani_Bliss_Admin/categories/" class="nav-link text-white/90 hover:text-white px-3 py-2 text-sm font-bold flex items-center gap-1 transition-colors">
+            <span class="material-symbols-outlined text-lg">category</span>
+            Categories
+          </a>
+          <a href="/Biriyani_Bliss_Admin/menu-items/" class="nav-link text-white/90 hover:text-white px-3 py-2 text-sm font-bold flex items-center gap-1 transition-colors">
+            <span class="material-symbols-outlined text-lg">dining</span>
+            Menu Items
+          </a>
+          <a href="/Biriyani_Bliss_Admin/orders/statistics/" class="nav-link text-white/90 hover:text-white px-3 py-2 text-sm font-bold flex items-center gap-1 transition-colors">
+            <span class="material-symbols-outlined text-lg">analytics</span>
+            Statistics
+          </a>
+          <a href="{% url 'logout' %}" 
+   class="flex items-center gap-2 px-5 py-2.5 rounded-full bg-red-50 hover:bg-red-500 text-red-600 hover:text-white font-bold text-sm transition-all duration-300 shadow-sm hover:shadow-md group">
+  <span class="material-symbols-outlined text-red-500 group-hover:text-white transition-all duration-300">logout</span>
+  <span>Logout</span>
+</a>
+
+        </nav>
+
+        <!-- Right Actions -->
+        <div class="flex items-center gap-2 md:gap-3">
+          <div class="hidden sm:flex items-center gap-2 bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/30">
+            <span class="material-symbols-outlined text-sm text-white animate-pulse">circle</span>
+            <span class="text-xs text-white font-bold">Live</span>
+          </div>
+          <button onclick="location.reload()" class="btn-primary px-3 md:px-4 py-2 rounded-full font-bold text-sm flex items-center gap-1 md:gap-2 hover:scale-105 transition-transform">
+            <span class="material-symbols-outlined text-lg">refresh</span>
+            <span class="hidden md:inline">Refresh</span>
+          </button>
+          <!-- Hamburger Menu -->
+          <button id="hamburger" class="hamburger lg:hidden flex flex-col gap-1.5 items-center justify-center size-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 hover:bg-white/30 transition-all" onclick="toggleNav()">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Nav Drawer -->
+      <div id="mobile-nav" class="lg:hidden bg-white/10 backdrop-blur-md border-t border-white/20 mt-4">
+        <nav class="py-4 space-y-2">
+          <a href="/Biriyani_Bliss_Admin/dashboard/" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/20 text-white font-bold transition-colors">
+            <span class="material-symbols-outlined text-white">home</span>
+            Dashboard
+          </a>
+          <a href="/Biriyani_Bliss_Admin/categories/" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/20 text-white font-bold transition-colors">
+            <span class="material-symbols-outlined text-white">category</span>
+            Categories
+          </a>
+          <a href="/Biriyani_Bliss_Admin/menu-items/" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/20 text-white font-bold transition-colors">
+            <span class="material-symbols-outlined text-white">dining</span>
+            Menu Items
+          </a>
+          <a href="/Biriyani_Bliss_Admin/orders/statistics/" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/20 text-white font-bold transition-colors">
+            <span class="material-symbols-outlined text-white">analytics</span>
+            Statistics
+          </a>
+          <a href="{% url 'logout' %}" 
+   class="flex items-center gap-2 px-5 py-2.5 rounded-full bg-red-50 hover:bg-red-500 text-red-600 hover:text-white font-bold text-sm transition-all duration-300 shadow-sm hover:shadow-md group">
+  <span class="material-symbols-outlined text-red-500 group-hover:text-white transition-all duration-300">logout</span>
+  <span>Logout</span>
+</a>
+
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="max-w-7xl mx-auto px-3 sm:px-4 md:px-8 lg:px-12 py-6 md:py-8">
+    
+    <!-- ===== PAGE HEADER ===== -->
+    <div class="mb-6 md:mb-8 animate-fade-in">
+      <div class="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4 md:mb-6">
+        <div>
+          <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 flex items-center gap-2 md:gap-3">
+            <span class="material-symbols-outlined text-primary text-3xl md:text-4xl">receipt_long</span>
+            <span class="line-clamp-1">Order Management</span>
+          </h1>
+          <p class="text-slate-600 mt-1 text-sm md:text-base">Track and manage all customer orders in real-time</p>
+        </div>
+        <div class="flex flex-wrap gap-2 md:gap-3 w-full sm:w-auto">
+          <button onclick="exportOrders()" class="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 md:px-6 py-2 md:py-3 rounded-full font-bold text-xs md:text-sm transition-all hover:shadow-lg hover:scale-105">
+            <span class="material-symbols-outlined text-lg md:text-xl">download</span>
+            <span class="hidden sm:inline">Export</span>
+          </button>
+          <button onclick="showBulkActionModal()" class="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-purple-500 hover:bg-purple-600 text-white px-4 md:px-6 py-2 md:py-3 rounded-full font-bold text-xs md:text-sm transition-all hover:shadow-lg hover:scale-105">
+            <span class="material-symbols-outlined text-lg md:text-xl">done_all</span>
+            <span class="hidden sm:inline">Bulk</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="divider-spice"></div>
+    </div>
+
+    <!-- ===== STATUS SUMMARY CARDS ===== -->
+    <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2 md:gap-3 mb-6 md:mb-8">
+      <div class="stat-card rounded-xl md:rounded-2xl p-3 md:p-4 shadow-md" style="animation-delay: 0.1s">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-yellow-100 flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-sm md:text-base text-yellow-600">schedule</span>
+          </div>
+          <div class="min-w-0">
+            <p class="text-xs text-slate-600 font-bold uppercase tracking-wide truncate">Pending</p>
+            <p class="text-lg md:text-2xl font-black text-yellow-600" id="pending-count">0</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card rounded-xl md:rounded-2xl p-3 md:p-4 shadow-md" style="animation-delay: 0.15s">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-sm md:text-base text-blue-600">check_circle</span>
+          </div>
+          <div class="min-w-0">
+            <p class="text-xs text-slate-600 font-bold uppercase tracking-wide truncate">Confirmed</p>
+            <p class="text-lg md:text-2xl font-black text-blue-600" id="confirmed-count">0</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card rounded-xl md:rounded-2xl p-3 md:p-4 shadow-md" style="animation-delay: 0.2s">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-sm md:text-base text-orange-600">soup_kitchen</span>
+          </div>
+          <div class="min-w-0">
+            <p class="text-xs text-slate-600 font-bold uppercase tracking-wide truncate">Preparing</p>
+            <p class="text-lg md:text-2xl font-black text-orange-600" id="preparing-count">0</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card rounded-xl md:rounded-2xl p-3 md:p-4 shadow-md" style="animation-delay: 0.25s">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-sm md:text-base text-green-600">verified</span>
+          </div>
+          <div class="min-w-0">
+            <p class="text-xs text-slate-600 font-bold uppercase tracking-wide truncate">Ready</p>
+            <p class="text-lg md:text-2xl font-black text-green-600" id="ready-count">0</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card rounded-xl md:rounded-2xl p-3 md:p-4 shadow-md" style="animation-delay: 0.3s">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-purple-100 flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-sm md:text-base text-purple-600">local_shipping</span>
+          </div>
+          <div class="min-w-0">
+            <p class="text-xs text-slate-600 font-bold uppercase tracking-wide truncate">Transit</p>
+            <p class="text-lg md:text-2xl font-black text-purple-600" id="out-for-delivery-count">0</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card rounded-xl md:rounded-2xl p-3 md:p-4 shadow-md" style="animation-delay: 0.35s">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-sm md:text-base text-emerald-600">done</span>
+          </div>
+          <div class="min-w-0">
+            <p class="text-xs text-slate-600 font-bold uppercase tracking-wide truncate">Delivered</p>
+            <p class="text-lg md:text-2xl font-black text-emerald-600" id="delivered-count">0</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card rounded-xl md:rounded-2xl p-3 md:p-4 shadow-md" style="animation-delay: 0.4s">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-red-100 flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-sm md:text-base text-red-600">cancel</span>
+          </div>
+          <div class="min-w-0">
+            <p class="text-xs text-slate-600 font-bold uppercase tracking-wide truncate">Cancelled</p>
+            <p class="text-lg md:text-2xl font-black text-red-600" id="cancelled-count">0</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== FILTERS ===== -->
+    <div class="bg-white rounded-2xl shadow-lg p-4 md:p-6 mb-6 md:mb-8 border border-primary/10 animate-fade-in" style="animation-delay: 0.2s">
+      <form method="get" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
+        <div>
+          <label class="block text-xs font-black text-slate-700 uppercase tracking-widest mb-2">Status</label>
+          <select name="status" class="w-full border-2 border-primary/20 rounded-xl px-3 md:px-4 py-2 md:py-3 focus:ring-2 focus:ring-primary focus:border-primary transition-all bg-white font-medium text-sm">
+            <option value="">All Status</option>
+            {% for value, label in status_choices %}
+            <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-black text-slate-700 uppercase tracking-widest mb-2">From Date</label>
+          <input type="date" name="date_from" value="{{ date_from }}" class="w-full border-2 border-primary/20 rounded-xl px-3 md:px-4 py-2 md:py-3 focus:ring-2 focus:ring-primary focus:border-primary transition-all font-medium text-sm">
+        </div>
+
+        <div>
+          <label class="block text-xs font-black text-slate-700 uppercase tracking-widest mb-2">To Date</label>
+          <input type="date" name="date_to" value="{{ date_to }}" class="w-full border-2 border-primary/20 rounded-xl px-3 md:px-4 py-2 md:py-3 focus:ring-2 focus:ring-primary focus:border-primary transition-all font-medium text-sm">
+        </div>
+
+        <div>
+          <label class="block text-xs font-black text-slate-700 uppercase tracking-widest mb-2">Search</label>
+          <input type="text" name="search" value="{{ search_query }}" placeholder="Order ID, Customer..." class="w-full border-2 border-primary/20 rounded-xl px-3 md:px-4 py-2 md:py-3 focus:ring-2 focus:ring-primary focus:border-primary transition-all font-medium text-sm">
+        </div>
+
+        <div class="flex items-end gap-2">
+          <button type="submit" class="btn-primary flex-1 px-3 md:px-6 py-2 md:py-3 rounded-xl font-bold text-xs md:text-sm flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-lg">search</span>
+            <span class="hidden sm:inline">Filter</span>
+          </button>
+          <a href="/Biriyani_Bliss_Admin/orders/" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 md:px-4 py-2 md:py-3 rounded-xl font-bold text-xs md:text-sm flex items-center justify-center transition-all">
+            <span class="material-symbols-outlined">close</span>
+          </a>
+        </div>
+      </form>
+    </div>
+
+    <!-- ===== ORDERS TABLE ===== -->
+    <div class="bg-white rounded-2xl shadow-lg border border-primary/10 overflow-hidden animate-fade-in" style="animation-delay: 0.3s">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-gradient-to-r from-primary/10 to-secondary/10 border-b-2 border-primary/20">
+              <th class="p-2 md:p-4 text-left">
+                <input type="checkbox" id="select-all" class="rounded border-2 border-primary/30 cursor-pointer w-4 md:w-5 h-4 md:h-5">
+              </th>
+              <th class="p-2 md:p-4 text-left font-black text-slate-700 uppercase text-xs tracking-widest">ID</th>
+              <th class="p-2 md:p-4 text-left font-black text-slate-700 uppercase text-xs tracking-widest">Customer</th>
+              <th class="p-2 md:p-4 text-left font-black text-slate-700 uppercase text-xs tracking-widest hidden md:table-cell">Phone</th>
+              <th class="p-2 md:p-4 text-left font-black text-slate-700 uppercase text-xs tracking-widest hidden sm:table-cell">Items</th>
+              <th class="p-2 md:p-4 text-left font-black text-slate-700 uppercase text-xs tracking-widest">Total</th>
+              <th class="p-2 md:p-4 text-left font-black text-slate-700 uppercase text-xs tracking-widest">Status</th>
+              <th class="p-2 md:p-4 text-left font-black text-slate-700 uppercase text-xs tracking-widest hidden lg:table-cell">Date</th>
+              <th class="p-2 md:p-4 text-left font-black text-slate-700 uppercase text-xs tracking-widest">Action</th>
+            </tr>
+          </thead>
+          <tbody id="orders-tbody">
+            {% for order in page_obj %}
+            <tr class="table-row border-b border-primary/5" style="animation-delay: {{ forloop.counter|add:0.1 }}s">
+              <td class="p-2 md:p-4">
+                <input type="checkbox" name="order_ids" value="{{ order.id }}" class="order-checkbox rounded border-2 border-primary/30 cursor-pointer w-4 md:w-5 h-4 md:h-5">
+              </td>
+              <td class="p-2 md:p-4">
+                <a href="/Biriyani_Bliss_Admin/orders/{{ order.id }}/" class="font-black text-primary hover:text-primary-dark transition-colors text-xs md:text-sm">#{{ order.id }}</a>
+              </td>
+              <td class="p-2 md:p-4">
+                <div class="flex items-center gap-2">
+                  <div class="w-6 h-6 md:w-8 md:h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 hidden sm:flex">
+                    <span class="material-symbols-outlined text-primary text-xs">account_circle</span>
+                  </div>
+                  <div class="min-w-0">
+                    <p class="font-bold text-slate-900 text-xs md:text-sm truncate">{{ order.user.get_full_name|default:order.user.username|truncatechars:15 }}</p>
+                    <p class="text-xs text-slate-500 hidden md:block truncate">{{ order.user.email|truncatechars:20 }}</p>
+                  </div>
+                </div>
+              </td>
+              <td class="p-2 md:p-4 text-slate-600 hidden md:table-cell">
+                <a href="tel:{{ order.phone_number }}" class="text-primary hover:text-primary-dark font-bold text-xs md:text-sm">{{ order.phone_number|truncatechars:12 }}</a>
+              </td>
+              <td class="p-2 md:p-4 hidden sm:table-cell">
+                <div class="flex flex-wrap gap-1">
+                  {% for item in order.order_items.all|slice:":1" %}
+                  <span class="item-tag text-xs">
+                    <span class="font-bold text-primary">{{ item.quantity }}x</span> {{ item.menu_item.name|truncatechars:12 }}
+                  </span>
+                  {% endfor %}
+                  {% if order.order_items.all|length > 1 %}
+                  <span class="item-tag text-xs">+{{ order.order_items.all|length|add:"-1" }}</span>
+                  {% endif %}
+                </div>
+              </td>
+              <td class="p-2 md:p-4">
+                <span class="font-black text-primary text-sm md:text-lg">₹{{ order.total_amount|floatformat:0 }}</span>
+              </td>
+              <td class="p-2 md:p-4">
+                <select onchange="updateOrderStatus({{ order.id }}, this.value, this)" class="status-select-{{ order.id }} status-badge cursor-pointer border-0 outline-none font-black text-xs md:text-sm px-2 md:px-3 py-1 {% if order.status == 'pending' %}badge-pending{% elif order.status == 'confirmed' %}badge-confirmed{% elif order.status == 'preparing' %}badge-preparing{% elif order.status == 'ready' %}badge-ready{% elif order.status == 'out_for_delivery' %}badge-out-for-delivery{% elif order.status == 'delivered' %}badge-delivered{% elif order.status == 'cancelled' %}badge-cancelled{% endif %}">
+                  {% for value, label in status_choices %}
+                  <option value="{{ value }}" {% if order.status == value %}selected{% endif %} style="color: #000;">{{ label }}</option>
+                  {% endfor %}
+                </select>
+              </td>
+              <td class="p-2 md:p-4 text-slate-500 text-xs hidden lg:table-cell">{{ order.created_at|date:"d M H:i" }}</td>
+              <td class="p-2 md:p-4">
+                <div class="flex items-center gap-1">
+                  <a href="/Biriyani_Bliss_Admin/orders/{{ order.id }}/" class="btn-primary w-7 h-7 md:w-8 md:h-8 rounded-lg flex items-center justify-center hover:scale-110 transition-transform" title="View">
+                    <span class="material-symbols-outlined text-xs md:text-sm">arrow_forward</span>
+                  </a>
+                  {% if order.status != 'cancelled' and order.status != 'delivered' %}
+                  <button onclick="cancelOrder({{ order.id }})" class="bg-red-500 hover:bg-red-600 text-white w-7 h-7 md:w-8 md:h-8 rounded-lg flex items-center justify-center transition-all hover:scale-110" title="Cancel">
+                    <span class="material-symbols-outlined text-xs md:text-sm">close</span>
+                  </button>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="9" class="text-center py-12 md:py-16 text-slate-500">
+                <div class="inline-flex flex-col items-center">
+                  <div class="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-3 md:mb-4">
+                    <span class="material-symbols-outlined text-3xl md:text-4xl text-primary">inbox</span>
+                  </div>
+                  <p class="text-base md:text-lg font-black text-slate-900">No orders found</p>
+                  <p class="text-xs md:text-sm text-slate-500 mt-1">Try adjusting your filters</p>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      {% if page_obj.paginator.num_pages > 1 %}
+      <div class="bg-gradient-to-r from-primary/5 to-secondary/5 px-3 md:px-6 py-3 md:py-4 flex flex-col sm:flex-row items-center justify-between gap-3 md:gap-0 border-t border-primary/10 text-xs md:text-sm">
+        <div class="text-center sm:text-left font-bold text-slate-700 order-2 sm:order-1">
+          Showing <span class="text-primary">{{ page_obj.start_index }}</span> to <span class="text-primary">{{ page_obj.end_index }}</span> of <span class="text-primary">{{ page_obj.paginator.count }}</span>
+        </div>
+        <div class="flex gap-1 md:gap-2 order-1 sm:order-2 flex-wrap justify-center">
+          {% if page_obj.has_previous %}
+          <a href="?page=1{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" class="btn-primary px-2 md:px-3 py-1 md:py-2 rounded-lg text-xs md:text-sm font-bold flex items-center gap-1 hover:scale-105 transition-transform">
+            <span class="material-symbols-outlined text-sm">first_page</span>
+          </a>
+          <a href="?page={{ page_obj.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" class="btn-primary px-2 md:px-3 py-1 md:py-2 rounded-lg text-xs md:text-sm font-bold flex items-center gap-1 hover:scale-105 transition-transform">
+            <span class="material-symbols-outlined text-sm">chevron_left</span>
+          </a>
+          {% endif %}
+
+          <span class="px-2 md:px-4 py-1 md:py-2 bg-primary text-white rounded-lg text-xs md:text-sm font-black">
+            {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+          </span>
+
+          {% if page_obj.has_next %}
+          <a href="?page={{ page_obj.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" class="btn-primary px-2 md:px-3 py-1 md:py-2 rounded-lg text-xs md:text-sm font-bold flex items-center gap-1 hover:scale-105 transition-transform">
+            <span class="material-symbols-outlined text-sm">chevron_right</span>
+          </a>
+          <a href="?page={{ page_obj.paginator.num_pages }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" class="btn-primary px-2 md:px-3 py-1 md:py-2 rounded-lg text-xs md:text-sm font-bold flex items-center gap-1 hover:scale-105 transition-transform">
+            <span class="material-symbols-outlined text-sm">last_page</span>
+          </a>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+  </main>
+
+  <!-- ===== BULK ACTION MODAL ===== -->
+  <div id="bulkActionModal" class="modal-overlay fixed inset-0 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl p-6 md:p-8 max-w-md w-full animate-slide-up">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-2xl md:text-3xl font-black text-slate-900 flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary">done_all</span>
+          Bulk Actions
+        </h3>
+        <button onclick="hideBulkActionModal()" class="text-slate-500 hover:text-slate-700 transition-colors">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <p class="text-slate-600 font-bold mb-6">Selected <span id="selected-count" class="text-primary font-black">0</span> orders</p>
+      
+      <form action="/Biriyani_Bliss_Admin/orders/bulk-action/" method="POST" id="bulkActionForm">
+        {% csrf_token %}
+        <div id="selected-orders-container"></div>
+        
+        <div class="space-y-2 md:space-y-3 mb-6">
+          <button type="submit" name="bulk_action" value="mark_confirmed" class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:shadow-lg text-white py-2 md:py-3 px-4 rounded-xl font-black flex items-center justify-center gap-2 transition-all hover:scale-105 text-sm md:text-base">
+            <span class="material-symbols-outlined">check_circle</span>
+            Mark as Confirmed
+          </button>
+          
+          <button type="submit" name="bulk_action" value="mark_ready" class="w-full bg-gradient-to-r from-green-500 to-green-600 hover:shadow-lg text-white py-2 md:py-3 px-4 rounded-xl font-black flex items-center justify-center gap-2 transition-all hover:scale-105 text-sm md:text-base">
+            <span class="material-symbols-outlined">verified</span>
+            Mark as Ready
+          </button>
+          
+          <button type="submit" name="bulk_action" value="mark_delivered" class="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:shadow-lg text-white py-2 md:py-3 px-4 rounded-xl font-black flex items-center justify-center gap-2 transition-all hover:scale-105 text-sm md:text-base">
+            <span class="material-symbols-outlined">done</span>
+            Mark as Delivered
+          </button>
+          
+          <button type="submit" name="bulk_action" value="delete" class="w-full bg-gradient-to-r from-red-500 to-red-600 hover:shadow-lg text-white py-2 md:py-3 px-4 rounded-xl font-black flex items-center justify-center gap-2 transition-all hover:scale-105 text-sm md:text-base" onclick="return confirm('Delete cancelled orders?')">
+            <span class="material-symbols-outlined">delete</span>
+            Delete Cancelled
+          </button>
+        </div>
+      </form>
+      
+      <button onclick="hideBulkActionModal()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-800 py-2 md:py-3 px-4 rounded-xl font-bold transition-all hover:scale-105 text-sm md:text-base">
+        Cancel
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== NOTIFICATION TOAST ===== -->
+  <div id="toast" class="fixed bottom-4 right-4 bg-slate-900 text-white px-4 md:px-6 py-3 md:py-4 rounded-xl text-xs md:text-sm font-bold opacity-0 pointer-events-none transition-opacity duration-300 z-50 flex items-center gap-2 shadow-lg"></div>
+
+</div>
+
+<script>
+  // ===== HAMBURGER MENU =====
+  function toggleNav() {
+    const nav = document.getElementById('mobile-nav');
+    const btn = document.getElementById('hamburger');
+    if (nav) nav.classList.toggle('open');
+    if (btn) btn.classList.toggle('open');
+  }
+
+  // Close menu when clicking nav links
+  document.querySelectorAll('#mobile-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+      document.getElementById('mobile-nav').classList.remove('open');
+      document.getElementById('hamburger').classList.remove('open');
+    });
+  });
+
+  // ===== CSRF TOKEN =====
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  const csrftoken = getCookie('csrftoken');
+
+  // ===== LOAD ORDER COUNTS =====
+  function loadOrderCounts() {
+    fetch('/Biriyani_Bliss_Admin/api/order-status-counts/')
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('pending-count').textContent = data.pending;
+        document.getElementById('confirmed-count').textContent = data.confirmed;
+        document.getElementById('preparing-count').textContent = data.preparing;
+        document.getElementById('ready-count').textContent = data.ready;
+        document.getElementById('out-for-delivery-count').textContent = data.out_for_delivery;
+        document.getElementById('delivered-count').textContent = data.delivered;
+        document.getElementById('cancelled-count').textContent = data.cancelled;
+      })
+      .catch(error => console.error('Error loading counts:', error));
+  }
+
+  // ===== UPDATE ORDER STATUS =====
+  function updateOrderStatus(orderId, newStatus, selectElement) {
+    const formData = new FormData();
+    formData.append('status', newStatus);
+
+    fetch(`/Biriyani_Bliss_Admin/api/orders/${orderId}/update-status/`, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': csrftoken },
+      body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        const badgeMap = {
+          'pending': 'badge-pending',
+          'confirmed': 'badge-confirmed',
+          'preparing': 'badge-preparing',
+          'ready': 'badge-ready',
+          'out_for_delivery': 'badge-out-for-delivery',
+          'delivered': 'badge-delivered',
+          'cancelled': 'badge-cancelled'
+        };
+        
+        selectElement.className = `status-select-${orderId} status-badge cursor-pointer border-0 outline-none font-black px-2 md:px-3 py-1 text-xs md:text-sm ${badgeMap[newStatus] || ''}`;
+        showNotification('Status updated!', 'success');
+        loadOrderCounts();
+      } else {
+        showNotification('Error updating status', 'error');
+        location.reload();
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      showNotification('Error updating status', 'error');
+    });
+  }
+
+  // ===== CANCEL ORDER =====
+  function cancelOrder(orderId) {
+    if (confirm('Cancel this order?')) {
+      const formData = new FormData();
+      formData.append('status', 'cancelled');
+
+      fetch(`/Biriyani_Bliss_Admin/api/orders/${orderId}/update-status/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrftoken },
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          location.reload();
+        } else {
+          showNotification('Error cancelling order', 'error');
+        }
+      });
+    }
+  }
+
+  // ===== BULK ACTIONS =====
+  document.getElementById('select-all')?.addEventListener('change', function(e) {
+    document.querySelectorAll('.order-checkbox').forEach(checkbox => {
+      checkbox.checked = e.target.checked;
+    });
+  });
+
+  function showBulkActionModal() {
+    const selected = document.querySelectorAll('.order-checkbox:checked');
+    if (selected.length === 0) {
+      showNotification('Select at least one order', 'warning');
+      return;
+    }
+
+    document.getElementById('selected-count').textContent = selected.length;
+    
+    const container = document.getElementById('selected-orders-container');
+    container.innerHTML = '';
+    selected.forEach(checkbox => {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'order_ids';
+      input.value = checkbox.value;
+      container.appendChild(input);
+    });
+
+    document.getElementById('bulkActionModal').classList.remove('hidden');
+    document.getElementById('bulkActionModal').classList.add('flex');
+  }
+
+  function hideBulkActionModal() {
+    document.getElementById('bulkActionModal').classList.add('hidden');
+    document.getElementById('bulkActionModal').classList.remove('flex');
+  }
+
+  // ===== EXPORT ORDERS =====
+  function exportOrders() {
+    const params = new URLSearchParams(window.location.search);
+    window.location.href = `/Biriyani_Bliss_Admin/orders/export/?${params.toString()}`;
+  }
+
+  // ===== NOTIFICATIONS =====
+  function showNotification(message, type) {
+    const toast = document.getElementById('toast');
+    const icons = {
+      'success': 'check_circle',
+      'error': 'error',
+      'warning': 'warning'
+    };
+    const colors = {
+      'success': 'from-green-500 to-green-600',
+      'error': 'from-red-500 to-red-600',
+      'warning': 'from-yellow-500 to-yellow-600'
+    };
+
+    toast.className = `fixed bottom-4 right-4 bg-gradient-to-r ${colors[type]} text-white px-4 md:px-6 py-3 md:py-4 rounded-xl text-xs md:text-sm font-bold transition-opacity duration-300 z-50 flex items-center gap-2 shadow-lg`;
+    toast.innerHTML = `
+      <span class="material-symbols-outlined text-sm md:text-base">${icons[type]}</span>
+      <span>${message}</span>
+    `;
+    toast.style.opacity = '1';
+    toast.style.pointerEvents = 'auto';
+
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.pointerEvents = 'none';
+    }, 3000);
+  }
+
+  // ===== INIT =====
+  document.addEventListener('DOMContentLoaded', loadOrderCounts);
+  setInterval(loadOrderCounts, 30000);
+</script>
+
+</body>
+</html>

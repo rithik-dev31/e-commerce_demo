@@ -1,0 +1,1285 @@
+<!-- head/templates/head/menuitem_management.html -->
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Menu Item Management - Biriyani Bliss Admin</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,700;0,900;1,700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#ee862b",
+              "primary-dark": "#c96f1a",
+              "secondary": "#f4a460",
+              "accent": "#d4691e",
+              "background-light": "#f8f7f6",
+              "background-dark": "#221810",
+              "spice-gold": "#f59e0b",
+              "spice-red": "#dc2626",
+            },
+            fontFamily: { "display": ["Be Vietnam Pro"] },
+            borderRadius: { "DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px" },
+            animation: {
+              "fade-in": "fadeIn 0.5s ease both",
+              "slide-up": "slideUp 0.6s ease both",
+              "pulse-glow": "pulseGlow 2s ease-in-out infinite",
+              "scale-in": "scaleIn 0.3s ease both",
+            },
+            keyframes: {
+              fadeIn: { 
+                "0%": { opacity: "0" }, 
+                "100%": { opacity: "1" } 
+              },
+              slideUp: { 
+                "0%": { opacity: "0", transform: "translateY(20px)" }, 
+                "100%": { opacity: "1", transform: "translateY(0)" } 
+              },
+              pulseGlow: { 
+                "0%, 100%": { boxShadow: "0 0 0 0 rgba(238,134,43,0.7)" }, 
+                "50%": { boxShadow: "0 0 0 10px rgba(238,134,43,0)" } 
+              },
+              scaleIn: {
+                "0%": { transform: "scale(0.9)", opacity: "0" },
+                "100%": { transform: "scale(1)", opacity: "1" }
+              }
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font-family: "Be Vietnam Pro", sans-serif; background: linear-gradient(135deg, #f8f7f6 0%, #faf8f6 100%); }
+      
+      .spice-texture {
+        background-image: radial-gradient(circle at 2px 2px, rgba(238,134,43,0.03) 1px, transparent 0);
+        background-size: 24px 24px;
+      }
+
+      .header-gradient {
+        background: linear-gradient(135deg, #ee862b 0%, #f4a460 50%, #fbbf24 100%);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .header-gradient::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.15), transparent);
+        pointer-events: none;
+      }
+
+      .nav-link {
+        position: relative;
+        transition: all 0.3s ease;
+      }
+
+      .nav-link::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.8);
+        transition: width 0.3s ease;
+      }
+
+      .nav-link:hover::after {
+        width: 100%;
+      }
+
+      /* ---- Hamburger ---- */
+      .hamburger span {
+        display: block;
+        width: 24px;
+        height: 2px;
+        background: white;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+        transform-origin: center;
+      }
+
+      .hamburger.open span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+      .hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+      .hamburger.open span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+      /* ---- Mobile nav ---- */
+      #mobile-nav {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s ease, opacity 0.3s ease;
+        opacity: 0;
+      }
+
+      #mobile-nav.open {
+        max-height: 500px;
+        opacity: 1;
+      }
+
+      .status-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.75rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        transition: all 0.3s ease;
+      }
+
+      .badge-available {
+        background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+        color: white;
+      }
+      
+      .badge-unavailable {
+        background: linear-gradient(135deg, #fca5a5 0%, #ef4444 100%);
+        color: white;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #ee862b 0%, #f4a460 100%);
+        color: white;
+        transition: all 0.3s ease;
+        border: none;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.2);
+        transition: left 0.3s ease;
+      }
+
+      .btn-primary:hover::before { left: 100%; }
+      .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(238, 134, 43, 0.3); }
+
+      .btn-secondary {
+        background: white;
+        color: #ee862b;
+        border: 2px solid #ee862b;
+        transition: all 0.3s ease;
+      }
+
+      .btn-secondary:hover {
+        background: #ee862b;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(238, 134, 43, 0.2);
+      }
+
+      .divider-spice {
+        background: linear-gradient(90deg, transparent 0%, rgba(238, 134, 43, 0.3) 50%, transparent 100%);
+        height: 1px;
+      }
+
+      .stat-card {
+        background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 100%);
+        border: 1px solid rgba(238, 134, 43, 0.15);
+        transition: all 0.3s ease;
+        backdrop-filter: blur(4px);
+      }
+
+      .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(238, 134, 43, 0.15);
+      }
+
+      .modal-overlay {
+        backdrop-filter: blur(5px);
+        background: rgba(0, 0, 0, 0.5);
+        animation: fadeIn 0.3s ease;
+      }
+
+      .menu-item-card {
+        transition: all 0.3s ease;
+        animation: slideUp 0.5s ease both;
+        background: white;
+        border: 1px solid rgba(238, 134, 43, 0.1);
+      }
+
+      .menu-item-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 25px -5px rgba(238, 134, 43, 0.2), 0 10px 10px -5px rgba(238, 134, 43, 0.1);
+        border-color: rgba(238, 134, 43, 0.3);
+      }
+
+      .category-tag {
+        display: inline-block;
+        background: linear-gradient(135deg, rgba(238, 134, 43, 0.1) 0%, rgba(244, 164, 96, 0.1) 100%);
+        border: 1px solid rgba(238, 134, 43, 0.2);
+        border-radius: 2rem;
+        padding: 0.25rem 1rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #c96f1a;
+        transition: all 0.2s ease;
+      }
+
+      .category-tag:hover {
+        background: linear-gradient(135deg, rgba(238, 134, 43, 0.2) 0%, rgba(244, 164, 96, 0.2) 100%);
+        border-color: rgba(238, 134, 43, 0.4);
+      }
+
+      /* Image container with overlay */
+      .image-container {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .image-container::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.1) 100%);
+        pointer-events: none;
+      }
+
+      /* Responsive grid adjustments */
+      @media (max-width: 640px) {
+        .menu-item-card .flex.space-x-2 {
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+        
+        .menu-item-card button {
+          width: 100%;
+          margin: 0;
+        }
+      }
+
+      [style*="animation-delay"] {
+        animation-fill-mode: both;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      @keyframes slideUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      /* Form input styling */
+      .form-input {
+        border: 2px solid rgba(238, 134, 43, 0.2);
+        border-radius: 1rem;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+      }
+
+      .form-input:focus {
+        border-color: #ee862b;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(238, 134, 43, 0.1);
+      }
+
+      /* Loading skeleton */
+      .skeleton {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+      }
+
+      @keyframes loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+      }
+    </style>
+</head>
+<body class="spice-texture min-h-screen">
+<div class="min-h-screen">
+  <!-- ===== HEADER ===== -->
+  <header class="header-gradient sticky top-0 z-50 shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 md:px-8 lg:px-12 py-4">
+      <div class="flex justify-between items-center gap-4">
+        <!-- Logo & Brand -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30">
+            <span class="material-symbols-outlined text-xl md:text-2xl text-white">restaurant_menu</span>
+          </div>
+          <div class="hidden xs:block">
+            <h1 class="text-base md:text-lg lg:text-xl font-black text-white tracking-tight leading-none">Biriyani Bliss</h1>
+            <p class="text-[10px] md:text-xs text-white/80 font-semibold">Menu Management</p>
+          </div>
+        </div>
+
+        <!-- Desktop Nav -->
+        <nav class="hidden lg:flex items-center gap-1">
+          <a href="{% url 'head:admin_dashboard' %}" class="nav-link text-white/90 hover:text-white px-3 py-2 text-sm font-bold flex items-center gap-1 transition-colors">
+            <span class="material-symbols-outlined text-lg">home</span>
+            Dashboard
+          </a>
+          <a href="{% url 'head:order_list' %}" class="nav-link text-white/90 hover:text-white px-3 py-2 text-sm font-bold flex items-center gap-1 transition-colors">
+            <span class="material-symbols-outlined text-lg">shopping_cart</span>
+            Orders
+          </a>
+          <a href="{% url 'head:category_management' %}" class="nav-link text-white/90 hover:text-white px-3 py-2 text-sm font-bold flex items-center gap-1 transition-colors">
+            <span class="material-symbols-outlined text-lg">category</span>
+            Categories
+          </a>
+          <a href="{% url 'head:menu_item_management' %}" class="nav-link text-white px-3 py-2 text-sm font-bold flex items-center gap-1 bg-white/20 rounded-lg">
+            <span class="material-symbols-outlined text-lg">dining</span>
+            Menu Items
+          </a>
+          <a href="{% url 'head:order_statistics' %}" class="nav-link text-white/90 hover:text-white px-3 py-2 text-sm font-bold flex items-center gap-1 transition-colors">
+            <span class="material-symbols-outlined text-lg">analytics</span>
+            Statistics
+          </a>
+          <a href="{% url 'logout' %}" 
+   class="flex items-center gap-2 px-5 py-2.5 rounded-full bg-red-50 hover:bg-red-500 text-red-600 hover:text-white font-bold text-sm transition-all duration-300 shadow-sm hover:shadow-md group">
+  <span class="material-symbols-outlined text-red-500 group-hover:text-white transition-all duration-300">logout</span>
+  <span>Logout</span>
+</a>
+
+        </nav>
+
+        <!-- Right Actions -->
+        <div class="flex items-center gap-2 md:gap-3">
+          <div class="hidden sm:flex items-center gap-2 bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/30">
+            <span class="material-symbols-outlined text-sm text-white animate-pulse">circle</span>
+            <span class="text-xs text-white font-bold">Live</span>
+          </div>
+          <button onclick="refreshMenuItems()" class="btn-primary px-3 md:px-4 py-2 rounded-full font-bold text-xs md:text-sm flex items-center gap-1 md:gap-2 hover:scale-105 transition-transform whitespace-nowrap">
+            <span class="material-symbols-outlined text-base md:text-lg">refresh</span>
+            <span class="hidden md:inline">Refresh</span>
+          </button>
+          <!-- Hamburger Menu -->
+          <button id="hamburger" class="hamburger lg:hidden flex flex-col gap-1.5 items-center justify-center w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 hover:bg-white/30 transition-all" onclick="toggleNav()">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Nav Drawer -->
+      <div id="mobile-nav" class="lg:hidden bg-white/10 backdrop-blur-md border-t border-white/20 mt-4 rounded-2xl overflow-hidden">
+        <nav class="py-4 space-y-2 px-4">
+          <a href="{% url 'head:admin_dashboard' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/20 text-white font-bold transition-all hover:translate-x-1">
+            <span class="material-symbols-outlined text-white">home</span>
+            Dashboard
+          </a>
+          <a href="{% url 'head:order_list' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/20 text-white font-bold transition-all hover:translate-x-1">
+            <span class="material-symbols-outlined text-white">shopping_cart</span>
+            Orders
+          </a>
+          <a href="{% url 'head:category_management' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/20 text-white font-bold transition-all hover:translate-x-1">
+            <span class="material-symbols-outlined text-white">category</span>
+            Categories
+          </a>
+          <a href="{% url 'head:menu_item_management' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/20 text-white font-bold">
+            <span class="material-symbols-outlined text-white">dining</span>
+            Menu Items
+          </a>
+          <a href="{% url 'head:order_statistics' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/20 text-white font-bold transition-all hover:translate-x-1">
+            <span class="material-symbols-outlined text-white">analytics</span>
+            Statistics
+          </a>
+         <a href="{% url 'logout' %}" 
+   class="flex items-center gap-2 px-5 py-2.5 rounded-full bg-red-50 hover:bg-red-500 text-red-600 hover:text-white font-bold text-sm transition-all duration-300 shadow-sm hover:shadow-md group">
+  <span class="material-symbols-outlined text-red-500 group-hover:text-white transition-all duration-300">logout</span>
+  <span>Logout</span>
+</a>
+
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="max-w-7xl mx-auto px-3 sm:px-4 md:px-8 lg:px-12 py-6 md:py-8">
+    
+    <!-- ===== PAGE HEADER ===== -->
+    <div class="mb-6 md:mb-8 animate-fade-in">
+      <div class="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4 md:mb-6">
+        <div>
+          <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-slate-900 flex items-center gap-2 md:gap-3">
+            <span class="material-symbols-outlined text-primary text-2xl md:text-3xl lg:text-4xl">restaurant_menu</span>
+            <span class="line-clamp-1">Menu Management</span>
+          </h1>
+          <p class="text-slate-600 mt-1 text-xs md:text-sm lg:text-base">Manage your restaurant's delicious offerings</p>
+        </div>
+        <div class="flex flex-wrap gap-2 md:gap-3 w-full sm:w-auto">
+          <button onclick="showAddMenuItemModal()" class="flex-1 sm:flex-none btn-primary px-4 md:px-6 py-2.5 md:py-3 rounded-full font-bold text-xs md:text-sm flex items-center justify-center gap-2 hover:scale-105 transition-all">
+            <span class="material-symbols-outlined text-base md:text-lg">add_circle</span>
+            <span>Add Item</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="divider-spice w-full"></div>
+    </div>
+
+    <!-- ===== STATS SUMMARY ===== -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 md:gap-3 mb-6 md:mb-8">
+      <div class="stat-card rounded-xl md:rounded-2xl p-3 md:p-4 shadow-md hover:shadow-lg transition-all" style="animation-delay: 0.1s">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-sm md:text-base text-blue-600">restaurant_menu</span>
+          </div>
+          <div class="min-w-0">
+            <p class="text-[10px] md:text-xs text-slate-600 font-bold uppercase tracking-wide truncate">Total Items</p>
+            <p class="text-base md:text-lg lg:text-2xl font-black text-blue-600" id="total-items">0</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card rounded-xl md:rounded-2xl p-3 md:p-4 shadow-md hover:shadow-lg transition-all" style="animation-delay: 0.15s">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-sm md:text-base text-green-600">check_circle</span>
+          </div>
+          <div class="min-w-0">
+            <p class="text-[10px] md:text-xs text-slate-600 font-bold uppercase tracking-wide truncate">Available</p>
+            <p class="text-base md:text-lg lg:text-2xl font-black text-green-600" id="available-items">0</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card rounded-xl md:rounded-2xl p-3 md:p-4 shadow-md hover:shadow-lg transition-all" style="animation-delay: 0.2s">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-sm md:text-base text-orange-600">category</span>
+          </div>
+          <div class="min-w-0">
+            <p class="text-[10px] md:text-xs text-slate-600 font-bold uppercase tracking-wide truncate">Categories</p>
+            <p class="text-base md:text-lg lg:text-2xl font-black text-orange-600" id="total-categories">{{ categories|length }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card rounded-xl md:rounded-2xl p-3 md:p-4 shadow-md hover:shadow-lg transition-all" style="animation-delay: 0.25s">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-purple-100 flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-sm md:text-base text-purple-600">trending_up</span>
+          </div>
+          <div class="min-w-0">
+            <p class="text-[10px] md:text-xs text-slate-600 font-bold uppercase tracking-wide truncate">Top Rated</p>
+            <p class="text-base md:text-lg lg:text-2xl font-black text-purple-600" id="top-rated">0</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== FILTERS ===== -->
+    <div class="bg-white rounded-2xl shadow-lg p-4 md:p-6 mb-6 md:mb-8 border border-primary/10 animate-fade-in" style="animation-delay: 0.2s">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+        <div>
+          <label class="block text-[10px] md:text-xs font-black text-slate-700 uppercase tracking-widest mb-2">Category</label>
+          <select id="categoryFilter" onchange="applyFilters()" class="w-full border-2 border-primary/20 rounded-xl px-3 md:px-4 py-2.5 md:py-3 focus:ring-2 focus:ring-primary focus:border-primary transition-all bg-white font-medium text-xs md:text-sm">
+            <option value="">All Categories</option>
+            {% for category in categories %}
+            <option value="{{ category.id }}">{{ category.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-[10px] md:text-xs font-black text-slate-700 uppercase tracking-widest mb-2">Availability</label>
+          <select id="availabilityFilter" onchange="applyFilters()" class="w-full border-2 border-primary/20 rounded-xl px-3 md:px-4 py-2.5 md:py-3 focus:ring-2 focus:ring-primary focus:border-primary transition-all bg-white font-medium text-xs md:text-sm">
+            <option value="">All Items</option>
+            <option value="available">Available Only</option>
+            <option value="unavailable">Unavailable Only</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-[10px] md:text-xs font-black text-slate-700 uppercase tracking-widest mb-2">Search</label>
+          <input type="text" id="searchInput" placeholder="Search by name or description..." 
+                 class="w-full border-2 border-primary/20 rounded-xl px-3 md:px-4 py-2.5 md:py-3 focus:ring-2 focus:ring-primary focus:border-primary transition-all font-medium text-xs md:text-sm">
+        </div>
+
+        <div class="flex items-end gap-2">
+          <button onclick="applyFilters()" class="btn-primary flex-1 px-3 md:px-6 py-2.5 md:py-3 rounded-xl font-bold text-xs md:text-sm flex items-center justify-center gap-2 hover:shadow-lg">
+            <span class="material-symbols-outlined text-base md:text-lg">search</span>
+            <span class="hidden sm:inline">Search</span>
+          </button>
+          <button onclick="clearFilters()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 md:px-4 py-2.5 md:py-3 rounded-xl font-bold text-xs md:text-sm flex items-center justify-center transition-all hover:scale-105" title="Clear filters">
+            <span class="material-symbols-outlined text-base">close</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== MENU ITEMS GRID ===== -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6" id="menu-items-container">
+      <!-- Items will be loaded here via JavaScript -->
+      <div class="col-span-full text-center py-12 md:py-16">
+        <div class="inline-flex flex-col items-center">
+          <div class="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-3 md:mb-4 animate-pulse">
+            <span class="material-symbols-outlined text-3xl md:text-4xl text-primary">restaurant</span>
+          </div>
+          <p class="text-base md:text-lg font-black text-slate-900">Loading menu items...</p>
+          <p class="text-xs md:text-sm text-slate-500 mt-1">Please wait</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PAGINATION ===== -->
+    <div id="pagination" class="mt-8 flex justify-center items-center gap-1 md:gap-2 flex-wrap">
+      <!-- Pagination will be loaded here -->
+    </div>
+  </main>
+
+  <!-- ===== ADD/EDIT MENU ITEM MODAL ===== -->
+  <div id="menuItemModal" class="modal-overlay fixed inset-0 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl p-6 md:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-scale-in">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-xl md:text-2xl lg:text-3xl font-black text-slate-900 flex items-center gap-2" id="modalTitle">
+          <span class="material-symbols-outlined text-primary text-2xl md:text-3xl">add_circle</span>
+          Add New Menu Item
+        </h3>
+        <button onclick="hideMenuItemModal()" class="text-slate-500 hover:text-slate-700 transition-colors hover:rotate-90 transform duration-300">
+          <span class="material-symbols-outlined text-xl">close</span>
+        </button>
+      </div>
+      
+      <form id="menuItemForm" onsubmit="saveMenuItem(event)">
+        <input type="hidden" id="itemId">
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div class="md:col-span-2">
+            <label class="block text-xs font-black text-slate-700 uppercase tracking-widest mb-2">Item Name *</label>
+            <input type="text" id="itemName" required 
+                   class="form-input w-full"
+                   placeholder="e.g., Chicken Biriyani">
+          </div>
+          
+          <div class="md:col-span-2">
+            <label class="block text-xs font-black text-slate-700 uppercase tracking-widest mb-2">Description *</label>
+            <textarea id="itemDescription" rows="3" required 
+                      class="form-input w-full"
+                      placeholder="Describe the menu item..."></textarea>
+          </div>
+          
+          <div>
+            <label class="block text-xs font-black text-slate-700 uppercase tracking-widest mb-2">Price (₹) *</label>
+            <input type="number" id="itemPrice" step="0.01" min="0" required 
+                   class="form-input w-full"
+                   placeholder="249.00">
+          </div>
+          
+          <div>
+            <label class="block text-xs font-black text-slate-700 uppercase tracking-widest mb-2">Category *</label>
+            <select id="itemCategory" required class="form-input w-full">
+              <option value="">Select Category</option>
+              {% for category in categories %}
+              <option value="{{ category.id }}">{{ category.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          
+          <div>
+            <label class="block text-xs font-black text-slate-700 uppercase tracking-widest mb-2">Rating (0-5)</label>
+            <input type="number" id="itemRating" step="0.1" min="0" max="5" value="4.5"
+                   class="form-input w-full">
+          </div>
+          
+          <div>
+            <label class="block text-xs font-black text-slate-700 uppercase tracking-widest mb-2">Image URL</label>
+            <input type="url" id="itemImageUrl" 
+                   class="form-input w-full"
+                   placeholder="https://example.com/image.jpg">
+          </div>
+          
+          <div class="md:col-span-2">
+            <label class="flex items-center gap-3 cursor-pointer">
+              <input type="checkbox" id="itemAvailable" class="w-5 h-5 text-primary rounded focus:ring-primary border-2 border-primary/30" checked>
+              <span class="text-slate-700 font-bold text-sm">Item is available for ordering</span>
+            </label>
+          </div>
+        </div>
+        
+        <div class="flex flex-col sm:flex-row gap-3 mt-6">
+          <button type="submit" class="flex-1 btn-primary py-3 px-4 rounded-xl font-bold text-sm md:text-base flex items-center justify-center gap-2 hover:scale-105 transition-all">
+            <span class="material-symbols-outlined">save</span>
+            Save Menu Item
+          </button>
+          <button type="button" onclick="hideMenuItemModal()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 py-3 px-4 rounded-xl font-bold transition-all hover:scale-105 text-sm md:text-base">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== VIEW MENU ITEM MODAL ===== -->
+  <div id="viewMenuItemModal" class="modal-overlay fixed inset-0 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl p-6 md:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-scale-in">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-xl md:text-2xl font-black text-slate-900" id="viewItemTitle">Menu Item Details</h3>
+        <button onclick="hideViewMenuItemModal()" class="text-slate-500 hover:text-slate-700 transition-colors hover:rotate-90 transform duration-300">
+          <span class="material-symbols-outlined text-xl">close</span>
+        </button>
+      </div>
+      
+      <div id="menuItemDetails" class="mb-6">
+        <!-- Item details will be loaded here -->
+      </div>
+      
+      <div class="border-t border-primary/10 pt-6">
+        <h4 class="text-lg font-black text-slate-900 mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary">analytics</span>
+          Order Statistics
+        </h4>
+        <div id="itemOrderStats" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <!-- Statistics will be loaded here -->
+        </div>
+      </div>
+      
+      <div class="flex flex-col sm:flex-row gap-3 mt-6">
+        <button onclick="editFromViewModal()" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all hover:scale-105 text-sm md:text-base">
+          <span class="material-symbols-outlined">edit</span>
+          Edit
+        </button>
+        <button onclick="toggleAvailabilityFromView()" id="toggleAvailabilityBtn" class="flex-1 bg-purple-500 hover:bg-purple-600 text-white py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all hover:scale-105 text-sm md:text-base">
+          <span class="material-symbols-outlined">toggle_off</span>
+          Toggle Availability
+        </button>
+        <button onclick="hideViewMenuItemModal()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 py-3 px-4 rounded-xl font-bold transition-all hover:scale-105 text-sm md:text-base">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== DELETE CONFIRMATION MODAL ===== -->
+  <div id="deleteModal" class="modal-overlay fixed inset-0 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl p-6 md:p-8 max-w-md w-full animate-scale-in">
+      <div class="text-center">
+        <div class="w-16 h-16 md:w-20 md:h-20 mx-auto rounded-2xl bg-red-100 flex items-center justify-center mb-4">
+          <span class="material-symbols-outlined text-3xl md:text-4xl text-red-600">warning</span>
+        </div>
+        <h3 class="text-xl md:text-2xl font-black text-slate-900 mb-2">Delete Menu Item</h3>
+        <p class="text-slate-600 mb-6 text-sm md:text-base">Are you sure you want to delete <span id="deleteItemName" class="font-black text-primary"></span>? This action cannot be undone.</p>
+        
+        <div class="flex flex-col sm:flex-row gap-3">
+          <button onclick="confirmDelete()" class="flex-1 bg-red-500 hover:bg-red-600 text-white py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all hover:scale-105 text-sm md:text-base">
+            <span class="material-symbols-outlined">delete</span>
+            Delete
+          </button>
+          <button onclick="hideDeleteModal()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 py-3 px-4 rounded-xl font-bold transition-all hover:scale-105 text-sm md:text-base">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== NOTIFICATION TOAST ===== -->
+  <div id="toast" class="fixed bottom-4 right-4 left-4 md:left-auto md:right-4 bg-gradient-to-r text-white px-4 md:px-6 py-3 md:py-4 rounded-xl text-xs md:text-sm font-bold opacity-0 pointer-events-none transition-all duration-300 z-50 flex items-center gap-2 shadow-lg max-w-sm mx-auto md:mx-0"></div>
+</div>
+
+<script>
+  // ===== HAMBURGER MENU =====
+  function toggleNav() {
+    const nav = document.getElementById('mobile-nav');
+    const btn = document.getElementById('hamburger');
+    if (nav) nav.classList.toggle('open');
+    if (btn) btn.classList.toggle('open');
+  }
+
+  // Close menu when clicking nav links
+  document.querySelectorAll('#mobile-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+      document.getElementById('mobile-nav')?.classList.remove('open');
+      document.getElementById('hamburger')?.classList.remove('open');
+    });
+  });
+
+  // Close mobile menu on window resize
+  window.addEventListener('resize', function() {
+    if (window.innerWidth >= 1024) {
+      document.getElementById('mobile-nav')?.classList.remove('open');
+      document.getElementById('hamburger')?.classList.remove('open');
+    }
+  });
+
+  // ===== CSRF TOKEN =====
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  const csrftoken = getCookie('csrftoken');
+  let currentPage = 1;
+  let currentItemId = null;
+
+  // ===== LOAD MENU ITEMS =====
+  function loadMenuItems(page = 1) {
+    currentPage = page;
+    
+    const category = document.getElementById('categoryFilter').value;
+    const availability = document.getElementById('availabilityFilter').value;
+    const search = document.getElementById('searchInput').value;
+    
+    let url = `/Biriyani_Bliss_Admin/api/menu-items/?page=${page}`;
+    if (category) url += `&category=${category}`;
+    if (availability) url += `&availability=${availability}`;
+    if (search) url += `&search=${encodeURIComponent(search)}`;
+    
+    // Show loading state
+    document.getElementById('menu-items-container').innerHTML = `
+      <div class="col-span-full text-center py-12 md:py-16">
+        <div class="inline-flex flex-col items-center">
+          <div class="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-3 md:mb-4 animate-pulse">
+            <span class="material-symbols-outlined text-3xl md:text-4xl text-primary animate-spin">progress_activity</span>
+          </div>
+          <p class="text-base md:text-lg font-black text-slate-900">Loading menu items...</p>
+          <p class="text-xs md:text-sm text-slate-500 mt-1">Please wait</p>
+        </div>
+      </div>
+    `;
+    
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          displayMenuItems(data);
+          displayPagination(data);
+          updateStats(data.stats);
+        } else {
+          showNotification('Error loading menu items', 'error');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showNotification('Error loading menu items', 'error');
+      });
+  }
+
+  // ===== UPDATE STATS =====
+  function updateStats(stats) {
+    if (stats) {
+      document.getElementById('total-items').textContent = stats.total || 0;
+      document.getElementById('available-items').textContent = stats.available || 0;
+      document.getElementById('top-rated').textContent = stats.top_rated || 0;
+    }
+  }
+
+  // ===== DISPLAY MENU ITEMS =====
+  function displayMenuItems(data) {
+    const container = document.getElementById('menu-items-container');
+    
+    if (data.items.length === 0) {
+      container.innerHTML = `
+        <div class="col-span-full text-center py-12 md:py-16 bg-white rounded-2xl border border-primary/10">
+          <div class="inline-flex flex-col items-center">
+            <div class="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-3 md:mb-4">
+              <span class="material-symbols-outlined text-3xl md:text-4xl text-primary">restaurant</span>
+            </div>
+            <p class="text-base md:text-lg font-black text-slate-900">No menu items found</p>
+            <p class="text-xs md:text-sm text-slate-500 mt-1">Try adjusting your filters or add a new menu item</p>
+            <button onclick="showAddMenuItemModal()" class="mt-4 btn-primary px-6 py-3 rounded-full font-bold text-sm flex items-center gap-2">
+              <span class="material-symbols-outlined">add_circle</span>
+              Add New Item
+            </button>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = data.items.map((item, index) => `
+      <div class="menu-item-card rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all" style="animation-delay: ${index * 0.05}s">
+        <div class="image-container h-40 md:h-48 bg-gradient-to-br from-primary/20 to-secondary/20 relative">
+          ${item.image_url ? 
+            `<img src="${item.image_url}" alt="${item.name}" class="w-full h-full object-cover">` : 
+            `<div class="w-full h-full flex items-center justify-center">
+              <span class="material-symbols-outlined text-4xl md:text-5xl text-primary">restaurant</span>
+            </div>`
+          }
+          <div class="absolute top-3 right-3">
+            <span class="status-badge ${item.available ? 'badge-available' : 'badge-unavailable'} text-[10px] md:text-xs px-3 py-1.5">
+              ${item.available ? 'Available' : 'Unavailable'}
+            </span>
+          </div>
+        </div>
+        
+        <div class="p-4 md:p-6">
+          <div class="flex justify-between items-start mb-2">
+            <h3 class="text-base md:text-lg lg:text-xl font-black text-slate-900">${item.name}</h3>
+            <span class="text-lg md:text-xl font-black text-primary">₹${item.price}</span>
+          </div>
+          
+          <p class="text-xs md:text-sm text-slate-600 mb-3 line-clamp-2">${item.description}</p>
+          
+          <div class="flex items-center justify-between mb-4">
+            <span class="category-tag text-[10px] md:text-xs">
+              ${item.category.name}
+            </span>
+            <div class="flex items-center gap-1">
+              <span class="material-symbols-outlined text-yellow-500 text-sm md:text-base">star</span>
+              <span class="text-xs md:text-sm font-bold">${item.rating}</span>
+              <span class="text-[10px] md:text-xs text-slate-500">(${item.reviews_count})</span>
+            </div>
+          </div>
+          
+          <div class="flex flex-col xs:flex-row gap-2">
+            <button onclick="viewMenuItem(${item.id})" class="flex-1 btn-secondary px-3 py-2 rounded-xl text-xs md:text-sm font-bold flex items-center justify-center gap-1 transition-all hover:scale-105">
+              <span class="material-symbols-outlined text-sm md:text-base">visibility</span>
+              <span class="hidden xs:inline">View</span>
+            </button>
+            <button onclick="editMenuItem(${item.id})" class="flex-1 bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-xl text-xs md:text-sm font-bold flex items-center justify-center gap-1 transition-all hover:scale-105">
+              <span class="material-symbols-outlined text-sm md:text-base">edit</span>
+              <span class="hidden xs:inline">Edit</span>
+            </button>
+            <button onclick="toggleAvailability(${item.id})" class="flex-1 ${item.available ? 'bg-purple-500 hover:bg-purple-600' : 'bg-slate-500 hover:bg-slate-600'} text-white px-3 py-2 rounded-xl text-xs md:text-sm font-bold flex items-center justify-center gap-1 transition-all hover:scale-105">
+              <span class="material-symbols-outlined text-sm md:text-base">${item.available ? 'toggle_on' : 'toggle_off'}</span>
+              <span class="hidden xs:inline">${item.available ? 'Disable' : 'Enable'}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ===== DISPLAY PAGINATION =====
+  function displayPagination(data) {
+    const pagination = document.getElementById('pagination');
+    
+    if (data.total_pages <= 1) {
+      pagination.innerHTML = '';
+      return;
+    }
+    
+    let html = '';
+    
+    // First page
+    if (currentPage > 1) {
+      html += `<button onclick="loadMenuItems(1)" class="btn-primary w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center hover:scale-105 transition-transform" title="First page">
+        <span class="material-symbols-outlined text-sm md:text-base">first_page</span>
+      </button>`;
+    }
+    
+    // Previous page
+    if (currentPage > 1) {
+      html += `<button onclick="loadMenuItems(${currentPage - 1})" class="btn-primary w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center hover:scale-105 transition-transform" title="Previous page">
+        <span class="material-symbols-outlined text-sm md:text-base">chevron_left</span>
+      </button>`;
+    }
+    
+    // Page numbers
+    for (let i = 1; i <= data.total_pages; i++) {
+      if (i === currentPage) {
+        html += `<span class="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-primary text-white font-black flex items-center justify-center text-xs md:text-sm shadow-md">${i}</span>`;
+      } else if (i === 1 || i === data.total_pages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+        html += `<button onclick="loadMenuItems(${i})" class="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-white border-2 border-primary/20 hover:border-primary font-bold text-slate-700 hover:text-primary flex items-center justify-center text-xs md:text-sm transition-all hover:scale-105">${i}</button>`;
+      } else if (i === currentPage - 3 || i === currentPage + 3) {
+        html += `<span class="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-slate-500">...</span>`;
+      }
+    }
+    
+    // Next page
+    if (currentPage < data.total_pages) {
+      html += `<button onclick="loadMenuItems(${currentPage + 1})" class="btn-primary w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center hover:scale-105 transition-transform" title="Next page">
+        <span class="material-symbols-outlined text-sm md:text-base">chevron_right</span>
+      </button>`;
+    }
+    
+    // Last page
+    if (currentPage < data.total_pages) {
+      html += `<button onclick="loadMenuItems(${data.total_pages})" class="btn-primary w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center hover:scale-105 transition-transform" title="Last page">
+        <span class="material-symbols-outlined text-sm md:text-base">last_page</span>
+      </button>`;
+    }
+    
+    pagination.innerHTML = html;
+  }
+
+  // ===== MODAL FUNCTIONS =====
+  function showAddMenuItemModal() {
+    document.getElementById('modalTitle').innerHTML = `
+      <span class="material-symbols-outlined text-primary text-2xl md:text-3xl">add_circle</span>
+      Add New Menu Item
+    `;
+    document.getElementById('itemId').value = '';
+    document.getElementById('itemName').value = '';
+    document.getElementById('itemDescription').value = '';
+    document.getElementById('itemPrice').value = '';
+    document.getElementById('itemCategory').value = '';
+    document.getElementById('itemRating').value = '4.5';
+    document.getElementById('itemImageUrl').value = '';
+    document.getElementById('itemAvailable').checked = true;
+    
+    document.getElementById('menuItemModal').classList.remove('hidden');
+    document.getElementById('menuItemModal').classList.add('flex');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function hideMenuItemModal() {
+    document.getElementById('menuItemModal').classList.add('hidden');
+    document.getElementById('menuItemModal').classList.remove('flex');
+    document.body.style.overflow = 'auto';
+  }
+
+  function editMenuItem(id) {
+    fetch(`/Biriyani_Bliss_Admin/api/menu-items/${id}/`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          document.getElementById('modalTitle').innerHTML = `
+            <span class="material-symbols-outlined text-primary text-2xl md:text-3xl">edit</span>
+            Edit Menu Item
+          `;
+          document.getElementById('itemId').value = data.item.id;
+          document.getElementById('itemName').value = data.item.name;
+          document.getElementById('itemDescription').value = data.item.description;
+          document.getElementById('itemPrice').value = data.item.price;
+          document.getElementById('itemCategory').value = data.item.category.id;
+          document.getElementById('itemRating').value = data.item.rating;
+          document.getElementById('itemImageUrl').value = data.item.image_url || '';
+          document.getElementById('itemAvailable').checked = data.item.available;
+          
+          document.getElementById('menuItemModal').classList.remove('hidden');
+          document.getElementById('menuItemModal').classList.add('flex');
+          document.body.style.overflow = 'hidden';
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showNotification('Error loading item details', 'error');
+      });
+  }
+
+  function saveMenuItem(event) {
+    event.preventDefault();
+    
+    const id = document.getElementById('itemId').value;
+    const name = document.getElementById('itemName').value;
+    const description = document.getElementById('itemDescription').value;
+    const price = document.getElementById('itemPrice').value;
+    const category_id = document.getElementById('itemCategory').value;
+    const rating = document.getElementById('itemRating').value;
+    const image_url = document.getElementById('itemImageUrl').value;
+    const available = document.getElementById('itemAvailable').checked;
+    
+    const url = id ? 
+      `/Biriyani_Bliss_Admin/api/menu-items/${id}/update/` : 
+      '/Biriyani_Bliss_Admin/api/menu-items/create/';
+    
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrftoken
+      },
+      body: JSON.stringify({
+        name, description, price, category_id, rating, image_url, available
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        hideMenuItemModal();
+        loadMenuItems(currentPage);
+        showNotification(data.message, 'success');
+      } else {
+        showNotification(data.error || 'Error saving menu item', 'error');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      showNotification('Error saving menu item', 'error');
+    });
+  }
+
+  function viewMenuItem(id) {
+    fetch(`/Biriyani_Bliss_Admin/api/menu-items/${id}/`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          displayMenuItemDetails(data.item);
+        } else {
+          showNotification('Error loading item details', 'error');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showNotification('Error loading item details', 'error');
+      });
+  }
+
+  function displayMenuItemDetails(item) {
+    document.getElementById('viewItemTitle').textContent = item.name;
+    currentItemId = item.id;
+    
+    const detailsHtml = `
+      <div class="flex flex-col md:flex-row gap-6">
+        <div class="md:w-1/3">
+          <div class="image-container h-40 md:h-48 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-xl overflow-hidden">
+            ${item.image_url ? 
+              `<img src="${item.image_url}" alt="${item.name}" class="w-full h-full object-cover">` : 
+              `<div class="w-full h-full flex items-center justify-center">
+                <span class="material-symbols-outlined text-4xl text-primary">restaurant</span>
+              </div>`
+            }
+          </div>
+        </div>
+        <div class="md:w-2/3 space-y-4">
+          <div>
+            <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mb-1">Category</p>
+            <p class="font-bold text-slate-900">${item.category.name}</p>
+          </div>
+          <div>
+            <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mb-1">Description</p>
+            <p class="text-sm text-slate-700">${item.description}</p>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mb-1">Price</p>
+              <p class="text-xl font-black text-primary">₹${item.price}</p>
+            </div>
+            <div>
+              <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mb-1">Rating</p>
+              <p class="flex items-center gap-1">
+                <span class="material-symbols-outlined text-yellow-500">star</span>
+                <span class="font-bold">${item.rating}</span>
+                <span class="text-xs text-slate-500">(${item.reviews_count} reviews)</span>
+              </p>
+            </div>
+            <div>
+              <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mb-1">Availability</p>
+              <p><span class="status-badge ${item.available ? 'badge-available' : 'badge-unavailable'} text-xs px-3 py-1.5">${item.available ? 'Available' : 'Unavailable'}</span></p>
+            </div>
+            <div>
+              <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mb-1">Added on</p>
+              <p class="font-bold text-sm">${new Date(item.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    document.getElementById('menuItemDetails').innerHTML = detailsHtml;
+    
+    const statsHtml = `
+      <div class="stat-card rounded-xl p-4 text-center">
+        <span class="material-symbols-outlined text-2xl text-blue-600 mb-2">shopping_cart</span>
+        <p class="text-2xl font-black text-blue-600">${item.order_stats?.total_orders || 0}</p>
+        <p class="text-xs text-slate-600 font-bold uppercase tracking-wide">Total Orders</p>
+      </div>
+      <div class="stat-card rounded-xl p-4 text-center">
+        <span class="material-symbols-outlined text-2xl text-green-600 mb-2">production_quantity_limits</span>
+        <p class="text-2xl font-black text-green-600">${item.order_stats?.total_quantity || 0}</p>
+        <p class="text-xs text-slate-600 font-bold uppercase tracking-wide">Items Sold</p>
+      </div>
+      <div class="stat-card rounded-xl p-4 text-center">
+        <span class="material-symbols-outlined text-2xl text-purple-600 mb-2">payments</span>
+        <p class="text-2xl font-black text-purple-600">₹${item.order_stats?.total_revenue || 0}</p>
+        <p class="text-xs text-slate-600 font-bold uppercase tracking-wide">Revenue</p>
+      </div>
+    `;
+    
+    document.getElementById('itemOrderStats').innerHTML = statsHtml;
+    
+    const toggleBtn = document.getElementById('toggleAvailabilityBtn');
+    toggleBtn.innerHTML = item.available ? 
+      '<span class="material-symbols-outlined">toggle_off</span> Mark as Unavailable' : 
+      '<span class="material-symbols-outlined">toggle_on</span> Mark as Available';
+    
+    document.getElementById('viewMenuItemModal').classList.remove('hidden');
+    document.getElementById('viewMenuItemModal').classList.add('flex');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function hideViewMenuItemModal() {
+    document.getElementById('viewMenuItemModal').classList.add('hidden');
+    document.getElementById('viewMenuItemModal').classList.remove('flex');
+    document.body.style.overflow = 'auto';
+    currentItemId = null;
+  }
+
+  function editFromViewModal() {
+    hideViewMenuItemModal();
+    if (currentItemId) {
+      editMenuItem(currentItemId);
+    }
+  }
+
+  function toggleAvailability(id) {
+    fetch(`/Biriyani_Bliss_Admin/api/menu-items/${id}/toggle-availability/`, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': csrftoken
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        loadMenuItems(currentPage);
+        showNotification(data.message, 'success');
+      } else {
+        showNotification(data.error || 'Error toggling availability', 'error');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      showNotification('Error toggling availability', 'error');
+    });
+  }
+
+  function toggleAvailabilityFromView() {
+    if (currentItemId) {
+      toggleAvailability(currentItemId);
+      hideViewMenuItemModal();
+    }
+  }
+
+  function showDeleteModal(id, name) {
+    currentItemId = id;
+    document.getElementById('deleteItemName').textContent = name;
+    document.getElementById('deleteModal').classList.remove('hidden');
+    document.getElementById('deleteModal').classList.add('flex');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function hideDeleteModal() {
+    document.getElementById('deleteModal').classList.add('hidden');
+    document.getElementById('deleteModal').classList.remove('flex');
+    document.body.style.overflow = 'auto';
+    currentItemId = null;
+  }
+
+  function confirmDelete() {
+    if (!currentItemId) return;
+    
+    fetch(`/Biriyani_Bliss_Admin/api/menu-items/${currentItemId}/delete/`, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': csrftoken
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      hideDeleteModal();
+      if (data.success) {
+        loadMenuItems(currentPage);
+        showNotification(data.message, 'success');
+      } else {
+        showNotification(data.error || 'Error deleting menu item', 'error');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      showNotification('Error deleting menu item', 'error');
+    });
+  }
+
+  // ===== FILTER FUNCTIONS =====
+  function applyFilters() {
+    loadMenuItems(1);
+  }
+
+  function clearFilters() {
+    document.getElementById('categoryFilter').value = '';
+    document.getElementById('availabilityFilter').value = '';
+    document.getElementById('searchInput').value = '';
+    loadMenuItems(1);
+  }
+
+  function refreshMenuItems() {
+    loadMenuItems(currentPage);
+    showNotification('Menu items refreshed!', 'success');
+  }
+
+  // ===== NOTIFICATION SYSTEM =====
+  function showNotification(message, type = 'info') {
+    const toast = document.getElementById('toast');
+    const icons = {
+      'success': 'check_circle',
+      'error': 'error',
+      'warning': 'warning',
+      'info': 'info'
+    };
+    const colors = {
+      'success': 'from-green-500 to-green-600',
+      'error': 'from-red-500 to-red-600',
+      'warning': 'from-yellow-500 to-yellow-600',
+      'info': 'from-blue-500 to-blue-600'
+    };
+
+    toast.className = `fixed bottom-4 right-4 left-4 md:left-auto md:right-4 bg-gradient-to-r ${colors[type]} text-white px-4 md:px-6 py-3 md:py-4 rounded-xl text-xs md:text-sm font-bold transition-all duration-300 z-50 flex items-center gap-2 shadow-lg max-w-sm mx-auto md:mx-0`;
+    toast.innerHTML = `
+      <span class="material-symbols-outlined text-sm md:text-base">${icons[type]}</span>
+      <span>${message}</span>
+    `;
+    toast.style.opacity = '1';
+    toast.style.pointerEvents = 'auto';
+    toast.style.transform = 'translateY(0)';
+
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.pointerEvents = 'none';
+      toast.style.transform = 'translateY(10px)';
+    }, 3000);
+  }
+
+  // ===== SEARCH DEBOUNCE =====
+  let searchTimeout;
+  document.getElementById('searchInput').addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      applyFilters();
+    }, 500);
+  });
+
+  // ===== CLOSE MODALS ON OUTSIDE CLICK =====
+  document.getElementById('menuItemModal')?.addEventListener('click', function(e) {
+    if (e.target === this) hideMenuItemModal();
+  });
+  
+  document.getElementById('viewMenuItemModal')?.addEventListener('click', function(e) {
+    if (e.target === this) hideViewMenuItemModal();
+  });
+  
+  document.getElementById('deleteModal')?.addEventListener('click', function(e) {
+    if (e.target === this) hideDeleteModal();
+  });
+
+  // ===== INIT =====
+  document.addEventListener('DOMContentLoaded', () => {
+    loadMenuItems(1);
+    
+    // Add animation delays to stat cards
+    document.querySelectorAll('.stat-card').forEach((card, index) => {
+      card.style.animationDelay = `${(index + 1) * 0.1}s`;
+    });
+  });
+</script>
+
+</body>
+</html>

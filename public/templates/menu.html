@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Menu | Biriyani Bliss</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,700;0,900;1,700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          primary: "#ee862b",
+          "primary-dark": "#c96f1a",
+          "bg-light": "#f8f7f6",
+          "bg-dark": "#221810",
+        },
+        fontFamily: { display: ["Be Vietnam Pro"] },
+        borderRadius: { DEFAULT: "1rem", lg: "2rem", xl: "3rem", full: "9999px" },
+      },
+    },
+  };
+</script>
+<style>
+  * { scroll-behavior: smooth; }
+
+  body {
+    background-color: #f8f7f6;
+    font-family: "Be Vietnam Pro", sans-serif;
+    background-image: radial-gradient(circle at 2px 2px, rgba(238,134,43,0.05) 1px, transparent 0);
+    background-size: 24px 24px;
+  }
+
+  /* ---- Hamburger ---- */
+  .hamburger span {
+    display: block; width: 24px; height: 2px;
+    background: #ee862b; border-radius: 4px;
+    transition: all 0.3s ease;
+    transform-origin: center;
+  }
+  .hamburger.open span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+  .hamburger.open span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+  /* ---- Mobile nav ---- */
+  #mobile-nav {
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.4s ease, opacity 0.3s ease;
+    opacity: 0;
+  }
+  #mobile-nav.open { max-height: 600px; opacity: 1; }
+
+  /* ---- Category pill active ---- */
+  .cat-pill { transition: all 0.2s ease; cursor: pointer; }
+  .cat-pill.active {
+    background: #ee862b; color: #1e1b18; font-weight: 800;
+  }
+  .cat-pill:not(.active):hover { background: rgba(238,134,43,0.15); color: #ee862b; }
+
+  /* ---- Card ---- */
+  .menu-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+  .menu-card:hover { transform: translateY(-6px); box-shadow: 0 20px 48px rgba(238,134,43,0.18); }
+  .menu-card .card-img { transition: transform 0.5s ease; }
+  .menu-card:hover .card-img { transform: scale(1.08); }
+
+  /* ---- Spice dots ---- */
+  .spice-1 { color: #22c55e; }
+  .spice-2 { color: #f59e0b; }
+  .spice-3 { color: #ef4444; }
+
+  /* ---- Badge ---- */
+  .badge { font-size: 10px; font-weight: 800; letter-spacing: 0.05em; padding: 3px 8px; border-radius: 999px; }
+
+  /* ---- Section fade-in ---- */
+  .section-block { animation: fadeUp 0.5s ease both; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---- Cart sidebar ---- */
+  #cart-drawer {
+    transform: translateX(100%);
+    transition: transform 0.35s cubic-bezier(.4,0,.2,1);
+  }
+  #cart-drawer.open { transform: translateX(0); }
+  #cart-overlay { display: none; }
+  #cart-overlay.open { display: block; }
+
+  /* ---- Sticky category bar ---- */
+  #cat-bar { position: sticky; top: 72px; z-index: 40; }
+
+  /* ---- Scrollbar ---- */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #ee862b55; border-radius: 99px; }
+
+  /* ---- Search highlight ---- */
+  .hidden-item { display: none !important; }
+
+  /* ---- Add animation for cart button ---- */
+  @keyframes cartBounce {
+    0%,100% { transform: scale(1); }
+    40% { transform: scale(1.3); }
+    70% { transform: scale(0.9); }
+  }
+  .cart-bounce { animation: cartBounce 0.4s ease; }
+
+  /* ---- Loading spinner ---- */
+  .spinner { animation: spin 1s linear infinite; }
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+</style>
+</head>
+<body class="text-slate-900 min-h-screen">
+
+<!-- ======================================================
+     HEADER / NAV
+====================================================== -->
+<header class="sticky top-0 z-50 w-full border-b border-amber-500/10 bg-[#f8f7f6]/90 backdrop-blur-md">
+  <div class="max-w-7xl mx-auto px-4 md:px-8 lg:px-16 py-4 flex items-center justify-between gap-4">
+
+    <!-- Logo -->
+    <a href="{% url 'public_dashboard' %}" class="flex items-center gap-2 text-amber-500 shrink-0">
+      <span class="material-symbols-outlined text-4xl">restaurant</span>
+      <h2 class="text-xl font-black uppercase tracking-tight leading-none">Biriyani<br/><span class="text-slate-800 text-base font-bold tracking-widest">BLISS</span></h2>
+    </a>
+
+    <!-- Desktop Nav -->
+    <nav class="hidden lg:flex items-center gap-8">
+      <a href="{% url 'public_dashboard' %}" class="flex items-center gap-1 text-sm font-medium hover:text-amber-500 transition-colors">
+        <span class="material-symbols-outlined text-lg">home</span> Home
+      </a>
+      <a href="{% url 'menu' %}" class="flex items-center gap-1 text-sm font-bold text-amber-500 border-b-2 border-amber-500 pb-1">
+        <span class="material-symbols-outlined text-lg">menu_book</span> Menu
+      </a>
+      <a href="{% url 'public_dashboard' %}#how-to-order" class="flex items-center gap-1 text-sm font-medium hover:text-amber-500 transition-colors">
+        <span class="material-symbols-outlined text-lg">fact_check</span> How to Order
+      </a>
+      <a href="{% url 'public_dashboard' %}#offers" class="flex items-center gap-1 text-sm font-medium hover:text-amber-500 transition-colors">
+        <span class="material-symbols-outlined text-lg">local_offer</span> Offers
+      </a>
+      <a href="{% url 'order_list' %}" class="flex items-center gap-1 text-sm font-medium hover:text-amber-500 transition-colors">
+        <span class="material-symbols-outlined text-lg">receipt_long</span> My Orders
+      </a>
+      <a href="{% url 'logout' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-amber-500/10 font-medium transition-colors">
+        <span class="material-symbols-outlined text-amber-500">logout</span> Logout
+      </a>
+    </nav>
+
+    <!-- Right actions -->
+    <div class="flex items-center gap-3">
+      <!-- Search (desktop) -->
+      <div class="hidden md:flex relative">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-amber-400 text-lg">search</span>
+        <input id="search-input" type="text" placeholder="Search biriyani…"
+          class="h-10 pl-10 pr-4 rounded-full border-none bg-amber-500/10 focus:ring-2 focus:ring-amber-400 placeholder:text-amber-400/50 text-sm w-48 focus:w-64 transition-all duration-300"/>
+      </div>
+      <!-- Cart -->
+      <button id="cart-btn" onclick="openCart()" class="relative flex size-10 items-center justify-center rounded-full bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-white transition-all">
+        <span class="material-symbols-outlined">shopping_cart</span>
+        <span id="cart-count" class="absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full bg-red-500 text-[10px] text-white font-black">0</span>
+      </button>
+      <!-- Profile -->
+      <!-- Hamburger -->
+      <button id="hamburger" class="hamburger flex flex-col gap-[6px] items-center justify-center size-10 rounded-full bg-amber-500/10 lg:hidden" onclick="toggleNav()">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Mobile Nav Drawer -->
+  <div id="mobile-nav" class="lg:hidden bg-[#f8f7f6] border-t border-amber-500/10 px-4">
+    <div class="py-4 space-y-1">
+      <!-- Mobile Search -->
+      <div class="relative mb-4">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-amber-400 text-lg">search</span>
+        <input id="search-mobile" type="text" placeholder="Search biriyani…"
+          class="h-11 pl-10 pr-4 rounded-full border-none bg-amber-500/10 focus:ring-2 focus:ring-amber-400 placeholder:text-amber-400/50 text-sm w-full"/>
+      </div>
+      <a href="{% url 'public_dashboard' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-amber-500/10 font-medium transition-colors">
+        <span class="material-symbols-outlined text-amber-500">home</span> Home
+      </a>
+      <a href="{% url 'menu' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-amber-500/10 text-amber-600 font-bold transition-colors">
+        <span class="material-symbols-outlined text-amber-500">menu_book</span> Menu
+      </a>
+      <a href="{% url 'public_dashboard' %}#how-to-order" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-amber-500/10 font-medium transition-colors">
+        <span class="material-symbols-outlined text-amber-500">fact_check</span> How to Order
+      </a>
+      <a href="{% url 'public_dashboard' %}#offers" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-amber-500/10 font-medium transition-colors">
+        <span class="material-symbols-outlined text-amber-500">local_offer</span> Offers
+      </a>
+      <div class="pt-2 border-t border-amber-500/10 mt-2">
+       
+        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-amber-500/10 font-medium transition-colors" onclick="openCart(); toggleNav(); return false;">
+          <span class="material-symbols-outlined text-amber-500">shopping_cart</span> Cart <span class="ml-auto bg-red-500 text-white text-xs font-black px-2 py-0.5 rounded-full" id="cart-count-mobile">0</span>
+        </a>
+        <a href="{% url 'logout' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-amber-500/10 font-medium transition-colors">
+        <span class="material-symbols-outlined text-amber-500">logout</span> Logout
+      </a>
+      </div>
+    </div>
+  </div>  
+</header>
+
+<!-- ======================================================
+     PAGE HERO BANNER
+====================================================== -->
+<section class="relative overflow-hidden bg-[#221810] py-14 px-4 md:px-16 text-white">
+  <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(circle at 70% 50%, #ee862b 0%, transparent 60%), radial-gradient(circle at 20% 80%, #c96f1a 0%, transparent 50%);"></div>
+  <div class="relative max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
+    <div>
+      <span class="inline-block px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 text-xs font-bold uppercase tracking-widest mb-4">Our Full Menu</span>
+      <h1 class="text-4xl md:text-5xl font-black leading-tight mb-3">
+        Every <span class="text-amber-400 italic">Biriyani</span><br/>You'll Ever Love
+      </h1>
+      <p class="text-slate-300 max-w-lg leading-relaxed">
+        From fiery Hyderabadi to fragrant Malabar — explore 30+ handcrafted biriyani varieties made fresh for every order.
+      </p>
+    </div>
+    <div class="flex gap-6 text-center shrink-0">
+      <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl px-6 py-5">
+        <p class="text-3xl font-black text-amber-400">30+</p>
+        <p class="text-xs text-slate-400 mt-1">Varieties</p>
+      </div>
+      <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl px-6 py-5">
+        <p class="text-3xl font-black text-amber-400">8</p>
+        <p class="text-xs text-slate-400 mt-1">Categories</p>
+      </div>
+      <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl px-6 py-5">
+        <p class="text-3xl font-black text-amber-400">60<span class="text-lg">m</span></p>
+        <p class="text-xs text-slate-400 mt-1">Delivery</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================
+     STICKY CATEGORY BAR
+====================================================== -->
+<div id="cat-bar" class="bg-[#f8f7f6]/95 backdrop-blur-md border-b border-amber-500/10 px-4 md:px-8 py-3">
+  <div class="max-w-7xl mx-auto overflow-x-auto no-scrollbar">
+    <div class="flex gap-2 w-max md:w-full md:flex-wrap">
+      <button class="cat-pill active whitespace-nowrap px-4 py-2 rounded-full bg-amber-500/10 text-sm font-semibold" onclick="filterCategory('all', this)">
+        🍛 All Items
+      </button>
+      <button class="cat-pill whitespace-nowrap px-4 py-2 rounded-full bg-amber-500/10 text-sm font-semibold" onclick="filterCategory('chicken', this)">
+        🍗 Chicken
+      </button>
+      <button class="cat-pill whitespace-nowrap px-4 py-2 rounded-full bg-amber-500/10 text-sm font-semibold" onclick="filterCategory('mutton', this)">
+        🥩 Mutton
+      </button>
+      <button class="cat-pill whitespace-nowrap px-4 py-2 rounded-full bg-amber-500/10 text-sm font-semibold" onclick="filterCategory('prawn', this)">
+        🦐 Prawn
+      </button>
+      <button class="cat-pill whitespace-nowrap px-4 py-2 rounded-full bg-amber-500/10 text-sm font-semibold" onclick="filterCategory('fish', this)">
+        🐟 Fish
+      </button>
+      <button class="cat-pill whitespace-nowrap px-4 py-2 rounded-full bg-amber-500/10 text-sm font-semibold" onclick="filterCategory('veg', this)">
+        🥦 Veg
+      </button>
+      <button class="cat-pill whitespace-nowrap px-4 py-2 rounded-full bg-amber-500/10 text-sm font-semibold" onclick="filterCategory('egg', this)">
+        🥚 Egg
+      </button>
+      <button class="cat-pill whitespace-nowrap px-4 py-2 rounded-full bg-amber-500/10 text-sm font-semibold" onclick="filterCategory('special', this)">
+        ✨ Chef's Special
+      </button>
+      <button class="cat-pill whitespace-nowrap px-4 py-2 rounded-full bg-amber-500/10 text-sm font-semibold" onclick="filterCategory('kids', this)">
+        👶 Kids Meal
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================================================
+     MAIN MENU CONTENT
+====================================================== -->
+<main class="max-w-7xl mx-auto px-4 md:px-8 lg:px-16 py-10 space-y-16" id="menu-main">
+
+  <!-- No results -->
+  <div id="no-results" class="hidden text-center py-24">
+    <span class="material-symbols-outlined text-6xl text-amber-300">search_off</span>
+    <p class="text-xl font-bold mt-4">No biriyani found</p>
+    <p class="text-slate-500 mt-2">Try a different search term or category.</p>
+  </div>
+
+  <!-- Loading overlay for cart operations -->
+  <div id="cart-loading" class="fixed inset-0 bg-black/20 backdrop-blur-sm z-[60] hidden items-center justify-center">
+    <div class="bg-white rounded-2xl p-6 flex flex-col items-center gap-3">
+      <div class="spinner w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full"></div>
+      <p class="font-bold text-slate-700">Updating cart...</p>
+    </div>
+  </div>
+
+  <!-- ── CHICKEN BIRIYANI ── -->
+  <section class="section-block" data-section="chicken">
+    <div class="flex items-center gap-3 mb-8">
+      <span class="text-3xl">🍗</span>
+      <div>
+        <h2 class="text-2xl md:text-3xl font-black">Chicken Biriyani</h2>
+        <p class="text-slate-500 text-sm">Tender, juicy chicken cooked in aromatic spices</p>
+      </div>
+      <span class="ml-auto badge bg-amber-100 text-amber-700">7 items</span>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="grid-chicken">
+
+      <!-- C1 -->
+      <div class="menu-card bg-white rounded-2xl overflow-hidden border border-amber-500/10 shadow-sm" data-category="chicken" data-name="hyderabadi chicken biriyani" data-menu-item-id="1">
+        <div class="relative overflow-hidden aspect-[4/3]">
+          <div class="card-img absolute inset-0 bg-cover bg-center" style="background-image:url('https://lh3.googleusercontent.com/aida-public/AB6AXuDJunHSfpjEo5mdS_NqJph--XcgNCAWhbAsw3y_XkKo3w31uBWdgjrcwaWcRj-A2BvpZhFvP7mk05shXOkwDmjclKo5fXpmy_Dy5HOe7n6KwXKKJJftbZrYdcWOdW5yqXilNuPersSni8glmUfgMt2XffF3BG0btTZ0uNWjsGNBs8b-f2Lg6fn-RkiVUIU9x9uRvWg9iDsKSd_orpAYHbnCVQSTWqNjvNI2IMlRWbnpQli4Y5hw9GcWSHIjS7c84ti9GvKCgqOBvA')"></div>
+          <div class="absolute top-3 left-3"><span class="badge bg-green-500 text-white">BESTSELLER</span></div>
+          <div class="absolute top-3 right-3 bg-amber-500 text-slate-900 font-black text-sm px-3 py-1 rounded-full">₹249</div>
+          <div class="absolute bottom-3 left-3 flex gap-1">
+            <span class="spice-3 material-symbols-outlined text-sm" title="Hot">local_fire_department</span>
+            <span class="spice-3 material-symbols-outlined text-sm">local_fire_department</span>
+            <span class="spice-2 material-symbols-outlined text-sm">local_fire_department</span>
+          </div>
+        </div>
+        <div class="p-4">
+          <div class="flex items-center gap-1 mb-1">
+            <span class="material-symbols-outlined text-yellow-400 text-sm">star</span>
+            <span class="text-xs font-bold">4.9</span>
+            <span class="text-xs text-slate-400">(200+)</span>
+            <span class="ml-auto text-xs text-green-600 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-xs">schedule</span>45 min</span>
+          </div>
+          <h3 class="font-black text-base mb-1">Hyderabadi Chicken Biriyani</h3>
+          <p class="text-slate-500 text-xs mb-4 line-clamp-2">Saffron-infused basmati rice with tender chicken pieces, fried onions & secret Hyderabadi masala.</p>
+          <button onclick="addToCart(1, 'Hyderabadi Chicken Biriyani', 249)" class="w-full h-10 rounded-xl bg-amber-500/10 text-amber-600 font-bold text-sm hover:bg-amber-500 hover:text-white transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-lg">add_shopping_cart</span> Add to Cart
+          </button>
+        </div>
+      </div>
+
+      <!-- C2 -->
+      <div class="menu-card bg-white rounded-2xl overflow-hidden border border-amber-500/10 shadow-sm" data-category="chicken" data-name="dum chicken biriyani" data-menu-item-id="2">
+        <div class="relative overflow-hidden aspect-[4/3]">
+          <div class="card-img absolute inset-0 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1599043513900-ed6fe01d3833?w=400&q=80')"></div>
+          <div class="absolute top-3 right-3 bg-amber-500 text-slate-900 font-black text-sm px-3 py-1 rounded-full">₹279</div>
+          <div class="absolute bottom-3 left-3 flex gap-1">
+            <span class="spice-3 material-symbols-outlined text-sm">local_fire_department</span>
+            <span class="spice-3 material-symbols-outlined text-sm">local_fire_department</span>
+            <span class="spice-3 material-symbols-outlined text-sm">local_fire_department</span>
+          </div>
+        </div>
+        <div class="p-4">
+          <div class="flex items-center gap-1 mb-1">
+            <span class="material-symbols-outlined text-yellow-400 text-sm">star</span>
+            <span class="text-xs font-bold">4.8</span><span class="text-xs text-slate-400">(180+)</span>
+            <span class="ml-auto text-xs text-green-600 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-xs">schedule</span>50 min</span>
+          </div>
+          <h3 class="font-black text-base mb-1">Dum Chicken Biriyani</h3>
+          <p class="text-slate-500 text-xs mb-4 line-clamp-2">Slow-cooked on dum in a sealed handi pot, locking in every drop of flavour and aroma.</p>
+          <button onclick="addToCart(2, 'Dum Chicken Biriyani', 279)" class="w-full h-10 rounded-xl bg-amber-500/10 text-amber-600 font-bold text-sm hover:bg-amber-500 hover:text-white transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-lg">add_shopping_cart</span> Add to Cart
+          </button>
+        </div>
+      </div>
+
+      <!-- C3 -->
+      <div class="menu-card bg-white rounded-2xl overflow-hidden border border-amber-500/10 shadow-sm" data-category="chicken" data-name="chettinad chicken biriyani" data-menu-item-id="3">
+        <div class="relative overflow-hidden aspect-[4/3]">
+          <div class="card-img absolute inset-0 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1512058556646-c4da40fba323?w=400&q=80')"></div>
+          <div class="absolute top-3 left-3"><span class="badge bg-red-500 text-white">SPICY 🔥</span></div>
+          <div class="absolute top-3 right-3 bg-amber-500 text-slate-900 font-black text-sm px-3 py-1 rounded-full">₹259</div>
+          <div class="absolute bottom-3 left-3 flex gap-1">
+            <span class="spice-3 material-symbols-outlined text-sm">local_fire_department</span>
+            <span class="spice-3 material-symbols-outlined text-sm">local_fire_department</span>
+            <span class="spice-3 material-symbols-outlined text-sm">local_fire_department</span>
+          </div>
+        </div>
+        <div class="p-4">
+          <div class="flex items-center gap-1 mb-1">
+            <span class="material-symbols-outlined text-yellow-400 text-sm">star</span>
+            <span class="text-xs font-bold">4.7</span><span class="text-xs text-slate-400">(140+)</span>
+            <span class="ml-auto text-xs text-green-600 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-xs">schedule</span>45 min</span>
+          </div>
+          <h3 class="font-black text-base mb-1">Chettinad Chicken Biriyani</h3>
+          <p class="text-slate-500 text-xs mb-4 line-clamp-2">Bold Chettinad spices with kalpasi, marathi mokku & freshly ground masala. Intensely aromatic.</p>
+          <button onclick="addToCart(3, 'Chettinad Chicken Biriyani', 259)" class="w-full h-10 rounded-xl bg-amber-500/10 text-amber-600 font-bold text-sm hover:bg-amber-500 hover:text-white transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-lg">add_shopping_cart</span> Add to Cart
+          </button>
+        </div>
+      </div>
+
+      <!-- C4 -->
+      <div class="menu-card bg-white rounded-2xl overflow-hidden border border-amber-500/10 shadow-sm" data-category="chicken" data-name="ambur chicken biriyani" data-menu-item-id="4">
+        <div class="relative overflow-hidden aspect-[4/3]">
+          <div class="card-img absolute inset-0 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&q=80')"></div>
+          <div class="absolute top-3 right-3 bg-amber-500 text-slate-900 font-black text-sm px-3 py-1 rounded-full">₹229</div>
+          <div class="absolute bottom-3 left-3 flex gap-1">
+            <span class="spice-3 material-symbols-outlined text-sm">local_fire_department</span>
+            <span class="spice-2 material-symbols-outlined text-sm">local_fire_department</span>
+            <span class="spice-1 material-symbols-outlined text-sm">local_fire_department</span>
+          </div>
+        </div>
+        <div class="p-4">
+          <div class="flex items-center gap-1 mb-1">
+            <span class="material-symbols-outlined text-yellow-400 text-sm">star</span>
+            <span class="text-xs font-bold">4.8</span><span class="text-xs text-slate-400">(160+)</span>
+            <span class="ml-auto text-xs text-green-600 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-xs">schedule</span>40 min</span>
+          </div>
+          <h3 class="font-black text-base mb-1">Ambur Star Chicken Biriyani</h3>
+          <p class="text-slate-500 text-xs mb-4 line-clamp-2">Signature Ambur-style with seeraga samba rice, light spicing & cooling sides of raita.</p>
+          <button onclick="addToCart(4, 'Ambur Star Chicken Biriyani', 229)" class="w-full h-10 rounded-xl bg-amber-500/10 text-amber-600 font-bold text-sm hover:bg-amber-500 hover:text-white transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-lg">add_shopping_cart</span> Add to Cart
+          </button>
+        </div>
+      </div>
+
+      <!-- C5 -->
+      <div class="menu-card bg-white rounded-2xl overflow-hidden border border-amber-500/10 shadow-sm" data-category="chicken" data-name="thalassery chicken biriyani" data-menu-item-id="5">
+        <div class="relative overflow-hidden aspect-[4/3]">
+          <div class="card-img absolute inset-0 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1574484284002-952d92456975?w=400&q=80')"></div>
+          <div class="absolute top-3 left-3"><span class="badge bg-blue-500 text-white">MALABAR</span></div>
+          <div class="absolute top-3 right-3 bg-amber-500 text-slate-900 font-black text-sm px-3 py-1 rounded-full">₹269</div>
+        </div>
+        <div class="p-4">
+          <div class="flex items-center gap-1 mb-1">
+            <span class="material-symbols-outlined text-yellow-400 text-sm">star</span>
+            <span class="text-xs font-bold">4.9</span><span class="text-xs text-slate-400">(220+)</span>
+            <span class="ml-auto text-xs text-green-600 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-xs">schedule</span>50 min</span>
+          </div>
+          <h3 class="font-black text-base mb-1">Thalassery Chicken Biriyani</h3>
+          <p class="text-slate-500 text-xs mb-4 line-clamp-2">Kerala's famous Thalassery biriyani with small-grain rice, cashews, raisins & light spicing.</p>
+          <button onclick="addToCart(5, 'Thalassery Chicken Biriyani', 269)" class="w-full h-10 rounded-xl bg-amber-500/10 text-amber-600 font-bold text-sm hover:bg-amber-500 hover:text-white transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-lg">add_shopping_cart</span> Add to Cart
+          </button>
+        </div>
+      </div>
+
+      <!-- C6 -->
+      <div class="menu-card bg-white rounded-2xl overflow-hidden border border-amber-500/10 shadow-sm" data-category="chicken" data-name="kolkata chicken biriyani" data-menu-item-id="6">
+        <div class="relative overflow-hidden aspect-[4/3]">
+          <div class="card-img absolute inset-0 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=400&q=80')"></div>
+          <div class="absolute top-3 right-3 bg-amber-500 text-slate-900 font-black text-sm px-3 py-1 rounded-full">₹289</div>
+        </div>
+        <div class="p-4">
+          <div class="flex items-center gap-1 mb-1">
+            <span class="material-symbols-outlined text-yellow-400 text-sm">star</span>
+            <span class="text-xs font-bold">4.7</span><span class="text-xs text-slate-400">(130+)</span>
+            <span class="ml-auto text-xs text-green-600 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-xs">schedule</span>55 min</span>
+          </div>
+          <h3 class="font-black text-base mb-1">Kolkata Chicken Biriyani</h3>
+          <p class="text-slate-500 text-xs mb-4 line-clamp-2">With potato & egg! Kolkata's unique take — mildly spiced, fragrant & absolutely comforting.</p>
+          <button onclick="addToCart(6, 'Kolkata Chicken Biriyani', 289)" class="w-full h-10 rounded-xl bg-amber-500/10 text-amber-600 font-bold text-sm hover:bg-amber-500 hover:text-white transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-lg">add_shopping_cart</span> Add to Cart
+          </button>
+        </div>
+      </div>
+
+      <!-- C7 -->
+      <div class="menu-card bg-white rounded-2xl overflow-hidden border border-amber-500/10 shadow-sm" data-category="chicken" data-name="boneless chicken biriyani" data-menu-item-id="7">
+        <div class="relative overflow-hidden aspect-[4/3]">
+          <div class="card-img absolute inset-0 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1633945274405-b6c8069047b0?w=400&q=80')"></div>
+          <div class="absolute top-3 left-3"><span class="badge bg-purple-500 text-white">BONELESS</span></div>
+          <div class="absolute top-3 right-3 bg-amber-500 text-slate-900 font-black text-sm px-3 py-1 rounded-full">₹299</div>
+        </div>
+        <div class="p-4">
+          <div class="flex items-center gap-1 mb-1">
+            <span class="material-symbols-outlined text-yellow-400 text-sm">star</span>
+            <span class="text-xs font-bold">4.8</span><span class="text-xs text-slate-400">(190+)</span>
+            <span class="ml-auto text-xs text-green-600 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-xs">schedule</span>45 min</span>
+          </div>
+          <h3 class="font-black text-base mb-1">Boneless Chicken Biriyani</h3>
+          <p class="text-slate-500 text-xs mb-4 line-clamp-2">100% boneless chicken chunks marinated in yogurt & spices. Easy to eat, hard to resist.</p>
+          <button onclick="addToCart(7, 'Boneless Chicken Biriyani', 299)" class="w-full h-10 rounded-xl bg-amber-500/10 text-amber-600 font-bold text-sm hover:bg-amber-500 hover:text-white transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-lg">add_shopping_cart</span> Add to Cart
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── MUTTON BIRIYANI ── -->
+  <section class="section-block" data-section="mutton">
+    <div class="flex items-center gap-3 mb-8">
+      <span class="text-3xl">🥩</span>
+      <div>
+        <h2 class="text-2xl md:text-3xl font-black">Mutton Biriyani</h2>
+        <p class="text-slate-500 text-sm">Rich, slow-cooked lamb in royal spice blends</p>
+      </div>
+      <span class="ml-auto badge bg-red-100 text-red-700">4 items</span>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+
+      <div class="menu-card bg-white rounded-2xl overflow-hidden border border-amber-500/10 shadow-sm" data-category="mutton" data-name="lucknowi mutton biriyani" data-menu-item-id="8">
+        <div class="relative overflow-hidden aspect-[4/3]">
+          <div class="card-img absolute inset-0 bg-cover bg-center" style="background-image:url('https://lh3.googleusercontent.com/aida-public/AB6AXuBOSeOTkv1LYPYH33DH7QKaouCmfpCmiewfEdLueh6zZp6hI9cVW1pQKV874vHb9eMf6kUb9BsM-e2BgiDd3GDIyFgTx_zYaotCNO04ENHGXN6gAluS63bC0hTTL0fyfyUoxujGvE0LJ7AtSgBv2jkiLpv0kCFNzvArTHoF8t-9CNTtDdA4DB2uoW9wdNAAR6jj80Yh1QdMYncJRbgOzmFk9ktFmuqJ-lRQI_FX9YH9baczaB1bX-4uqgDhrFUD1JlscBzbuHY6-g')"></div>
+          <div class="absolute top-3 left-3"><span class="badge bg-yellow-500 text-white">PREMIUM</span></div>
+          <div class="absolute top-3 right-3 bg-amber-500 text-slate-900 font-black text-sm px-3 py-1 rounded-full">₹349</div>
+        </div>
+        <div class="p-4">
+          <div class="flex items-center gap-1 mb-1">
+            <span class="material-symbols-outlined text-yellow-400 text-sm">star</span>
+            <span class="text-xs font-bold">4.8</span><span class="text-xs text-slate-400">(150+)</span>
+            <span class="ml-auto text-xs text-green-600 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-xs">schedule</span>60 min</span>
+          </div>
+          <h3 class="font-black text-base mb-1">Lucknowi Mutton Biriyani</h3>
+          <p class="text-slate-500 text-xs mb-4 line-clamp-2">Awadhi-style pakki biriyani with fall-off-the-bone mutton & kewra-scented basmati.</p>
+          <button onclick="addToCart(8, 'Lucknowi Mutton Biriyani', 349)" class="w-full h-10 rounded-xl bg-amber-500/10 text-amber-600 font-bold text-sm hover:bg-amber-500 hover:text-white transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-lg">add_shopping_cart</span> Add to Cart
+          </button>
+        </div>
+      </div>
+
+      <div class="menu-card bg-white rounded-2xl overflow-hidden border border-amber-500/10 shadow-sm" data-category="mutton" data-name="hyderabadi mutton biriyani" data-menu-item-id="9">
+        <div class="relative overflow-hidden aspect-[4/3]">
+          <div class="card-img absolute inset-0 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1596797038530-2c107229654b?w=400&q=80')"></div>
+          <div class="absolute top-3 left-3"><span class="badge bg-green-500 text-white">BESTSELLER</span></div>
+          <div class="absolute top-3 right-3 bg-amber-500 text-slate-900 font-black text-sm px-3 py-1 rounded-full">₹379</div>
+        </div>
+        <div class="p-4">
+          <div class="flex items-center gap-1 mb-1">
+            <span class="material-symbols-outlined text-yellow-400 text-sm">star</span>
+            <span class="text-xs font-bold">4.9</span><span class="text-xs text-slate-400">(200+)</span>
+            <span class="ml-auto text-xs text-green-600 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-xs">schedule</span>60 min</span>
+          </div>
+          <h3 class="font-black text-base mb-1">Hyderabadi Mutton Dum</h3>
+          <p class="text-slate-500 text-xs mb-4 line-clamp-2">Layered kacchi biriyani with raw mutton slow-cooked on dum with saffron & rose water.</p>
+          <button onclick="addToCart(9, 'Hyderabadi Mutton Dum', 379)" class="w-full h-10 rounded-xl bg-amber-500/10 text-amber-600 font-bold text-sm hover:bg-amber-500 hover:text-white transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-lg">add_shopping_cart</span> Add to Cart
+          </button>
+        </div>
+      </div>
+
+      <div class="menu-card bg-white rounded-2xl overflow-hidden border border-amber-500/10 shadow-sm" data-category="mutton" data-name="sindhi mutton biriyani" data-menu-item-id="10">
+        <div class="relative overflow-hidden aspect-[4/3]">
+          <div class="card-img absolute inset-0 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1606491956689-2ea866880c84?w=400&q=80')"></div>
+          <div class="absolute top-3 right-3 bg-amber-500 text-slate-900 font-black text-sm px-3 py-1 rounded-full">₹359</div>
+        </div>
+        <div class="p-4">
+          <div class="flex items-center gap-1 mb-1">
+            <span class="material-symbols-outlined text-yellow-400 text-sm">star</span>
+            <span class="text-xs font-bold">4.7</span><span class="text-xs text-slate-400">(110+)</span>
+            <span class="ml-auto text-xs text-green-600 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-xs">schedule</span>55 min</span>
+          </div>
+          <h3 class="font-black text-base mb-1">Sindhi Mutton Biriyani</h3>
+          <p class="text-slate-500 text-xs mb-4 line-clamp-2">Tangy tamarind base with plums, potatoes & rich mutton gravy layered with rice.</p>
+          <button onclick="addToCart(10, 'Sindhi Mutton Biriyani', 359)" class="w-full h-10 rounded-xl bg-amber-500/10 text-amber-600 font-bold text-sm hover:bg-amber-500 hover:text-white transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-lg">add_shopping_cart</span> Add to Cart
+          </button>
+        </div>
+      </div>
+
+      <div class="menu-card bg-white rounded-2xl overflow-hidden border border-amber-500/10 shadow-sm" data-category="mutton" data-name="memoni mutton biriyani" data-menu-item-id="11">
+        <div class="relative overflow-hidden aspect-[4/3]">
+          <div class="card-img absolute inset-0 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?w=400&q=80')"></div>
+          <div class="absolute top-3 left-3"><span class="badge bg-orange-600 text-white">NEW</span></div>
+          <div class="absolute top-3 right-3 bg-amber-500 text-slate-900 font-black text-sm px-3 py-1 rounded-full">₹399</div>
+        </div>
+        <div class="p-4">
+          <div class="flex items-center gap-1 mb-1">
+            <span class="material-symbols-outlined text-yellow-400 text-sm">star</span>
+            <span class="text-xs font-bold">4.6</span><span class="text-xs text-slate-400">(80+)</span>
+            <span class="ml-auto text-xs text-green-600 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-xs">schedule</span>60 min</span>
+          </div>
+          <h3 class="font-black text-base mb-1">Memoni Mutton Biriyani</h3>
+          <p class="text-slate-500 text-xs mb-4 line-clamp-2">Gujarati-Sindhi fusion with fiery masala, potatoes & curd. Less colour, huge flavour.</p>
+          <button onclick="addToCart(11, 'Memoni Mutton Biriyani', 399)" class="w-full h-10 rounded-xl bg-amber-500/10 text-amber-600 font-bold text-sm hover:bg-amber-500 hover:text-white transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-lg">add_shopping_cart</span> Add to Cart
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── PRAWN BIRIYANI ── -->
+  <section class="section-block" data-section="prawn">
+    <div class="flex items-center gap-3 mb-8">
+      <span class="text-3xl">🦐</span>
+      <div>
+        <h2 class="text-2xl md:text-3xl font-black">Prawn Biriyani</h2>
+        <p class="text-slate-500 text-sm">Coastal delights with succulent prawns</p>
+      </div>
+      <span class="ml-auto badge bg-orange-100 text-orange-700">3 items</span>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+
+      <div class="menu-card bg-white rounded-2xl overflow-hidden border border-amber-500/10 shadow-sm" data-category="prawn" data-name="goan prawn biriyani" data-menu-item-id="12">
+        <div class="relative overflow-hidden aspect-[4/3]">
+          <div class="card-img absolute inset-0 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=400&q=80')"></div>
+          <div class="absolute top-3 left-3"><span class="badge bg-blue-500 text-white">COASTAL</span></div>
+          <div class="absolute top-3 right-3 bg-amber-500 text-slate-900 font-black text-sm px-3 py-1 rounded-full">₹329</div>
+        </div>
+        <div class="p-4">
+          <div class="flex items-center gap-1 mb-1">
+            <span class="material-symbols-outlined text-yellow-400 text-sm">star</span>
+            <span class="text-xs font-bold">4.7</span><span class="text-xs text-slate-400">(95+)</span>
+            <span class="ml-auto text-xs text-green-600 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-xs">schedule</span>45 min</span>
+          </div>
+          <h3 class="font-black text-base mb-1">Goan Prawn Biriyani</h3>
+          <p class="text-slate-500 text-xs mb-4 line-clamp-2">Coconut milk rice with tiger prawns, Goan spices & kokum. A coastal symphony.</p>
+          <button onclick="addToCart(12, 'Goan Prawn Biriyani', 329)" class="w-full h-10 rounded-xl bg-amber-500/10 text-amber-600 font-bold text-sm hover:bg-amber-500 hover:text-white transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-lg">add_shopping_cart</span> Add to Cart
+          </button>
+        </div>
+      </div>
+
+      <div class="menu-card bg-white rounded-2xl overflow-hidden border border-amber-500/10 shadow-sm" data-category="prawn" data-name="andhra prawn biriyani" data-menu-item-id="13">
+        <div class="relative overflow-hidden aspect-[4/3]">
+          <div class="card-img absolute inset-0 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&q=80')"></div>
+          <div class="absolute top-3 left-3"><span class="badge bg-red-500 text-white">SPICY 🔥</span></div>
+          <div class="absolute top-3 right-3 bg-amber-500 text-slate-900 font-black text-sm px-3 py-1 rounded-full">₹349</div>
+        </div>
+        <div class="p-4">
+          <div class="flex items-center gap-1 mb-1">
+            <span class="material-symbols-outlined text-yellow-400 text-sm">star</span>
+            <span class="text-xs font-bold">4.8</span><span class="text-xs text-slate-400">(110+)</span>
+            <span class="ml-auto text-xs text-green-600 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-xs">schedule</span>50 min</span>
+          </div>
+          <h3 class="font-black text-base mb-1">Andhra Prawn Biriyani</h3>
+          <p class="text-slate-500 text-xs mb-4 line-clamp-2">Fiery Andhra masala with jumbo prawns. Bold, spicy & unforgettably rich in flavour.</p>
+          <button onclick="addToCart(13, 'Andhra Prawn Biriyani', 349)" class="w-full h-10 rounded-xl bg-amber-500/10 text-amber-600 font-bold text-sm hover:bg-amber-500 hover:text-white transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-lg">add_shopping_cart</span> Add to Cart
+          </button>
+        </div>
+      </div>
+
+      <div class="menu-card bg-white rounded-2xl overflow-hidden border border-amber-500/10 shadow-sm" data-category="prawn" data-name="malabar prawn biriyani" data-menu-item-id="14">
+        <div class="relative overflow-hidden aspect-[4/3]">
+          <div class="card-img absolute inset-0 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=400&q=80')"></div>
+          <div class="absolute top-3 right-3 bg-amber-500 text-slate-900 font-black text-sm px-3 py-1 rounded-full">₹369</div>
+        </div>
+        <div class="p-4">
+          <div class="flex items-center gap-1 mb-1">
+            <span class="material-symbols-outlined text-yellow-400 text-sm">star</span>
+            <span class="text-xs font-bold">4.6</span><span class="text-xs text-slate-400">(75+)</span>
+            <span class="ml-auto text-xs text-green-600 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-xs">schedule</span>50 min</span>
+          </div>
+          <h3 class="font-black text-base mb-1">Malabar Prawn Biriyani</h3>
+          <p class="text-slate-500 text-xs mb-4 line-clamp-2">Kerala-style with kaima rice, ghee-roasted cashews & plump prawns in a gentle masala.</p>
+          <button onclick="addToCart(14, 'Malabar Prawn Biriyani', 369)" class="w-full h-10 rounded-xl bg-amber-500/10 text-amber-600 font-bold text-sm hover:bg-amber-500 hover:text-white transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-lg">add_shopping_cart</span> Add to Cart
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── FISH BIRIYANI ── -->
+  <section class="section-block" data-section="fish">
+    <div class="flex items-center gap-3 mb-8">
+      <span class="text-3xl">🐟</span>
+      <div>
+        <h2 class="text-2xl md:text-3xl font-black">Fish Biriyani</h2>
+        <p class="text-slate-500 text-sm">Flaky fish with fragrant coastal rice</p>
+      </div>
+      <span class="ml-auto badge bg-blue-100 text-blue-700">2 items</span>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+
+      <div class="menu-card bg-white rounded-2xl overflow-hidden border border-amber-500/10 shadow-sm" data-category="fish" data-name="kerala fish biriyani" data-menu-item-id="15">
+        <div class="relative overflow-hidden aspect-[4/3]">
+          <div class="card-img absolute inset-0 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1625944525533-473f1a3d54e7?w=400&q=80')"></div>
+          <div class="absolute top-3 left-3"><span class="badge bg-blue-500 text-white">KERALA</span></div>
+          <div class="absolute top-3 right-3 bg-amber-500 text-slate-900 font-black text-sm px-3 py-1 rounded-full">₹319</div>
+        </div>
+        <div class="p-4">
+          <div class="flex items-center gap-1 mb-1">
+            <span class="material-symbols-outlined text-yellow-400 text-sm">star</span>
+            <span class="text-xs font-bold">4.6</span><span class="text-xs text-slate-400">(80+)</span>
+            <span class="ml-auto text-xs text-green-600 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-xs">schedule</span>45 min</span>
+          </div>
+          <h3 class="font-black text-base mb-1">Kerala Fish Biriyani</h3>
+          <p class="text-slate-500 text-xs mb-4 line-clamp-2">Fried fish pieces layered with seeraga samba rice, coconut & curry leaf tempering.</p>
+          <button onclick="addToCart(15, 'Kerala Fish Biriyani', 319)" class="w-full h-10 rounded-xl bg-amber-500/10 text-amber-600 font-bold text-sm hover:bg-amber-500 hover:text-white transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-lg">add_shopping_cart</span> Add to Cart
+          </button>
+        </div>
+      </div>
+
+      <div class="menu-card bg-white rounded-2xl overflow-hidden border border-amber-500/10 shadow-sm" data-category="fish" data-name="bangda fish biriyani" data-menu-item-id="16">
+        <div class="relative overflow-hidden aspect-[4/3]">
+          <div class="card-img absolute inset-0 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80')"></div>
+          <div class="absolute top-3 left-3"><span class="badge bg-orange-500 text-white">KONKAN</span></div>
+          <div class="absolute top-3 right-3 bg-amber-500 text-slate-900 font-black text-sm px-3 py-1 rounded-full">₹299</div>
+        </div>
+        <div class="p-4">
+          <div class="flex items-center gap-1 mb-1">
+            <span class="material-symbols-outlined text-yellow-400 text-sm">star</span>
+            <span class="text-xs font-bold">4.5</span><span class="text-xs text-slate-400">(60+)</span>
+            <span class="ml-auto text-xs text-green-600 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-xs">schedule</span>45 min</span>
+          </div>
+          <h3 class="font-black text-base mb-1">Bangda Fish Biriyani</h3>
+          <p class="text-slate-500 text-xs mb-4 line-clamp-2">Konkan mackerel marinated in red masala paste, layered with parboiled rice.</p>
+          <button onclick="addToCart(16, 'Bangda Fish Biriyani', 299)" class="w-full h-10 rounded-xl bg-amber-500/10 text-amber-600 font-bold text-sm hover:bg-amber-500 hover:text-white transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-lg">add_shopping_cart</span> Add to Cart
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── VEG BIRIYANI ── -->
+  <section class="section-block" data-section="veg">
+    <div class="flex items-center gap-3 mb-8">
+      <span class="text-3xl">🥦</span>
+      <div>
+        <h2 class="text-2xl md:text-3xl font-black">Veg Biriyani</h2>
+        <p class="text-slate-500 text-sm">Garden-fresh vegetables in aromatic rice</p>
+      </div>
+      <span class="ml-auto badge bg-green-100 text-green-700">4 items</span>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+
+      <div class="menu-card bg-white rounded-2xl overflow-hidden border border-amber-500/10 shadow-sm" data-category="veg" data-name="malabar veg biriyani" data-menu-item-id="17">
+        <div class="relative overflow-hidden aspect-[4/3]">
+          <div class="card-img absolute inset-0 bg-cover bg-center" style="background-image:url('https://lh3.googleusercontent.com/aida-public/AB6AXuAzwWAoliZXm58rLbFXXZ9ViVhK07rM_VUPt5Eahtt5hFiG_F7DOw5NoZHFVOjRK7quKT166i6ekfCGulEhBH0QV7RvsZGp6fjF9TcLD4Dh4psFc4p8UQvyVLQ7vE_POShSUiaLFGpYoo709RPfO42wHNn29meAp8LGyLn6Rww3nEQZla3PD_7gqXeGhzWDnG9SqeraorrlORIV67xafn0f5O6leEWydMJw-QEqdpP5a23e2A9ZxdeAFmYjfalfNWzekM09vZ93Qw')"></div>
+          <div class="absolute top-3 left-3"><span class="badge bg-green-500 text-white">PURE VEG</span></div>
+          <div class="absolute top-3 right-3 bg-amber-500 text-slate-900 font-black text-sm px-3 py-1 rounded-full">₹189</div>
+        </div>
+        <div class="p-4">
+          <div class="flex items-center gap-1 mb-1">
+            <span class="material-symbols-outlined text-yellow-400 text-sm">star</span>
+            <span class="text-xs font-bold">4.7</span><span class="text-xs text-slate-400">(120+)</span>
+            <span class="ml-auto text-xs text-green-600 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-xs">schedule</span>40 min</span>
+          </div>
+          <h3 class="font-black text-base mb-1">Malabar Veg Biriyani</h3>
+          <p class="text-slate-500 text-xs mb-4 line-clamp-2">Farm-fresh vegetables with cashews & raisins in Jeerakasala rice from the Malabar coast.</p>
+          <button onclick="addToCart(17, 'Malabar Veg Biriyani', 189)" class="w-full h-10 rounded-xl bg-amber-500/10 text-amber-600 font-bold text-sm hover:bg-amber-500 hover:text-white transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-lg">add_shopping_cart</span> Add to Cart
+          </button>
+        </div>
+      </div>
+
+      <div class="menu-card bg-white rounded-2xl overflow-hidden border border-amber-500/10 shadow-sm" data-category="veg" data-name="paneer biriyani" data-menu-item-id="18">
+        <div class="relative overflow-hidden aspect-[4/3]">
+          <div class="card-img absolute inset-0 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80')"></div>
+          <div class="absolute top-3 left-3"><span class="badge bg-yellow-500 text-white">FAN FAVE</span></div>
+          <div class="absolute top-3 right-3 bg-amber-500 text-slate-900 font-black text-sm px-3 py-1 rounded-full">₹219</div>
+        </div>
+        <div class="p-4">
+          <div class="flex items-center gap-1 mb-1">
+            <span class="material-symbols-outlined text-yellow-400 text-sm">star</span>
+            <span class="text-xs font-bold">4.8</span><span class="text-xs text-slate-400">(170+)</span>
+            <span class="ml-auto text-xs text-green-600 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-xs">schedule</span>40 min</span>
+          </div>
+          <h3 class="font-black text-base mb-1">Paneer Biriyani</h3>
+          <p class="text-slate-500 text-xs mb-4 line-clamp-2">Soft cottage cheese cubes marinated in tikka masala, layered with saffron basmati rice.</p>
+          <button onclick="addToCart(18, 'Paneer Biriyani', 219)" class="w-full h-10 rounded-xl bg-amber-500/10 text-amber-600 font-bold text-sm hover:bg-amber-500 hover:text-white transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-lg">add_shopping_cart</span> Add to Cart
+          </button>
+        </div>
+      </div>
+
+      <div class="menu-card bg-white rounded-2xl overflow-hidden border border-amber-500/10 shadow-sm" data-category="veg" data-name="mushroom biriyani" data-menu-item-id="19">
+        <div class="relative overflow-hidden aspect-[4/3]">
+          <div class="card-img absolute inset-0 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1527976746453-f363eac4d889?w=400&q=80')"></div>
+          <div class="absolute top-3 right-3 bg-amber-500 text-slate-900 font-black text-sm px-3 py-1 rounded-full">₹199</div>
+        </div>
+        <div class="p-4">
+          <div class="flex items-center gap-1 mb-1">
+            <span class="material-symbols-outlined text-yellow-400 text-sm">star</span>
+            <span class="text-xs font-bold">4.6</span><span class="text-xs text-slate-400">(90+)</span>
+            <span class="ml-auto text-xs text-green-600 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-xs">schedule</span>40 min</span>
+          </div>
+          <h3 class="font-black text-base mb-1">Mushroom Biriyani</h3>
+          <p class="text-slate-500 text-xs mb-4 line-clamp-2">Earthy button mushrooms sautéed with whole spices & layered with fragrant basmati.</p>
+          <button onclick="addToCart(19, 'Mushroom Biriyani', 199)" class="w-full h-10 rounded-xl bg-amber-500/10 text-amber-600 font-bold text-sm hover:bg-amber-500 hover:text-white transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-lg">add_shopping_cart</span> Add to Cart
+          </button>
+        </div>
+      </div>
+
+      <div class="menu-card bg-white rounded-2xl overflow-hidden border border-amber-500/10 shadow-sm" data-category="veg" data-name="soya chunks biriyani" data-menu-item-id="20">
+        <div class="relative overflow-hidden aspect-[4/3]">
+          <div class="card-img absolute inset-0 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80')"></div>
+          <div class="absolute top-3 left-3"><span class="badge bg-purple-500 text-white">HIGH PROTEIN</span></div>
+          <div class="absolute top-3 right-3 bg-amber-500 text-slate-900 font-black text-sm px-3 py-1 rounded-full">₹179</div>
+        </div>
+        <div class="p-4">
+          <div class="flex items-center gap-1 mb-1">
+            <span class="material-symbols-outlined text-yellow-400 text-sm">star</span>
+            <span class="text-xs font-bold">4.5</span><span class="text-xs text-slate-400">(70+)</span>
+            <span class="ml-auto text-xs text-green-600 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-xs">schedule</span>35 min</span>
+          </div>
+          <h3 class="font-black text-base mb-1">Soya Chunks Biriyani</h3>
+          <p class="text-slate-500 text-xs mb-4 line-clamp-2">High-protein soya chunks in a bold masala — perfect for fitness-conscious biriyani lovers.</p>
+          <button onclick="addToCart(20, 'Soya Chunks Biriyani', 179)" class="w-full h-10 rounded-xl bg-amber-500/10 text-amber-600 font-bold text-sm hover:bg-amber-500 hover:text-white transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-lg">add_shopping_cart</span> Add to Cart
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── EGG BIRIYANI ── -->
+  <section class="section-block" data-section="egg">
+    <div class="flex items-center gap-3 mb-8">
+      <span class="text-3xl">🥚</span>
+      <div>
+        <h2 class="text-2xl md:text-3xl font-black">Egg Biriyani</h2>
+        <p class="text-slate-500 text-sm">Classic comfort with perfectly boiled eggs</p>
+      </div>
+      <span class="ml-auto badge bg-yellow-100 text-yellow-700">2 items</span>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+
+      <div class="menu-card bg-white rounded-2xl overflow-hidden border border-amber-500/10 shadow-sm" data-category="egg" data-name="classic egg biriyani" data-menu-item-id="21">
+        <div class="relative overflow-hidden aspect-[4/3]">
+          <div class="card-img absolute inset-0 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1563379926898-05f4575a45d8?w=400&q=80')"></div>
+          <div class="absolute top-3 left-3"><span class="badge bg-amber-400 text-slate-900">VALUE PICK</span></div>
+          <div class="absolute top-3 right-3 bg-amber-500 text-slate-900 font-black text-sm px-3 py-1 rounded-full">₹159</div>
+        </div>
+        <div class="p-4">
+          <div class="flex items-center gap-1 mb-1">
+            <span class="material-symbols-outlined text-yellow-400 text-sm">star</span>
+            <span class="text-xs font-bold">4.6</span><span class="text-xs text-slate-400">(100+)</span>
+            <span class="ml-auto text-xs text-green-600 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-xs">schedule</span>35 min</span>
+          </div>
+          <h3 class="font-black text-base mb-1">Classic Egg Biriyani</h3>
+          <p class="text-slate-500 text-xs mb-4 line-clamp-2">Two boiled eggs in a tangy onion-tomato masala, layered with basmati rice.</p>
+          <button onclick="addToCart(21, 'Classic Egg Biriyani', 159)" class="w-full h-10 rounded-xl bg-amber-500/10 text-amber-600 font-bold text-sm hover:bg-amber-500 hover:text-white transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-lg">add_shopping_cart</span> Add to Cart
+          </button>
+        </div>
+      </div>
+
+      <div class="menu-card bg-white rounded-2xl overflow-hidden border border-amber-500/10 shadow-sm" data-category="egg" data-name="anda keema biriyani" data-menu-item-id="22">
+        <div class="relative overflow-hidden aspect-[4/3]">
+          <div class="card-img absolute inset-0 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1574484284002-952d92456975?w=400&q=80')"></div>
+          <div class="absolute top-3 right-3 bg-amber-500 text-slate-900 font-black text-sm px-3 py-1 rounded-full">₹219</div>
+        </div>
+        <div class="p-4">
+          <div class="flex items-center gap-1 mb-1">
+            <span class="material-symbols-outlined text-yellow-400 text-sm">star</span>
+            <span class="text-xs font-bold">4.7</span><span class="text-xs text-slate-400">(85+)</span>
+            <span class="ml-auto text-xs text-green-600 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-xs">schedule</span>40 min</span>
+          </div>
+          <h3 class="font-black text-base mb-1">Anda Keema Biriyani</h3>
+          <p class="text-slate-500 text-xs mb-4 line-clamp-2">Spiced minced chicken keema with whole boiled eggs on a bed of fragrant basmati.</p>
+          <button onclick="addToCart(22, 'Anda Keema Biriyani', 219)" class="w-full h-10 rounded-xl bg-amber-500/10 text-amber-600 font-bold text-sm hover:bg-amber-500 hover:text-white transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-lg">add_shopping_cart</span> Add to Cart
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── CHEF'S SPECIAL ── -->
+  <section class="section-block" data-section="special">
+    <div class="relative rounded-3xl overflow-hidden bg-[#221810] p-8 md:p-12 mb-8">
+      <div class="absolute inset-0 opacity-30" style="background-image: radial-gradient(circle at 80% 50%, #ee862b, transparent 60%);"></div>
+      <div class="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+          <span class="inline-block px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 text-xs font-bold uppercase tracking-widest mb-3">Limited Edition</span>
+          <h2 class="text-2xl md:text-3xl font-black text-white flex items-center gap-3">✨ Chef's Special Biriyani</h2>
+          <p class="text-slate-300 mt-2 max-w-lg">Exclusive recipes crafted by our head chef. Available in limited quantities daily.</p>
+        </div>
+        <div class="flex items-center gap-2 bg-amber-500 text-slate-900 px-5 py-3 rounded-full font-black whitespace-nowrap">
+          <span class="material-symbols-outlined">stars</span> Premium Selection
+        </div>
+      </div>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+
+      <div class="menu-card bg-white rounded-2xl overflow-hidden border-2 border-amber-400/40 shadow-sm" data-category="special" data-name="nawabi mixed biriyani" data-menu-item-id="23">
+        <div class="relative overflow-hidden aspect-[4/3]">
+          <div class="card-img absolute inset-0 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=400&q=80')"></div>
+          <div class="absolute top-3 left-3"><span class="badge bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-900">CHEF'S PICK</span></div>
+          <div class="absolute top-3 right-3 bg-amber-500 text-slate-900 font-black text-sm px-3 py-1 rounded-full">₹499</div>
+        </div>
+        <div class="p-4">
+          <div class="flex items-center gap-1 mb-1">
+            <span class="material-symbols-outlined text-yellow-400 text-sm">star</span>
+            <span class="text-xs font-bold">5.0</span><span class="text-xs text-slate-400">(50+)</span>
+            <span class="ml-auto text-xs text-green-600 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-xs">schedule</span>60 min</span>
+          </div>
+          <h3 class="font-black text-base mb-1">Nawabi Mixed Biriyani</h3>
+          <p class="text-slate-500 text-xs mb-4 line-clamp-2">A royal platter of chicken, mutton & prawn on a bed of saffron-kewra rice. For the true Nawab.</p>
+          <button onclick="addToCart(23, 'Nawabi Mixed Biriyani', 499)" class="w-full h-10 rounded-xl bg-amber-500 text-slate-900 font-bold text-sm hover:bg-amber-600 transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-lg">add_shopping_cart</span> Add to Cart
+          </button>
+        </div>
+      </div>
+
+      <div class="menu-card bg-white rounded-2xl overflow-hidden border-2 border-amber-400/40 shadow-sm" data-category="special" data-name="black truffle biriyani" data-menu-item-id="24">
+        <div class="relative overflow-hidden aspect-[4/3]">
+          <div class="card-img absolute inset-0 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1512058556646-c4da40fba323?w=400&q=80')"></div>
+          <div class="absolute top-3 left-3"><span class="badge bg-slate-800 text-white">LUXURY</span></div>
+          <div class="absolute top-3 right-3 bg-amber-500 text-slate-900 font-black text-sm px-3 py-1 rounded-full">₹649</div>
+        </div>
+        <div class="p-4">
+          <div class="flex items-center gap-1 mb-1">
+            <span class="material-symbols-outlined text-yellow-400 text-sm">star</span>
+            <span class="text-xs font-bold">4.9</span><span class="text-xs text-slate-400">(30+)</span>
+            <span class="ml-auto text-xs text-green-600 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-xs">schedule</span>60 min</span>
+          </div>
+          <h3 class="font-black text-base mb-1">Black Truffle Chicken Biriyani</h3>
+          <p class="text-slate-500 text-xs mb-4 line-clamp-2">A fusion masterpiece — classic Hyderabadi base elevated with black truffle oil & aged basmati.</p>
+          <button onclick="addToCart(24, 'Black Truffle Chicken Biriyani', 649)" class="w-full h-10 rounded-xl bg-amber-500 text-slate-900 font-bold text-sm hover:bg-amber-600 transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-lg">add_shopping_cart</span> Add to Cart
+          </button>
+        </div>
+      </div>
+
+      <div class="menu-card bg-white rounded-2xl overflow-hidden border-2 border-amber-400/40 shadow-sm" data-category="special" data-name="tasting platter biriyani" data-menu-item-id="25">
+        <div class="relative overflow-hidden aspect-[4/3]">
+          <div class="card-img absolute inset-0 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&q=80')"></div>
+          <div class="absolute top-3 left-3"><span class="badge bg-rose-500 text-white">PARTY PACK</span></div>
+          <div class="absolute top-3 right-3 bg-amber-500 text-slate-900 font-black text-sm px-3 py-1 rounded-full">₹899</div>
+        </div>
+        <div class="p-4">
+          <div class="flex items-center gap-1 mb-1">
+            <span class="material-symbols-outlined text-yellow-400 text-sm">star</span>
+            <span class="text-xs font-bold">4.9</span><span class="text-xs text-slate-400">(25+)</span>
+            <span class="ml-auto text-xs text-green-600 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-xs">schedule</span>60 min</span>
+          </div>
+          <h3 class="font-black text-base mb-1">Biriyani Tasting Platter</h3>
+          <p class="text-slate-500 text-xs mb-4 line-clamp-2">Serves 4 — four mini portions of our top biriyani: Hyderabadi, Lucknowi, Malabar & Chettinad.</p>
+          <button onclick="addToCart(25, 'Biriyani Tasting Platter', 899)" class="w-full h-10 rounded-xl bg-amber-500 text-slate-900 font-bold text-sm hover:bg-amber-600 transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-lg">add_shopping_cart</span> Add to Cart
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── KIDS MEAL ── -->
+  <section class="section-block" data-section="kids">
+    <div class="flex items-center gap-3 mb-8">
+      <span class="text-3xl">👶</span>
+      <div>
+        <h2 class="text-2xl md:text-3xl font-black">Kids Meal</h2>
+        <p class="text-slate-500 text-sm">Mild, fun & perfectly portioned for little ones</p>
+      </div>
+      <span class="ml-auto badge bg-pink-100 text-pink-700">2 items</span>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+
+      <div class="menu-card bg-white rounded-2xl overflow-hidden border border-pink-200 shadow-sm" data-category="kids" data-name="kids chicken biriyani" data-menu-item-id="26">
+        <div class="relative overflow-hidden aspect-[4/3]">
+          <div class="card-img absolute inset-0 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80')"></div>
+          <div class="absolute top-3 left-3"><span class="badge bg-pink-400 text-white">MILD 🌸</span></div>
+          <div class="absolute top-3 right-3 bg-pink-400 text-white font-black text-sm px-3 py-1 rounded-full">₹129</div>
+        </div>
+        <div class="p-4">
+          <div class="flex items-center gap-1 mb-1">
+            <span class="material-symbols-outlined text-yellow-400 text-sm">star</span>
+            <span class="text-xs font-bold">4.7</span><span class="text-xs text-slate-400">(55+)</span>
+            <span class="ml-auto text-xs text-green-600 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-xs">schedule</span>35 min</span>
+          </div>
+          <h3 class="font-black text-base mb-1">Kids Chicken Biriyani</h3>
+          <p class="text-slate-500 text-xs mb-4 line-clamp-2">Mild & delicious chicken biriyani portion sized for kids. No spice, all flavour. Served with raita.</p>
+          <button onclick="addToCart(26, 'Kids Chicken Biriyani', 129)" class="w-full h-10 rounded-xl bg-pink-50 text-pink-600 font-bold text-sm hover:bg-pink-400 hover:text-white transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-lg">add_shopping_cart</span> Add to Cart
+          </button>
+        </div>
+      </div>
+
+      <div class="menu-card bg-white rounded-2xl overflow-hidden border border-pink-200 shadow-sm" data-category="kids" data-name="kids veg biriyani" data-menu-item-id="27">
+        <div class="relative overflow-hidden aspect-[4/3]">
+          <div class="card-img absolute inset-0 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80')"></div>
+          <div class="absolute top-3 left-3"><span class="badge bg-green-400 text-white">PURE VEG</span></div>
+          <div class="absolute top-3 right-3 bg-pink-400 text-white font-black text-sm px-3 py-1 rounded-full">₹109</div>
+        </div>
+        <div class="p-4">
+          <div class="flex items-center gap-1 mb-1">
+            <span class="material-symbols-outlined text-yellow-400 text-sm">star</span>
+            <span class="text-xs font-bold">4.6</span><span class="text-xs text-slate-400">(40+)</span>
+            <span class="ml-auto text-xs text-green-600 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-xs">schedule</span>30 min</span>
+          </div>
+          <h3 class="font-black text-base mb-1">Kids Veg Biriyani</h3>
+          <p class="text-slate-500 text-xs mb-4 line-clamp-2">Colourful veggies in a lightly spiced rice, shaped like a star. Kids absolutely love it!</p>
+          <button onclick="addToCart(27, 'Kids Veg Biriyani', 109)" class="w-full h-10 rounded-xl bg-pink-50 text-pink-600 font-bold text-sm hover:bg-pink-400 hover:text-white transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-lg">add_shopping_cart</span> Add to Cart
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<!-- ======================================================
+     CART SIDEBAR DRAWER
+====================================================== -->
+<div id="cart-overlay" class="fixed inset-0 bg-black/40 z-50 backdrop-blur-sm" onclick="closeCart()"></div>
+
+<div id="cart-drawer" class="fixed top-0 right-0 h-full w-full max-w-sm bg-white z-50 shadow-2xl flex flex-col">
+  <div class="flex items-center justify-between px-6 py-5 border-b border-amber-500/10">
+    <h2 class="text-xl font-black flex items-center gap-2">
+      <span class="material-symbols-outlined text-amber-500">shopping_cart</span> Your Cart
+    </h2>
+    <button onclick="closeCart()" class="size-9 rounded-full bg-slate-100 flex items-center justify-center hover:bg-amber-500 hover:text-white transition-all">
+      <span class="material-symbols-outlined text-lg">close</span>
+    </button>
+  </div>
+
+  <div id="cart-items" class="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+    <div id="cart-empty" class="flex flex-col items-center justify-center h-full text-center py-12">
+      <span class="material-symbols-outlined text-6xl text-amber-200">shopping_cart</span>
+      <p class="font-bold text-lg mt-4 text-slate-400">Your cart is empty</p>
+      <p class="text-sm text-slate-400 mt-1">Add some delicious biriyani!</p>
+    </div>
+  </div>
+
+  <div id="cart-footer" class="hidden px-6 py-5 border-t border-amber-500/10 space-y-4 bg-white">
+    <div class="flex justify-between items-center">
+      <span class="text-slate-500 text-sm">Subtotal</span>
+      <span id="cart-subtotal" class="font-black text-lg">₹0</span>
+    </div>
+    <div class="flex justify-between items-center text-xs text-slate-400">
+      <span>Delivery fee</span>
+      <span class="text-green-500 font-semibold">FREE (over ₹299)</span>
+    </div>
+    <div class="flex justify-between items-center text-xs text-slate-400 pb-2 border-b border-dashed border-slate-200">
+      <span>Estimated time</span>
+      <span class="font-semibold text-slate-600">45–60 min</span>
+    </div>
+    <div class="flex justify-between items-center text-base font-black">
+      <span>Total</span>
+      <span id="cart-total" class="text-amber-500 text-xl">₹0</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <input type="text" placeholder="Coupon code" class="flex-1 h-10 rounded-xl border border-slate-200 px-3 text-sm focus:ring-2 focus:ring-amber-400 focus:border-transparent"/>
+      <button class="h-10 px-4 bg-amber-500/10 text-amber-600 font-bold rounded-xl text-sm hover:bg-amber-500 hover:text-white transition-all">Apply</button>
+    </div>
+    <a href="{% url 'checkout' %}" class="block w-full">
+      <button class="w-full h-12 bg-amber-500 text-slate-900 font-black rounded-xl hover:bg-amber-600 transition-all flex items-center justify-center gap-2 text-base">
+        <span class="material-symbols-outlined">shopping_bag</span> Proceed to Checkout
+      </button>
+    </a>
+  </div>
+</div>
+
+<!-- ======================================================
+     FOOTER
+====================================================== -->
+<footer class="bg-[#221810] text-slate-300 py-12 px-4 md:px-16 border-t border-amber-500/20 mt-8">
+  <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+    <div class="flex items-center gap-2 text-amber-500">
+      <span class="material-symbols-outlined text-3xl">restaurant</span>
+      <h2 class="text-lg font-black uppercase tracking-tight">Biriyani Bliss</h2>
+    </div>
+    <div class="flex flex-wrap gap-6 text-sm justify-center">
+      <a href="{% url 'public_dashboard' %}" class="hover:text-amber-400 transition-colors">Home</a>
+      <a href="{% url 'menu' %}" class="text-amber-400 font-bold">Menu</a>
+      <a href="{% url 'public_dashboard' %}#how-to-order" class="hover:text-amber-400 transition-colors">How to Order</a>
+      <a href="{% url 'public_dashboard' %}#offers" class="hover:text-amber-400 transition-colors">Offers</a>
+      <a href="#" class="hover:text-amber-400 transition-colors">Contact</a>
+    </div>
+    <p class="text-xs text-slate-500">© 2024 Biriyani Bliss. All rights reserved.</p>
+  </div>
+</footer>
+<script>
+  // ── Cart State (localStorage only) ──
+  let cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+
+  // ── CSRF Token for Django ──
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+  const csrftoken = getCookie('csrftoken');
+
+  // ── Persist cart to localStorage ──
+  function saveCart() {
+    localStorage.setItem('cartItems', JSON.stringify(cartItems));
+  }
+
+  // ── Cart Calculations ──
+  function getCartSubtotal() {
+    return cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  }
+
+  function getCartItemCount() {
+    return cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  }
+
+  // ── Loading Overlay ──
+  function showLoading() {
+    const el = document.getElementById('cart-loading');
+    if (el) {
+      el.classList.remove('hidden');
+      el.classList.add('flex');
+    }
+  }
+
+  function hideLoading() {
+    const el = document.getElementById('cart-loading');
+    if (el) {
+      el.classList.add('hidden');
+      el.classList.remove('flex');
+    }
+  }
+
+  // ── Add to Cart (pure frontend) ──
+  function addToCart(menuItemId, name, price) {
+    const existing = cartItems.find(i => i.id === menuItemId);
+    if (existing) {
+      existing.quantity += 1;
+    } else {
+      cartItems.push({
+        id: menuItemId,
+        name: name,
+        price: parseFloat(price),
+        quantity: 1
+      });
+    }
+
+    saveCart();
+    updateCartCountUI();
+    renderCart();
+
+    // Bounce cart icon
+    const btn = document.getElementById('cart-btn');
+    if (btn) {
+      btn.classList.remove('cart-bounce');
+      void btn.offsetWidth;
+      btn.classList.add('cart-bounce');
+      setTimeout(() => btn.classList.remove('cart-bounce'), 400);
+    }
+
+    openCart();
+  }
+
+  // ── Update Quantity ──
+  function updateCartItem(menuItemId, newQuantity) {
+    if (newQuantity <= 0) {
+      cartItems = cartItems.filter(i => i.id !== menuItemId);
+    } else {
+      const item = cartItems.find(i => i.id === menuItemId);
+      if (item) item.quantity = newQuantity;
+    }
+
+    saveCart();
+    updateCartCountUI();
+    renderCart();
+  }
+
+  // ── Remove Item ──
+  function removeCartItem(menuItemId) {
+    cartItems = cartItems.filter(i => i.id !== menuItemId);
+    saveCart();
+    updateCartCountUI();
+    renderCart();
+  }
+
+  // ── Update Badge Counts ──
+  function updateCartCountUI() {
+    const count = getCartItemCount();
+    const badge = document.getElementById('cart-count');
+    const badgeMobile = document.getElementById('cart-count-mobile');
+    if (badge) badge.textContent = count;
+    if (badgeMobile) badgeMobile.textContent = count;
+  }
+
+  // ── Render Cart Drawer ──
+  function renderCart() {
+    const container = document.getElementById('cart-items');
+    const empty = document.getElementById('cart-empty');
+    const footer = document.getElementById('cart-footer');
+
+    if (!container) return;
+
+    if (cartItems.length === 0) {
+      if (empty) empty.style.display = 'flex';
+      if (footer) footer.classList.add('hidden');
+      container.innerHTML = '';
+      if (empty) container.appendChild(empty);
+      updateCartCountUI();
+      return;
+    }
+
+    if (empty) empty.style.display = 'none';
+    if (footer) footer.classList.remove('hidden');
+
+    container.innerHTML = cartItems.map(item => `
+      <div class="flex items-center gap-3 p-3 rounded-xl bg-amber-50 border border-amber-100">
+        <div class="flex-1 min-w-0">
+          <p class="font-bold text-sm truncate">${item.name}</p>
+          <p class="text-amber-600 font-black text-sm">₹${item.price.toFixed(2)} × ${item.quantity}</p>
+        </div>
+        <div class="flex items-center gap-1">
+          <button onclick="updateCartItem(${item.id}, ${item.quantity - 1})"
+            class="size-7 rounded-full bg-white border border-slate-200 text-slate-600 font-black hover:bg-amber-500 hover:text-white hover:border-amber-500 transition-all text-sm flex items-center justify-center">−</button>
+          <span class="w-6 text-center font-black text-sm">${item.quantity}</span>
+          <button onclick="updateCartItem(${item.id}, ${item.quantity + 1})"
+            class="size-7 rounded-full bg-white border border-slate-200 text-slate-600 font-black hover:bg-amber-500 hover:text-white hover:border-amber-500 transition-all text-sm flex items-center justify-center">+</button>
+          <button onclick="removeCartItem(${item.id})"
+            class="size-7 rounded-full bg-white border border-red-100 text-red-400 font-black hover:bg-red-500 hover:text-white hover:border-red-500 transition-all ml-1 flex items-center justify-center">
+            <span class="material-symbols-outlined text-sm">delete</span>
+          </button>
+        </div>
+      </div>
+    `).join('');
+
+    const subtotal = getCartSubtotal();
+    const subtotalEl = document.getElementById('cart-subtotal');
+    const totalEl = document.getElementById('cart-total');
+    if (subtotalEl) subtotalEl.textContent = `₹${subtotal.toFixed(2)}`;
+    if (totalEl) totalEl.textContent = `₹${subtotal.toFixed(2)}`;
+
+    updateCartCountUI();
+  }
+
+  // ── Open / Close Cart Drawer ──
+  function openCart() {
+    const drawer = document.getElementById('cart-drawer');
+    const overlay = document.getElementById('cart-overlay');
+    if (drawer) drawer.classList.add('open');
+    if (overlay) overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    renderCart(); // always re-render from localStorage when opened
+  }
+
+  function closeCart() {
+    const drawer = document.getElementById('cart-drawer');
+    const overlay = document.getElementById('cart-overlay');
+    if (drawer) drawer.classList.remove('open');
+    if (overlay) overlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  // ── Proceed to Checkout ──
+  function proceedToCheckout() {
+    if (cartItems.length === 0) {
+      alert('Your cart is empty!');
+      return;
+    }
+    // Cart is already in localStorage, just navigate
+    window.location.href = '/User/checkout/';
+  }
+
+  // ── Place Order (called from checkout page) ──
+  async function placeOrder() {
+    const cart = JSON.parse(localStorage.getItem('cartItems') || '[]');
+
+    if (cart.length === 0) {
+      alert('Your cart is empty!');
+      return;
+    }
+
+    const delivery_address = document.getElementById('delivery_address')?.value.trim();
+    const phone_number     = document.getElementById('phone_number')?.value.trim();
+    const order_notes      = document.getElementById('order_notes')?.value.trim() || '';
+
+    if (!delivery_address || !phone_number) {
+      alert('Please provide delivery address and phone number.');
+      return;
+    }
+
+    showLoading();
+
+    try {
+      const response = await fetch('/User/checkout/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrftoken,
+        },
+        body: JSON.stringify({
+          cart: cart,
+          delivery_address,
+          phone_number,
+          order_notes,
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        localStorage.removeItem('cartItems'); // ✅ clear cart after order placed
+        updateCartCountUI();
+        window.location.href = data.redirect_url; // go to confirmation page
+      } else {
+        alert(data.error || 'Something went wrong. Please try again.');
+      }
+
+    } catch (error) {
+      console.error('Order error:', error);
+      alert('Network error. Please try again.');
+    } finally {
+      hideLoading();
+    }
+  }
+
+  // ── Hamburger ──
+  function toggleNav() {
+    const nav = document.getElementById('mobile-nav');
+    const btn = document.getElementById('hamburger');
+    if (nav) nav.classList.toggle('open');
+    if (btn) btn.classList.toggle('open');
+  }
+
+  // ── Category Filter ──
+  function filterCategory(cat, btn) {
+    document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+
+    const sections = document.querySelectorAll('#menu-main section[data-section]');
+
+    if (cat === 'all') {
+      sections.forEach(s => s.style.display = '');
+    } else {
+      sections.forEach(s => {
+        s.style.display = s.dataset.section === cat ? '' : 'none';
+      });
+    }
+
+    document.getElementById('menu-main')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    checkNoResults();
+  }
+
+  // ── Search ──
+  function handleSearch(val) {
+    const q = val.toLowerCase().trim();
+    const cards = document.querySelectorAll('[data-category]');
+    const sections = document.querySelectorAll('#menu-main section[data-section]');
+
+    if (!q) {
+      sections.forEach(s => s.style.display = '');
+      cards.forEach(c => c.classList.remove('hidden-item'));
+      document.querySelectorAll('.cat-pill').forEach((p, i) => {
+        if (i === 0) p.classList.add('active');
+        else p.classList.remove('active');
+      });
+    } else {
+      sections.forEach(s => s.style.display = '');
+      cards.forEach(c => {
+        const name = (c.dataset.name || '').toLowerCase();
+        const cat  = (c.dataset.category || '').toLowerCase();
+        if (name.includes(q) || cat.includes(q)) {
+          c.classList.remove('hidden-item');
+        } else {
+          c.classList.add('hidden-item');
+        }
+      });
+      sections.forEach(s => {
+        const visible = s.querySelectorAll('[data-category]:not(.hidden-item)');
+        s.style.display = visible.length === 0 ? 'none' : '';
+      });
+    }
+    checkNoResults();
+  }
+
+  function checkNoResults() {
+    const visible = document.querySelectorAll('[data-category]:not(.hidden-item)');
+    document.getElementById('no-results')?.classList.toggle('hidden', visible.length > 0);
+  }
+
+  // ── Search Input Handlers ──
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('search-input');
+    const searchMobile = document.getElementById('search-mobile');
+
+    if (searchInput) {
+      searchInput.addEventListener('input', e => {
+        handleSearch(e.target.value);
+        if (searchMobile) searchMobile.value = e.target.value;
+      });
+    }
+
+    if (searchMobile) {
+      searchMobile.addEventListener('input', e => {
+        handleSearch(e.target.value);
+        if (searchInput) searchInput.value = e.target.value;
+      });
+    }
+
+    // ✅ Init cart UI from localStorage on every page load
+    updateCartCountUI();
+    renderCart();
+  });
+</script>
+</body>
+</html>

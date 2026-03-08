@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: biriyani-shop
+    env: python
+    plan: free
+    buildCommand: bash build.sh
+    startCommand: gunicorn aromatic_explorer.wsgi:application
+    envVars:
+      - key: DEBUG
+        value: "False"
+      - key: PYTHON_VERSION
+        value: "3.10"

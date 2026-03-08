@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>Biriyani Bliss - Sign In</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script>
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#ee862b",
+          "primary-dark": "#d4711a",
+          "background-light": "#f8f7f6",
+          "saffron": "#f4c430",
+          "earth-red": "#a63d40",
+        },
+        fontFamily: { "display": ["Be Vietnam Pro", "sans-serif"] },
+      }
+    }
+  }
+</script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Be Vietnam Pro', sans-serif;
+    background-color: #f8f7f6;
+    min-height: 100svh;
+  }
+
+  .glass-nav {
+    background: rgba(248, 247, 246, 0.88);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  .mobile-menu { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+  .mobile-menu.open { max-height: 260px; }
+
+  .rice-pattern {
+    background-image: radial-gradient(circle at 2px 2px, rgba(238,134,43,0.06) 1px, transparent 0);
+    background-size: 22px 22px;
+  }
+
+  .hero-bg {
+    background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBooEkXFyJCBb93rvhwbG4_yOLZcbuFCBF6JkgyWOXVOqSfSXf0FW_el1euW19OCv2rQBgSaHT4exNVwquskmf6NzTdzPoumWFSgklgnAZqYwnbNuF3mvuoCtm8_9dHjafHIH4DJbv2-4jdFNRZrLu6C1zRWe5GNO8fywKX-coY_wc4kT32J5sZb-xjPa1lwan98So-tsS-xBtOf59F0GKL0_YRzhoqRw6tFDDN95y4Ebsty9sAhBIMGzPsEE71cP7esRvhLNq52Q");
+    background-size: cover;
+    background-position: center;
+    transition: transform 7s ease;
+  }
+  .hero-bg:hover { transform: scale(1.04); }
+
+  /* ── Inputs ── */
+  .input-field {
+    width: 100%;
+    height: 3.5rem;
+    padding: 0 1rem 0 3rem;
+    border: 1.5px solid rgba(238,134,43,0.2);
+    border-radius: 0.875rem;
+    background: #fff;
+    font-family: 'Be Vietnam Pro', sans-serif;
+    font-size: 0.9rem;
+    color: #1e293b;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .input-field:focus { border-color: #ee862b; box-shadow: 0 0 0 3px rgba(238,134,43,0.13); }
+  .input-field::placeholder { color: #94a3b8; }
+  .input-field.error { border-color: #a63d40 !important; box-shadow: 0 0 0 3px rgba(166,61,64,0.1) !important; }
+
+  /* Error text */
+  .err-msg {
+    display: none;
+    font-size: 0.72rem;
+    color: #a63d40;
+    margin-top: 0.35rem;
+    margin-left: 0.15rem;
+    align-items: center;
+    gap: 0.25rem;
+    font-weight: 600;
+  }
+  .err-msg.show { display: flex; }
+
+  /* Shake */
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20%      { transform: translateX(-7px); }
+    40%      { transform: translateX(7px); }
+    60%      { transform: translateX(-4px); }
+    80%      { transform: translateX(4px); }
+  }
+  .shake { animation: shake 0.38s ease; }
+
+  /* ── Buttons ── */
+  .btn-primary {
+    width: 100%; height: 3.5rem;
+    background: #ee862b; color: #fff;
+    font-family: 'Be Vietnam Pro', sans-serif;
+    font-weight: 900; font-size: 1rem;
+    border: none; border-radius: 0.875rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    box-shadow: 0 8px 24px rgba(238,134,43,0.28);
+    transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+  }
+  .btn-primary:hover { background:#d4711a; box-shadow:0 12px 30px rgba(238,134,43,0.38); transform:translateY(-1px); }
+  .btn-primary:active { transform:scale(0.98); }
+  .btn-primary:disabled { opacity:0.7; cursor:not-allowed; transform:none; }
+
+  .btn-social {
+    display:flex; align-items:center; justify-content:center; gap:0.55rem;
+    height:3rem; border:1.5px solid #e2e8f0; border-radius:0.875rem; background:#fff;
+    font-family:'Be Vietnam Pro',sans-serif; font-weight:700; font-size:0.85rem; color:#334155;
+    cursor:pointer; transition:border-color 0.2s,background 0.2s,transform 0.15s;
+  }
+  .btn-social:hover { border-color:#ee862b; background:rgba(238,134,43,0.04); transform:translateY(-1px); }
+
+  .btn-icon { background:none; border:none; cursor:pointer; color:#94a3b8; display:flex; align-items:center; transition:color 0.2s; padding:0; }
+  .btn-icon:hover { color:#ee862b; }
+
+  .divider { position:relative; text-align:center; margin:1.75rem 0; }
+  .divider::before { content:''; position:absolute; top:50%; left:0; right:0; height:1px; background:#e2e8f0; }
+  .divider span { position:relative; background:#f8f7f6; padding:0 1rem; color:#94a3b8; font-size:0.8rem; font-weight:600; }
+
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-7px)} }
+  .badge-float { animation:float 3s ease-in-out infinite; }
+  .badge-float:nth-child(2) { animation-delay:1.2s; }
+
+  /* Toast */
+  .toast {
+    position:fixed; bottom:1.5rem; left:50%;
+    transform:translateX(-50%) translateY(80px);
+    background:#1e293b; color:#fff;
+    padding:0.85rem 1.5rem; border-radius:0.875rem;
+    font-size:0.875rem; font-weight:600;
+    box-shadow:0 8px 24px rgba(0,0,0,0.18); opacity:0;
+    transition:all 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    z-index:9999; display:flex; align-items:center; gap:0.5rem;
+    white-space:nowrap; font-family:'Be Vietnam Pro',sans-serif;
+    max-width:calc(100vw - 2rem);
+  }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+  .fade-up   { animation:fadeUp 0.45s ease both; }
+  .fade-up-2 { animation:fadeUp 0.45s 0.1s ease both; }
+  .fade-up-3 { animation:fadeUp 0.45s 0.2s ease both; }
+
+  input[type="checkbox"] { width:1rem; height:1rem; border-radius:0.3rem; accent-color:#ee862b; cursor:pointer; flex-shrink:0; }
+
+  @media (max-width:767px) { .auth-card { border-radius:0!important; box-shadow:none!important; border:none!important; min-height:calc(100svh - 60px); } }
+  @media (max-width:360px) { .input-field{height:3rem;font-size:0.83rem} .btn-primary{height:3rem;font-size:0.92rem} .btn-social{height:2.75rem;font-size:0.8rem} }
+
+  /* ══════════════════════════════════════
+     SUCCESS OVERLAY
+  ══════════════════════════════════════ */
+  #success-overlay {
+    position:fixed; inset:0; z-index:10000;
+    display:flex; align-items:center; justify-content:center;
+    pointer-events:none; opacity:0;
+    transition:opacity 0.3s ease;
+  }
+  #success-overlay.active {
+    opacity:1; pointer-events:all;
+    background:rgba(248,247,246,0.96);
+    backdrop-filter:blur(16px);
+    -webkit-backdrop-filter:blur(16px);
+  }
+
+  @keyframes ripple { 0%{transform:scale(0);opacity:.7} 100%{transform:scale(6);opacity:0} }
+  .ripple-ring {
+    position:absolute; width:120px; height:120px; border-radius:50%;
+    background:radial-gradient(circle,rgba(238,134,43,.35),rgba(244,196,48,.1));
+    animation:ripple 1.4s ease-out forwards; display:none;
+  }
+  .ripple-ring:nth-child(2){animation-delay:.2s;background:radial-gradient(circle,rgba(238,134,43,.25),transparent)}
+  .ripple-ring:nth-child(3){animation-delay:.4s;background:radial-gradient(circle,rgba(244,196,48,.2),transparent)}
+
+  @keyframes cardPop {
+    0%  {transform:scale(.6) translateY(20px);opacity:0}
+    60% {transform:scale(1.05) translateY(-4px);opacity:1}
+    100%{transform:scale(1) translateY(0);opacity:1}
+  }
+  .success-card {
+    position:relative; z-index:2;
+    background:#fff; border-radius:1.5rem;
+    padding:2.5rem 2rem 2rem;
+    width:min(360px,calc(100vw - 2rem));
+    box-shadow:0 24px 64px rgba(238,134,43,.18),0 4px 16px rgba(0,0,0,.08);
+    border:1.5px solid rgba(238,134,43,.15);
+    text-align:center; opacity:0;
+    transform:scale(.6) translateY(20px);
+  }
+  .success-card.pop { animation:cardPop .55s cubic-bezier(.34,1.56,.64,1) forwards; }
+
+  .check-circle-wrap { width:80px; height:80px; margin:0 auto 1.25rem; position:relative; }
+  .check-circle-bg {
+    width:80px; height:80px; border-radius:50%;
+    background:linear-gradient(135deg,#ee862b,#f4c430);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 8px 24px rgba(238,134,43,.4);
+  }
+  @keyframes checkPop {
+    0%  {transform:scale(0) rotate(-20deg);opacity:0}
+    70% {transform:scale(1.2) rotate(5deg);opacity:1}
+    100%{transform:scale(1) rotate(0);opacity:1}
+  }
+  .check-icon { color:#fff; font-size:2.2rem!important; opacity:0; transform:scale(0); }
+  .check-icon.animate { animation:checkPop .45s .3s cubic-bezier(.34,1.56,.64,1) forwards; }
+
+  @keyframes pulseRing { 0%{transform:scale(1);opacity:.6} 100%{transform:scale(1.6);opacity:0} }
+  .pulse-ring { position:absolute; inset:-8px; border-radius:50%; border:2px solid rgba(238,134,43,.5); opacity:0; }
+  .pulse-ring.animate { animation:pulseRing 1s .5s ease-out infinite; }
+
+  @keyframes slideUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+  .success-title { font-size:1.45rem; font-weight:900; color:#1e293b; margin-bottom:.4rem; opacity:0; }
+  .success-title.animate { animation:slideUp .4s .55s ease forwards; }
+  .success-sub { font-size:.85rem; color:#64748b; font-weight:500; margin-bottom:1.75rem; opacity:0; }
+  .success-sub.animate { animation:slideUp .4s .65s ease forwards; }
+
+  .redirect-bar-wrap { background:#f1f5f9; border-radius:99px; height:6px; overflow:hidden; margin-bottom:.75rem; opacity:0; }
+  .redirect-bar-wrap.animate { animation:slideUp .4s .75s ease forwards; }
+  @keyframes fillBar { from{width:0%} to{width:100%} }
+  .redirect-bar-fill { height:100%; border-radius:99px; background:linear-gradient(90deg,#ee862b,#f4c430); width:0%; }
+  .redirect-bar-fill.animate { animation:fillBar 2.2s .85s cubic-bezier(.4,0,.2,1) forwards; }
+
+  .redirect-label { font-size:.75rem; color:#94a3b8; font-weight:600; display:flex; align-items:center; justify-content:center; gap:.4rem; opacity:0; }
+  .redirect-label.animate { animation:slideUp .4s .8s ease forwards; }
+
+  @keyframes dotSpin { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(.4);opacity:.3} }
+  .dot-loader { display:inline-flex; gap:5px; align-items:center; }
+  .dot-loader span { width:5px; height:5px; border-radius:50%; background:#ee862b; animation:dotSpin 1s ease-in-out infinite; }
+  .dot-loader span:nth-child(2){animation-delay:.15s} .dot-loader span:nth-child(3){animation-delay:.3s}
+
+  @keyframes confettiFall { 0%{transform:translateY(-20px) rotate(0);opacity:1} 100%{transform:translateY(110px) rotate(540deg);opacity:0} }
+  .confetti-piece { position:absolute; width:7px; height:7px; border-radius:2px; animation:confettiFall 1.2s ease-in forwards; top:-10px; }
+
+  @keyframes emojiFloat { 0%{transform:translateY(0) scale(1);opacity:1} 100%{transform:translateY(-60px) scale(.5);opacity:0} }
+  .emoji-float { position:absolute; font-size:1.4rem; animation:emojiFloat 1.5s ease-out forwards; pointer-events:none; }
+
+  @keyframes btnSpin { to{transform:rotate(360deg)} }
+  .btn-spinner { width:18px; height:18px; border:2.5px solid rgba(255,255,255,.4); border-top-color:#fff; border-radius:50%; animation:btnSpin .7s linear infinite; flex-shrink:0; }
+</style>
+</head>
+<body class="bg-background-light font-display min-h-screen">
+
+<!-- SUCCESS OVERLAY -->
+<div id="success-overlay">
+  <div class="ripple-ring" id="rr1"></div>
+  <div class="ripple-ring" id="rr2"></div>
+  <div class="ripple-ring" id="rr3"></div>
+
+  <div class="success-card" id="success-card">
+    <div id="confetti-container" style="position:absolute;inset:0;overflow:hidden;border-radius:1.5rem;pointer-events:none"></div>
+
+    <div class="check-circle-wrap">
+      <div class="pulse-ring" id="pulse-ring"></div>
+      <div class="check-circle-bg">
+        <span class="material-symbols-outlined check-icon" id="check-icon">check</span>
+      </div>
+    </div>
+
+    <h2 class="success-title" id="success-title">Welcome back! 🍛</h2>
+    <p class="success-sub"   id="success-sub">You've signed in successfully.</p>
+
+    <div class="redirect-bar-wrap" id="redirect-bar-wrap">
+      <div class="redirect-bar-fill" id="redirect-bar-fill"></div>
+    </div>
+    <div class="redirect-label" id="redirect-label">
+      <div class="dot-loader"><span></span><span></span><span></span></div>
+      Redirecting to your dashboard…
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span class="material-symbols-outlined" style="font-size:1.1rem" id="toast-icon">check_circle</span>
+  <span id="toast-msg">Signed in!</span>
+</div>
+
+<!-- NAVBAR -->
+<header class="glass-nav sticky top-0 z-50 border-b border-primary/10">
+  <div class="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 md:px-10 py-3 md:py-4">
+    <a href="#" class="flex items-center gap-2.5 text-primary flex-shrink-0">
+      <div class="w-7 h-7 sm:w-8 sm:h-8">
+        <svg fill="currentColor" viewBox="0 0 48 48">
+          <path d="M24 45.8096C19.6865 45.8096 15.4698 44.5305 11.8832 42.134C8.29667 39.7376 5.50128 36.3314 3.85056 32.3462C2.19985 28.361 1.76794 23.9758 2.60947 19.7452C3.451 15.5145 5.52816 11.6284 8.57829 8.5783C11.6284 5.52817 15.5145 3.45101 19.7452 2.60948C23.9758 1.76795 28.361 2.19986 32.3462 3.85057C36.3314 5.50129 39.7376 8.29668 42.134 11.8833C44.5305 15.4698 45.8096 19.6865 45.8096 24L24 24L24 45.8096Z"/>
+        </svg>
+      </div>
+      <span class="text-lg sm:text-xl font-black text-slate-900 tracking-tight">Biriyani Bliss</span>
+    </a>
+
+    <nav class="hidden md:flex items-center gap-8 lg:gap-10">
+      <a href="#" class="text-slate-600 text-sm font-medium hover:text-primary transition-colors">Home</a>
+      <a href="#" class="text-slate-600 text-sm font-medium hover:text-primary transition-colors">Menu</a>
+      <a href="#" class="text-slate-600 text-sm font-medium hover:text-primary transition-colors">Offers</a>
+    </nav>
+
+    <div class="flex items-center gap-3">
+      <button class="hidden md:flex items-center justify-center h-10 px-6 bg-primary text-white text-sm font-bold rounded-full shadow-md shadow-primary/20 hover:bg-primary-dark transition-all">Get Started</button>
+      <button id="menu-btn" class="md:hidden w-10 h-10 flex items-center justify-center rounded-xl hover:bg-primary/10 transition-colors" aria-label="Toggle menu">
+        <span class="material-symbols-outlined text-slate-700" id="menu-icon">menu</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="mobile-menu md:hidden border-t border-primary/10 bg-white/80 backdrop-blur-md" id="mobile-menu">
+    <div class="px-4 py-3 flex flex-col gap-1">
+      <a href="#" class="px-4 py-2.5 rounded-xl text-slate-700 font-medium hover:bg-primary/10 hover:text-primary transition-colors text-sm">Home</a>
+      <a href="#" class="px-4 py-2.5 rounded-xl text-slate-700 font-medium hover:bg-primary/10 hover:text-primary transition-colors text-sm">Menu</a>
+      <a href="#" class="px-4 py-2.5 rounded-xl text-slate-700 font-medium hover:bg-primary/10 hover:text-primary transition-colors text-sm">Offers</a>
+      <button class="mt-1 w-full h-11 bg-primary text-white font-bold rounded-xl hover:bg-primary-dark transition-colors text-sm">Get Started</button>
+    </div>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main class="flex flex-1 items-center justify-center p-0 sm:p-4 md:p-8 lg:p-12 min-h-[calc(100svh-62px)]">
+  <div class="auth-card flex flex-col md:flex-row w-full max-w-[1080px] md:min-h-[660px] md:rounded-xl overflow-hidden md:shadow-2xl md:shadow-slate-300/40 bg-white md:border md:border-primary/10">
+
+    <!-- LEFT PANEL -->
+    <div class="relative w-full h-52 xs:h-60 sm:h-72 md:h-auto md:w-[46%] lg:w-1/2 overflow-hidden flex-shrink-0">
+      <div class="hero-bg absolute inset-0"></div>
+      <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent"></div>
+
+      <div class="absolute top-6 right-5 hidden md:flex flex-col gap-3">
+        <div class="badge-float flex items-center gap-2 px-3 py-2 bg-black/30 backdrop-blur-sm rounded-xl border border-white/15">
+          <span class="material-symbols-outlined text-saffron" style="font-size:1rem">star</span>
+          <span class="text-white text-xs font-bold">4.9 ★ Rating</span>
+        </div>
+        <div class="badge-float flex items-center gap-2 px-3 py-2 bg-black/30 backdrop-blur-sm rounded-xl border border-white/15">
+          <span class="material-symbols-outlined text-green-300" style="font-size:1rem">delivery_dining</span>
+          <span class="text-white text-xs font-bold">30 min delivery</span>
+        </div>
+      </div>
+
+      <div class="absolute inset-x-0 bottom-0 p-5 sm:p-8 md:p-10 text-white">
+        <span class="inline-flex items-center gap-1 px-3 py-1 bg-saffron text-slate-900 text-xs font-black rounded-full mb-3">
+          <span class="material-symbols-outlined" style="font-size:0.85rem">local_fire_department</span>
+          AUTHENTIC SPICES
+        </span>
+        <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black leading-tight tracking-tight mb-2 md:mb-3">
+          Join the<br/><span style="color:#ee862b">Biriyani Bliss</span>
+        </h1>
+        <p class="text-slate-200 text-sm md:text-base max-w-xs hidden sm:block leading-relaxed">
+          Experience authentic steaming chicken biriyani delivered right to your doorstep.
+        </p>
+        <div class="mt-4 md:mt-6 flex items-center gap-4 md:gap-6">
+          <div class="flex items-center gap-1.5 text-white/75 text-xs"><span class="material-symbols-outlined" style="font-size:1.1rem">cooking</span><span class="hidden sm:inline font-medium">Fresh Cooked</span></div>
+          <div class="flex items-center gap-1.5 text-white/75 text-xs"><span class="material-symbols-outlined" style="font-size:1.1rem">restaurant</span><span class="hidden sm:inline font-medium">Premium Quality</span></div>
+          <div class="flex items-center gap-1.5 text-white/75 text-xs"><span class="material-symbols-outlined" style="font-size:1.1rem">delivery_dining</span><span class="hidden sm:inline font-medium">Fast Delivery</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="w-full md:flex-1 bg-background-light rice-pattern flex flex-col justify-center p-5 xs:p-6 sm:p-10 md:p-10 lg:p-14 relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-44 h-44 rounded-full pointer-events-none" style="background:rgba(244,196,48,0.08);filter:blur(60px);transform:translate(30%,-30%)"></div>
+      <div class="absolute bottom-0 left-0 w-36 h-36 rounded-full pointer-events-none" style="background:rgba(238,134,43,0.06);filter:blur(50px);transform:translate(-30%,30%)"></div>
+
+      <div class="relative z-10 w-full max-w-sm mx-auto">
+
+        <div class="mb-8 fade-up">
+          <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mb-1.5">Welcome Back 👋</h2>
+          <p class="text-slate-500 text-sm leading-relaxed">Sign in with your username or email.</p>
+        </div>
+
+        <!-- FORM -->
+        <form id="signin-form" class="space-y-5 fade-up-2" onsubmit="handleSignIn(event)" novalidate>
+
+          <!-- Identifier -->
+          <div>
+            <label class="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">
+              Username or Email <span style="color:#a63d40">*</span>
+            </label>
+            <div class="relative">
+              <input
+                id="identifier" name="identifier" type="text"
+                class="input-field"
+                placeholder="rahul_biriyani or rahul@email.com"
+                autocomplete="username"
+              />
+              <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none select-none" style="font-size:1.1rem">person</span>
+            </div>
+            <p id="identifier-err" class="err-msg">
+              <span class="material-symbols-outlined" style="font-size:.85rem">error</span>
+              <span id="identifier-err-text">Please enter your username or email.</span>
+            </p>
+          </div>
+
+          <!-- Password -->
+          <div>
+            <label class="block text-sm font-bold text-slate-700 mb-1.5 ml-0.5">
+              Password <span style="color:#a63d40">*</span>
+            </label>
+            <div class="relative" >
+              <input
+                id="password" name="password" type="password"
+                class="input-field pr-12"
+                placeholder="••••••••"
+                autocomplete="current-password"
+              />
+              <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none select-none" style="font-size:1.1rem">lock</span>
+              <button type="button" class="btn-icon absolute right-3.5 top-1/2 -translate-y-1/2" onclick="togglePwd()" aria-label="Toggle password">
+                <span class="material-symbols-outlined" id="pwd-eye" style="font-size:1.2rem">visibility</span>
+              </button>
+            </div>
+            <p id="password-err" class="err-msg">
+              <span class="material-symbols-outlined" style="font-size:.85rem">error</span>
+              <span id="password-err-text">Password must be at least 6 characters.</span>
+            </p>
+          </div>
+
+          <!-- Remember + Forgot -->
+          <div class="flex items-center justify-between py-1">
+            <label class="flex items-center gap-2 cursor-pointer select-none">
+              <input type="checkbox" id="remember"/>
+              <span class="text-xs font-medium text-slate-600">Remember me</span>
+            </label>
+            <a href="#" class="text-xs font-bold text-primary hover:underline underline-offset-4">Forgot Password?</a>
+          </div>
+
+          <!-- Submit -->
+          <button type="submit" class="btn-primary" id="signin-btn">
+            Sign In
+            <span class="material-symbols-outlined" style="font-size:1.1rem">arrow_forward</span>
+          </button>
+        </form>
+
+        <div class="divider fade-up-3"><span>Or continue with</span></div>
+
+        <div class="grid grid-cols-2 gap-3 fade-up-3">
+          <button class="btn-social" onclick="showToast('Google sign-in coming soon!','info')">
+            <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.92 3.32-2.04 4.44-1.2 1.2-3.08 2.48-5.8 2.48-4.64 0-8.32-3.76-8.32-8.32s3.68-8.32 8.32-8.32c2.48 0 4.28.96 5.52 2.12l2.32-2.32C18.4 2.12 15.8 1 12.48 1 6.48 1 1.6 5.88 1.6 11.88s4.88 10.88 10.88 10.88c3.24 0 5.68-1.08 7.6-3.08 2-2 2.64-4.8 2.64-7.16 0-.48-.04-1-.12-1.48h-10.48z" fill="#EA4335"/></svg>
+            Google
+          </button>
+          <button class="btn-social" onclick="showToast('Facebook sign-in coming soon!','info')">
+            <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" fill="#1877F2"/></svg>
+            Facebook
+          </button>
+        </div>
+
+        <p class="mt-9 text-center text-sm font-medium text-slate-500 fade-up-3">
+          Don't have an account?
+          <a href="{% url 'signup' %}" class="text-primary font-black hover:underline underline-offset-4 ml-1">Sign up for free</a>
+        </p>
+
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="py-6 text-center">
+  <p class="text-slate-400 text-xs">© 2024 Biriyani Bliss. Made with <span style="color:#a63d40">♥</span> and authentic spices.</p>
+</footer>
+
+<script>
+/* ── Mobile menu ── */
+const menuBtn    = document.getElementById('menu-btn');
+const mobileMenu = document.getElementById('mobile-menu');
+const menuIcon   = document.getElementById('menu-icon');
+menuBtn.addEventListener('click', () => {
+  const open = mobileMenu.classList.toggle('open');
+  menuIcon.textContent = open ? 'close' : 'menu';
+});
+document.addEventListener('click', (e) => {
+  if (!menuBtn.contains(e.target) && !mobileMenu.contains(e.target)) {
+    mobileMenu.classList.remove('open');
+    menuIcon.textContent = 'menu';
+  }
+});
+
+/* ── Password toggle ── */
+function togglePwd() {
+  const input = document.getElementById('password');
+  const eye   = document.getElementById('pwd-eye');
+  input.type  = input.type === 'password' ? 'text' : 'password';
+  eye.textContent = input.type === 'password' ? 'visibility' : 'visibility_off';
+}
+
+/* ── Field helpers ── */
+function setFieldError(fieldId, errId, errTextId, show, msg) {
+  const field = document.getElementById(fieldId);
+  const errEl = document.getElementById(errId);
+  if (show) {
+    field.classList.add('error');
+    errEl.classList.add('show');
+    if (msg) document.getElementById(errTextId).textContent = msg;
+    field.classList.remove('shake');
+    void field.offsetWidth; // reflow
+    field.classList.add('shake');
+  } else {
+    field.classList.remove('error', 'shake');
+    errEl.classList.remove('show');
+  }
+}
+
+function clearField(fieldId, errId) {
+  document.getElementById(fieldId).classList.remove('error', 'shake');
+  document.getElementById(errId).classList.remove('show');
+}
+
+/* ── Client-side validation ── */
+function validateForm() {
+  const identifier = document.getElementById('identifier').value.trim();
+  const password   = document.getElementById('password').value;
+  let ok = true;
+  if (!identifier) {
+    setFieldError('identifier', 'identifier-err', 'identifier-err-text', true, 'Please enter your username or email.');
+    ok = false;
+  } else {
+    clearField('identifier', 'identifier-err');
+  }
+  if (password.length < 6) {
+    setFieldError('password', 'password-err', 'password-err-text', true, 'Password must be at least 6 characters.');
+    ok = false;
+  } else {
+    clearField('password', 'password-err');
+  }
+  return ok;
+}
+
+/* ── CSRF ── */
+function getCookie(name) {
+  let v = null;
+  document.cookie.split(';').forEach(c => {
+    c = c.trim();
+    if (c.startsWith(name + '=')) v = decodeURIComponent(c.slice(name.length + 1));
+  });
+  return v;
+}
+
+/* ── Success animation ── */
+function launchSuccessAnimation(welcomeMsg, redirectUrl) {
+  const overlay  = document.getElementById('success-overlay');
+  const card     = document.getElementById('success-card');
+  const checkEl  = document.getElementById('check-icon');
+  const pulseEl  = document.getElementById('pulse-ring');
+  const titleEl  = document.getElementById('success-title');
+  const subEl    = document.getElementById('success-sub');
+  const barWrap  = document.getElementById('redirect-bar-wrap');
+  const barFill  = document.getElementById('redirect-bar-fill');
+  const labelEl  = document.getElementById('redirect-label');
+  const confetti = document.getElementById('confetti-container');
+
+  titleEl.textContent = welcomeMsg || 'Welcome back! 🍛';
+
+  overlay.classList.add('active');
+  setTimeout(() => {
+    card.classList.add('pop');
+    ['rr1','rr2','rr3'].forEach(id => { document.getElementById(id).style.display = 'block'; });
+    setTimeout(() => { checkEl.classList.add('animate'); pulseEl.classList.add('animate'); }, 200);
+    setTimeout(() => titleEl.classList.add('animate'),  550);
+    setTimeout(() => subEl.classList.add('animate'),    650);
+    setTimeout(() => { barWrap.classList.add('animate'); barFill.classList.add('animate'); }, 750);
+    setTimeout(() => labelEl.classList.add('animate'),  800);
+    spawnConfetti(confetti);
+    setTimeout(() => { window.location.href = redirectUrl; }, 3200);
+  }, 80);
+}
+
+function spawnConfetti(container) {
+  const colors = ['#ee862b','#f4c430','#22c55e','#3b82f6','#a63d40','#fff'];
+  const emojis = ['🍛','✨','🎉','😋'];
+  for (let i = 0; i < 28; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'confetti-piece';
+      el.style.left              = Math.random() * 100 + '%';
+      el.style.background        = colors[Math.floor(Math.random() * colors.length)];
+      el.style.animationDuration = (0.9 + Math.random() * 0.8) + 's';
+      el.style.width  = (5 + Math.random() * 6) + 'px';
+      el.style.height = (5 + Math.random() * 6) + 'px';
+      el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      el.style.transform = `rotate(${Math.random()*360}deg)`;
+      container.appendChild(el);
+      setTimeout(() => el.remove(), 2000);
+    }, i * 40);
+  }
+  emojis.forEach((emoji, i) => {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'emoji-float';
+      el.textContent = emoji;
+      el.style.left   = (15 + Math.random() * 70) + '%';
+      el.style.bottom = '20px';
+      el.style.animationDuration = (1.2 + Math.random() * 0.5) + 's';
+      container.appendChild(el);
+      setTimeout(() => el.remove(), 2000);
+    }, 300 + i * 180);
+  });
+}
+
+/* ── Main submit ── */
+function handleSignIn(e) {
+  e.preventDefault();
+  if (!validateForm()) return;
+
+  const btn = document.getElementById('signin-btn');
+  btn.disabled = true;
+  btn.innerHTML = `<div class="btn-spinner"></div> Signing in…`;
+
+  fetch("{% url 'signin' %}", {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': getCookie('csrftoken'),
+      'X-Requested-With': 'XMLHttpRequest'
+    },
+    body: new FormData(document.getElementById('signin-form'))
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.status === 'success') {
+      launchSuccessAnimation(data.message, data.redirect_url);
+      return;
+    }
+
+    /* Restore button */
+    btn.disabled = false;
+    btn.innerHTML = `Sign In <span class="material-symbols-outlined" style="font-size:1.1rem">arrow_forward</span>`;
+
+    /* Field-specific error from backend */
+    if (data.field === 'identifier') {
+      setFieldError('identifier', 'identifier-err', 'identifier-err-text', true, data.message);
+    } else if (data.field === 'password') {
+      setFieldError('password', 'password-err', 'password-err-text', true, data.message);
+    } else {
+      /* Generic — shake both and show toast */
+      ['identifier','password'].forEach(id => {
+        const el = document.getElementById(id);
+        el.classList.add('error');
+        el.classList.remove('shake');
+        void el.offsetWidth;
+        el.classList.add('shake');
+      });
+      showToast(data.message || 'Sign in failed.', 'error');
+    }
+  })
+  .catch(() => {
+    btn.disabled = false;
+    btn.innerHTML = `Sign In <span class="material-symbols-outlined" style="font-size:1.1rem">arrow_forward</span>`;
+    showToast('Network error. Please try again.', 'error');
+  });
+}
+
+/* ── Live clear errors ── */
+document.getElementById('identifier').addEventListener('input', () => clearField('identifier','identifier-err'));
+document.getElementById('password').addEventListener('input',   () => clearField('password','password-err'));
+
+/* ── Toast ── */
+let toastTimer;
+function showToast(msg, type = 'success') {
+  const toast = document.getElementById('toast');
+  const icon  = document.getElementById('toast-icon');
+  const text  = document.getElementById('toast-msg');
+  const map   = { success:{bg:'#1e293b',ic:'check_circle'}, error:{bg:'#a63d40',ic:'error'}, info:{bg:'#475569',ic:'info'} };
+  const s = map[type] || map.success;
+  toast.style.background = s.bg;
+  icon.textContent = s.ic;
+  text.textContent = msg;
+  clearTimeout(toastTimer);
+  toast.classList.add('show');
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 3500);
+}
+</script>
+</body>
+</html>

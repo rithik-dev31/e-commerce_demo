@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category Management - Biriyani Bliss Admin</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,700;0,900;1,700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#ee862b",
+              "primary-dark": "#c96f1a",
+              "secondary": "#f4a460",
+              "accent": "#d4691e",
+              "background-light": "#f8f7f6",
+              "background-dark": "#221810",
+            },
+            fontFamily: { "display": ["Be Vietnam Pro"] },
+            borderRadius: { "DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px" },
+            animation: {
+              "fade-in": "fadeIn 0.5s ease both",
+              "slide-up": "slideUp 0.6s ease both",
+              "slide-down": "slideDown 0.4s ease both",
+              "scale-in": "scaleIn 0.3s ease both",
+              "bounce-subtle": "bounceSubtle 0.6s ease both",
+            },
+            keyframes: {
+              fadeIn: { "0%": { opacity: "0" }, "100%": { opacity: "1" } },
+              slideUp: { "0%": { opacity: "0", transform: "translateY(20px)" }, "100%": { opacity: "1", transform: "translateY(0)" } },
+              slideDown: { "0%": { opacity: "0", transform: "translateY(-20px)" }, "100%": { opacity: "1", transform: "translateY(0)" } },
+              scaleIn: { "0%": { opacity: "0", transform: "scale(0.95)" }, "100%": { opacity: "1", transform: "scale(1)" } },
+              bounceSubtle: { "0%, 100%": { transform: "translateY(0)" }, "50%": { transform: "translateY(-8px)" } },
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; width: 100%; }
+      body { 
+        font-family: "Be Vietnam Pro", sans-serif; 
+        background: linear-gradient(135deg, #f8f7f6 0%, #faf8f6 100%);
+        overflow-x: hidden;
+      }
+      
+      .spice-texture {
+        background-image: radial-gradient(circle at 2px 2px, rgba(238,134,43,0.03) 1px, transparent 0);
+        background-size: 24px 24px;
+      }
+
+      .header-gradient {
+        background: linear-gradient(135deg, #ee862b 0%, #f4a460 50%, #fbbf24 100%);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .header-gradient::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.15), transparent);
+        pointer-events: none;
+      }
+
+      .nav-link {
+        position: relative;
+        transition: all 0.3s ease;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 700;
+      }
+
+      .nav-link::after {
+        content: '';
+        position: absolute;
+        bottom: -4px;
+        left: 0;
+        width: 0;
+        height: 3px;
+        background: rgba(255, 255, 255, 0.95);
+        transition: width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        border-radius: 2px;
+      }
+
+      .nav-link:hover {
+        color: white;
+      }
+
+      .nav-link:hover::after { 
+        width: 100%; 
+      }
+
+      /* ---- Hamburger ---- */
+      .hamburger {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+      }
+
+      .hamburger:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.4);
+      }
+
+      .hamburger span {
+        display: block;
+        width: 22px;
+        height: 2.5px;
+        background: white;
+        border-radius: 4px;
+        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        transform-origin: center;
+      }
+
+      .hamburger.open span:nth-child(1) { 
+        transform: translateY(10px) rotate(45deg); 
+      }
+      .hamburger.open span:nth-child(2) { 
+        opacity: 0; 
+        transform: scaleX(0); 
+      }
+      .hamburger.open span:nth-child(3) { 
+        transform: translateY(-10px) rotate(-45deg); 
+      }
+
+      /* ---- Mobile nav ---- */
+      #mobile-nav {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                    opacity 0.3s ease,
+                    padding 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        opacity: 0;
+        padding: 0;
+      }
+
+      #mobile-nav.open { 
+        max-height: 500px; 
+        opacity: 1;
+        padding: 1rem 0;
+      }
+
+      .mobile-nav-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        border-radius: 12px;
+        color: white;
+        font-weight: 700;
+        transition: all 0.3s ease;
+      }
+
+      .mobile-nav-link:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateX(4px);
+      }
+
+      .card-glass {
+        background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 100%);
+        border: 1px solid rgba(238, 134, 43, 0.15);
+        backdrop-filter: blur(10px);
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #ee862b 0%, #f4a460 100%);
+        color: white;
+        transition: all 0.3s ease;
+        border: none;
+        position: relative;
+        overflow: hidden;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.2);
+        transition: left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+
+      .btn-primary:hover::before { 
+        left: 100%; 
+      }
+
+      .btn-primary:hover { 
+        transform: translateY(-3px); 
+        box-shadow: 0 12px 28px rgba(238, 134, 43, 0.4); 
+      }
+
+      .btn-primary:active {
+        transform: translateY(-1px);
+      }
+
+      .modal-overlay {
+        backdrop-filter: blur(8px);
+        background: rgba(0, 0, 0, 0.55);
+        animation: fadeIn 0.3s ease;
+      }
+
+      .category-card {
+        transition: all 0.3s ease;
+        animation: slideUp 0.5s ease both;
+      }
+
+      .category-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 16px 32px rgba(238, 134, 43, 0.2);
+      }
+
+      .field-input {
+        width: 100%;
+        padding: 0.875rem 1.125rem;
+        border-radius: 1rem;
+        border: 2px solid #e2e8f0;
+        background: white;
+        font-size: 0.875rem;
+        font-family: "Be Vietnam Pro", sans-serif;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        outline: none;
+      }
+
+      .field-input:focus {
+        border-color: #ee862b;
+        box-shadow: 0 0 0 4px rgba(238,134,43,0.15);
+        background: #fafafa;
+      }
+
+      .field-input::placeholder {
+        color: #cbd5e1;
+        font-weight: 500;
+      }
+
+      /* Loading skeleton */
+      .skeleton {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+      }
+
+      @keyframes loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+      }
+
+      /* Responsive utilities */
+      @media (max-width: 640px) {
+        .container {
+          padding-left: 12px;
+          padding-right: 12px;
+        }
+
+        body {
+          font-size: 14px;
+        }
+      }
+
+      /* Touch-friendly spacing on mobile */
+      @media (hover: none) and (pointer: coarse) {
+        button, a {
+          min-height: 48px;
+          min-width: 48px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+        }
+      }
+
+      /* Smooth scrolling */
+      html {
+        scroll-behavior: smooth;
+      }
+
+      /* Print styles */
+      @media print {
+        .btn-primary, #hamburger, #mobile-nav {
+          display: none !important;
+        }
+      }
+    </style>
+</head>
+<body class="text-slate-900 min-h-screen spice-texture">
+
+<!-- ===== HEADER / NAV ===== -->
+<header class="header-gradient sticky top-0 z-50 shadow-xl">
+  <div class="w-full">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-3 sm:py-4">
+      <div class="flex justify-between items-center gap-3 sm:gap-4">
+        <!-- Logo & Brand -->
+        <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-white/25 backdrop-blur-md flex items-center justify-center border border-white/30 transition-all hover:bg-white/35">
+            <span class="material-symbols-outlined text-xl sm:text-2xl text-white">category</span>
+          </div>
+          <div class="hidden xs:block">
+            <h1 class="text-base sm:text-lg md:text-xl font-black text-white tracking-tight leading-tight">Biriyani Bliss</h1>
+            <p class="text-xs text-white/80 font-semibold">Admin Panel</p>
+          </div>
+        </div>
+
+        <!-- Desktop Nav -->
+        <nav class="hidden lg:flex items-center gap-0.5 xl:gap-1">
+          <a href="{% url 'head:admin_dashboard' %}" class="nav-link text-xs xl:text-sm px-2 xl:px-4 py-2 flex items-center gap-1 sm:gap-2 transition-colors">
+            <span class="material-symbols-outlined text-base xl:text-lg">home</span>
+            <span class="hidden xl:inline">Dashboard</span>
+          </a>
+          <a href="{% url 'head:order_list' %}" class="nav-link text-xs xl:text-sm px-2 xl:px-4 py-2 flex items-center gap-1 sm:gap-2 transition-colors">
+            <span class="material-symbols-outlined text-base xl:text-lg">shopping_cart</span>
+            <span class="hidden xl:inline">Orders</span>
+          </a>
+          <a href="{% url 'head:menu_item_management' %}" class="nav-link text-xs xl:text-sm px-2 xl:px-4 py-2 flex items-center gap-1 sm:gap-2 transition-colors">
+            <span class="material-symbols-outlined text-base xl:text-lg">dining</span>
+            <span class="hidden xl:inline">Menu Items</span>
+          </a>
+          <a href="{% url 'head:order_statistics' %}" class="nav-link text-xs xl:text-sm px-2 xl:px-4 py-2 flex items-center gap-1 sm:gap-2 transition-colors">
+            <span class="material-symbols-outlined text-base xl:text-lg">analytics</span>
+            <span class="hidden xl:inline">Statistics</span>
+          </a>
+          <a href="{% url 'logout' %}" 
+   class="flex items-center gap-2 px-5 py-2.5 rounded-full bg-red-50 hover:bg-red-500 text-red-600 hover:text-white font-bold text-sm transition-all duration-300 shadow-sm hover:shadow-md group">
+  <span class="material-symbols-outlined text-red-500 group-hover:text-white transition-all duration-300">logout</span>
+  <span>Logout</span>
+</a>
+
+
+
+        </nav>
+
+        <!-- Right Actions -->
+        <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+          <div class="hidden xs:flex items-center gap-1.5 sm:gap-2 bg-white/20 backdrop-blur-md px-2.5 sm:px-3.5 py-1.5 rounded-full border border-white/30 transition-all hover:bg-white/25">
+            <span class="material-symbols-outlined text-xs sm:text-sm text-white animate-pulse">circle</span>
+            <span class="text-xs font-bold text-white">Live</span>
+          </div>
+          <button onclick="refreshCategories()" class="btn-primary px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full font-bold text-xs sm:text-sm flex items-center gap-1 sm:gap-2 hover:scale-105 transition-transform active:scale-95" title="Refresh categories">
+            <span class="material-symbols-outlined text-base sm:text-lg">refresh</span>
+            <span class="hidden sm:inline">Refresh</span>
+          </button>
+          <!-- Hamburger -->
+          <button id="hamburger" class="hamburger lg:hidden" onclick="toggleNav()" title="Toggle navigation" aria-label="Toggle mobile navigation menu" aria-expanded="false">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Nav Drawer -->
+      <div id="mobile-nav" class="lg:hidden bg-white/15 backdrop-blur-md border-t border-white/20 mt-3 mx-0">
+        <nav class="px-2 sm:px-4 space-y-1">
+          <a href="{% url 'head:admin_dashboard' %}" class="mobile-nav-link" onclick="closeNav()">
+            <span class="material-symbols-outlined text-lg">home</span>
+            <span>Dashboard</span>
+          </a>
+          <a href="{% url 'head:order_list' %}" class="mobile-nav-link" onclick="closeNav()">
+            <span class="material-symbols-outlined text-lg">shopping_cart</span>
+            <span>Orders</span>
+          </a>
+          <a href="{% url 'head:menu_item_management' %}" class="mobile-nav-link" onclick="closeNav()">
+            <span class="material-symbols-outlined text-lg">dining</span>
+            <span>Menu Items</span>
+          </a>
+          <a href="{% url 'head:order_statistics' %}" class="mobile-nav-link" onclick="closeNav()">
+            <span class="material-symbols-outlined text-lg">analytics</span>
+            <span>Statistics</span>
+          </a>
+         <a href="{% url 'logout' %}" 
+   class="flex items-center gap-2 px-5 py-2.5 rounded-full bg-red-50 hover:bg-red-500 text-red-600 hover:text-white font-bold text-sm transition-all duration-300 shadow-sm hover:shadow-md group">
+  <span class="material-symbols-outlined text-red-500 group-hover:text-white transition-all duration-300">logout</span>
+  <span>Logout</span>
+</a>
+
+
+        </nav>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ===== MAIN CONTENT ===== -->
+<main class="w-full min-h-[calc(100vh-200px)]">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-6 md:py-8 lg:py-10">
+    
+    <!-- ===== PAGE HEADER ===== -->
+    <div class="mb-6 md:mb-8 lg:mb-10 animate-fade-in">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-6 mb-4 md:mb-6">
+        <div class="w-full sm:flex-1">
+          <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 flex items-center gap-2 md:gap-3 mb-2 leading-tight">
+            <span class="material-symbols-outlined text-3xl md:text-4xl text-primary">category</span>
+            <span class="block">Category Management</span>
+          </h1>
+          <p class="text-slate-600 text-sm md:text-base font-medium">Organize and manage your restaurant menu categories</p>
+        </div>
+        <button onclick="showAddCategoryModal()" class="btn-primary px-4 md:px-6 py-2.5 md:py-3 rounded-full font-bold text-sm md:text-base flex items-center gap-2 shadow-lg hover:shadow-xl transition-all active:scale-95 whitespace-nowrap w-full sm:w-auto justify-center sm:justify-start">
+          <span class="material-symbols-outlined text-lg md:text-xl">add_circle</span>
+          <span class="hidden sm:inline">Add Category</span>
+          <span class="sm:hidden">Add</span>
+        </button>
+      </div>
+      <div class="h-1 bg-gradient-to-r from-primary/40 via-primary/20 to-transparent rounded-full"></div>
+    </div>
+
+    <!-- ===== CATEGORIES GRID ===== -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6" id="categories-container">
+      <!-- Loading skeletons -->
+      <div class="skeleton rounded-2xl h-48 col-span-1"></div>
+      <div class="skeleton rounded-2xl h-48 col-span-1 hidden sm:block"></div>
+      <div class="skeleton rounded-2xl h-48 col-span-1 hidden lg:block"></div>
+    </div>
+
+  </div>
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer class="bg-gradient-to-r from-slate-900 to-slate-800 text-slate-300 py-6 md:py-8 px-4 sm:px-6 md:px-8 lg:px-12 border-t border-primary/20 mt-8 md:mt-12 lg:mt-16 w-full">
+  <div class="max-w-7xl mx-auto text-center">
+    <p class="text-slate-500 text-xs md:text-sm font-medium">© 2024 Biriyani Bliss Admin. All rights reserved.</p>
+    <p class="text-slate-600 text-xs mt-2">Made with ❤️ for restaurant management</p>
+  </div>
+</footer>
+
+<!-- ===== ADD/EDIT CATEGORY MODAL ===== -->
+<div id="categoryModal" class="modal-overlay fixed inset-0 hidden items-center justify-center z-50 p-3 sm:p-4">
+  <div class="card-glass rounded-2xl shadow-2xl p-5 sm:p-6 md:p-8 max-w-md w-full animate-slide-up max-h-[90vh] overflow-y-auto">
+    <div class="flex items-center justify-between mb-5 md:mb-6 pb-4 border-b border-primary/10">
+      <h3 class="text-2xl md:text-3xl font-black text-slate-900" id="modalTitle">Add New Category</h3>
+      <button onclick="hideCategoryModal()" class="text-slate-400 hover:text-slate-700 transition-colors p-1 hover:bg-slate-100 rounded-lg" aria-label="Close modal">
+        <span class="material-symbols-outlined text-xl">close</span>
+      </button>
+    </div>
+    
+    <form id="categoryForm" onsubmit="saveCategory(event)" class="space-y-4 md:space-y-5">
+      <input type="hidden" id="categoryId">
+      
+      <!-- Category Name -->
+      <div>
+        <label class="block text-xs font-bold uppercase tracking-widest text-slate-600 mb-2.5">
+          Category Name <span class="text-red-500 font-black">*</span>
+        </label>
+        <input type="text" id="categoryName" required 
+               placeholder="e.g., Biryani, Starters, Desserts"
+               class="field-input text-sm" maxlength="100"/>
+        <p class="text-xs text-slate-500 mt-1.5">Enter a descriptive category name</p>
+      </div>
+      
+      <!-- Slug -->
+      <div>
+        <label class="block text-xs font-bold uppercase tracking-widest text-slate-600 mb-2.5">
+          URL Slug <span class="text-red-500 font-black">*</span>
+        </label>
+        <input type="text" id="categorySlug" required 
+               placeholder="e.g., biryani, starters, desserts"
+               class="field-input text-sm" maxlength="100"/>
+        <p class="text-xs text-slate-500 mt-1.5">Auto-generated from category name (lowercase with hyphens)</p>
+      </div>
+      
+      <!-- Buttons -->
+      <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-primary/10">
+        <button type="submit" class="flex-1 btn-primary py-2.5 md:py-3 px-4 rounded-lg font-bold text-sm md:text-base flex items-center justify-center gap-2 transition-all">
+          <span class="material-symbols-outlined">save</span>
+          <span>Save</span>
+        </button>
+        <button type="button" onclick="hideCategoryModal()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 py-2.5 md:py-3 px-4 rounded-lg font-bold text-sm md:text-base transition-all active:scale-95">
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===== VIEW CATEGORY MODAL ===== -->
+<div id="viewCategoryModal" class="modal-overlay fixed inset-0 hidden items-center justify-center z-50 p-3 sm:p-4">
+  <div class="card-glass rounded-2xl shadow-2xl p-5 sm:p-6 md:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-slide-up">
+    <div class="flex justify-between items-start md:items-center gap-3 mb-5 md:mb-6 pb-4 border-b border-primary/10">
+      <div class="flex-1 min-w-0">
+        <h3 class="text-2xl md:text-3xl font-black text-slate-900 truncate" id="viewModalTitle">Category Details</h3>
+      </div>
+      <button onclick="hideViewCategoryModal()" class="text-slate-400 hover:text-slate-700 transition-colors p-1 hover:bg-slate-100 rounded-lg flex-shrink-0" aria-label="Close modal">
+        <span class="material-symbols-outlined text-xl">close</span>
+      </button>
+    </div>
+    
+    <!-- Category Details -->
+    <div id="categoryDetails" class="mb-6 p-4 md:p-5 bg-gradient-to-br from-primary/8 to-secondary/5 rounded-xl border border-primary/15">
+      <!-- Category details will be loaded here -->
+    </div>
+    
+    <!-- Menu Items Section -->
+    <div class="mb-6">
+      <h4 class="text-lg md:text-xl font-black text-slate-900 mb-4 flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary">restaurant</span>
+        Menu Items
+      </h4>
+      <div id="categoryMenuItems" class="space-y-2 max-h-64 overflow-y-auto">
+        <!-- Menu items will be loaded here -->
+      </div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-primary/10">
+      <button onclick="editFromView()" class="flex-1 btn-primary py-2.5 md:py-3 px-4 rounded-lg font-bold text-sm md:text-base flex items-center justify-center gap-2 transition-all">
+        <span class="material-symbols-outlined">edit</span>
+        <span class="hidden sm:inline">Edit</span>
+      </button>
+      <button onclick="hideViewCategoryModal()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 py-2.5 md:py-3 px-4 rounded-lg font-bold text-sm md:text-base transition-all active:scale-95">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== DELETE CONFIRMATION MODAL ===== -->
+<div id="deleteModal" class="modal-overlay fixed inset-0 hidden items-center justify-center z-50 p-3 sm:p-4">
+  <div class="card-glass rounded-2xl shadow-2xl p-5 sm:p-6 md:p-8 max-w-md w-full animate-slide-up text-center">
+    <div class="w-14 h-14 md:w-16 md:h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+      <span class="material-symbols-outlined text-3xl md:text-4xl text-red-500">delete_outline</span>
+    </div>
+    <h3 class="text-2xl md:text-3xl font-black text-slate-900 mb-3">Delete Category?</h3>
+    <p class="text-slate-600 text-sm md:text-base mb-6 leading-relaxed">
+      Are you sure you want to delete <span id="deleteCategoryName" class="font-bold text-primary"></span>? This action cannot be undone.
+    </p>
+    
+    <div class="flex flex-col sm:flex-row gap-3">
+      <button onclick="confirmDelete()" class="flex-1 bg-red-500 hover:bg-red-600 text-white py-2.5 md:py-3 px-4 rounded-lg font-bold text-sm md:text-base transition-all active:scale-95">
+        Delete
+      </button>
+      <button onclick="hideDeleteModal()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 py-2.5 md:py-3 px-4 rounded-lg font-bold text-sm md:text-base transition-all active:scale-95">
+        Cancel
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== NOTIFICATION TOAST ===== -->
+<div id="toast" class="fixed bottom-4 right-4 z-[200] opacity-0 pointer-events-none transition-all duration-300 ease-out"></div>
+
+<!-- ===== JAVASCRIPT ===== -->
+<script>
+  // ── CSRF Token ──
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  const csrftoken = getCookie('csrftoken');
+  let currentCategoryId = null;
+  let mobileNavOpen = false;
+
+  // ── Hamburger Menu ──
+  function toggleNav() {
+    const nav = document.getElementById('mobile-nav');
+    const btn = document.getElementById('hamburger');
+    mobileNavOpen = !mobileNavOpen;
+    
+    if (mobileNavOpen) {
+      nav.classList.add('open');
+      btn.classList.add('open');
+      btn.setAttribute('aria-expanded', 'true');
+    } else {
+      nav.classList.remove('open');
+      btn.classList.remove('open');
+      btn.setAttribute('aria-expanded', 'false');
+    }
+  }
+
+  function closeNav() {
+    const nav = document.getElementById('mobile-nav');
+    const btn = document.getElementById('hamburger');
+    mobileNavOpen = false;
+    nav.classList.remove('open');
+    btn.classList.remove('open');
+    btn.setAttribute('aria-expanded', 'false');
+  }
+
+  // Close mobile nav when clicking outside
+  document.addEventListener('click', (e) => {
+    const header = document.querySelector('header');
+    const hamburger = document.getElementById('hamburger');
+    if (mobileNavOpen && !header.contains(e.target) && e.target !== hamburger) {
+      closeNav();
+    }
+  });
+
+  // Close mobile nav on window resize
+  window.addEventListener('resize', () => {
+    if (window.innerWidth >= 1024 && mobileNavOpen) {
+      closeNav();
+    }
+  });
+
+  // ── Load categories ──
+  function loadCategories() {
+    fetch('/Biriyani_Bliss_Admin/api/categories/')
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          displayCategories(data.categories);
+        } else {
+          showErrorState('Error loading categories');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showErrorState('Error loading categories');
+      });
+  }
+
+  function showErrorState(message) {
+    const container = document.getElementById('categories-container');
+    container.innerHTML = `
+      <div class="col-span-full text-center py-12 md:py-16 card-glass rounded-2xl">
+        <div class="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <span class="material-symbols-outlined text-4xl text-red-500">error_outline</span>
+        </div>
+        <p class="text-xl md:text-2xl font-black text-slate-900">${message}</p>
+        <p class="text-slate-500 text-sm md:text-base mt-2">Please try refreshing the page</p>
+        <button onclick="loadCategories()" class="btn-primary mt-4 px-6 py-2 rounded-lg text-sm font-bold">
+          Retry
+        </button>
+      </div>
+    `;
+  }
+
+  // ── Display categories in grid ──
+  function displayCategories(categories) {
+    const container = document.getElementById('categories-container');
+    
+    if (categories.length === 0) {
+      container.innerHTML = `
+        <div class="col-span-full text-center py-12 md:py-16 card-glass rounded-2xl animate-fade-in">
+          <div class="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <span class="material-symbols-outlined text-4xl text-primary">folder_open</span>
+          </div>
+          <p class="text-xl md:text-2xl font-black text-slate-900">No categories yet</p>
+          <p class="text-slate-500 text-sm md:text-base mt-2 mb-6">Create your first category to organize menu items</p>
+          <button onclick="showAddCategoryModal()" class="btn-primary px-6 py-2.5 rounded-lg text-sm font-bold inline-flex items-center gap-2">
+            <span class="material-symbols-outlined">add_circle</span>
+            Create Category
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = categories.map((category, index) => `
+      <div class="category-card card-glass rounded-2xl shadow-md overflow-hidden h-full" style="animation-delay: ${index * 50}ms">
+        <div class="p-4 md:p-5 space-y-4 h-full flex flex-col">
+          <!-- Header -->
+          <div class="flex justify-between items-start gap-3 flex-1">
+            <div class="flex-1 min-w-0">
+              <h3 class="text-lg md:text-xl font-black text-slate-900 truncate">${escapeHtml(category.name)}</h3>
+              <p class="text-xs md:text-sm text-slate-500 mt-1.5 font-mono font-medium">
+                <span class="text-slate-400">slug:</span> ${escapeHtml(category.slug)}
+              </p>
+            </div>
+            <span class="shrink-0 bg-gradient-to-br from-primary/20 to-secondary/20 text-primary px-3 py-1.5 rounded-full text-xs md:text-sm font-black border border-primary/20">
+              ${category.item_count} ${category.item_count === 1 ? 'item' : 'items'}
+            </span>
+          </div>
+          
+          <!-- Date Info -->
+          <div class="flex items-center text-xs md:text-sm text-slate-500 font-medium">
+            <span class="material-symbols-outlined text-sm mr-2">calendar_today</span>
+            ${new Date(category.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+          </div>
+          
+          <!-- Action Buttons -->
+          <div class="grid grid-cols-3 gap-2 pt-3 mt-auto border-t border-primary/10">
+            <button onclick="viewCategory(${category.id})" class="btn-primary py-2 px-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1 transition-all" title="View details">
+              <span class="material-symbols-outlined text-sm">visibility</span>
+              <span class="hidden xs:inline text-xs">View</span>
+            </button>
+            <button onclick="editCategory(${category.id}, '${escapeJs(category.name)}', '${escapeJs(category.slug)}')" class="bg-green-500 hover:bg-green-600 text-white py-2 px-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1 transition-all active:scale-95" title="Edit category">
+              <span class="material-symbols-outlined text-sm">edit</span>
+              <span class="hidden xs:inline text-xs">Edit</span>
+            </button>
+            <button onclick="showDeleteModal(${category.id}, '${escapeJs(category.name)}')" class="bg-red-500 hover:bg-red-600 text-white py-2 px-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1 transition-all active:scale-95" title="Delete category">
+              <span class="material-symbols-outlined text-sm">delete</span>
+              <span class="hidden xs:inline text-xs">Delete</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ── Utility functions ──
+  function escapeHtml(text) {
+    const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+    return text.replace(/[&<>"']/g, m => map[m]);
+  }
+
+  function escapeJs(text) {
+    return text.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
+  }
+
+  // ── Show add category modal ──
+  function showAddCategoryModal() {
+    document.getElementById('modalTitle').textContent = 'Add New Category';
+    document.getElementById('categoryId').value = '';
+    document.getElementById('categoryName').value = '';
+    document.getElementById('categorySlug').value = '';
+    document.getElementById('categoryModal').classList.remove('hidden');
+    document.getElementById('categoryModal').classList.add('flex');
+    document.getElementById('categoryName').focus();
+    closeNav();
+  }
+
+  // ── Hide category modal ──
+  function hideCategoryModal() {
+    document.getElementById('categoryModal').classList.add('hidden');
+    document.getElementById('categoryModal').classList.remove('flex');
+    document.getElementById('categoryForm').reset();
+  }
+
+  // ── Edit category ──
+  function editCategory(id, name, slug) {
+    document.getElementById('modalTitle').textContent = 'Edit Category';
+    document.getElementById('categoryId').value = id;
+    document.getElementById('categoryName').value = name;
+    document.getElementById('categorySlug').value = slug;
+    document.getElementById('categoryModal').classList.remove('hidden');
+    document.getElementById('categoryModal').classList.add('flex');
+  }
+
+  // ── Save category (create or update) ──
+  function saveCategory(event) {
+    event.preventDefault();
+    
+    const id = document.getElementById('categoryId').value;
+    const name = document.getElementById('categoryName').value.trim();
+    const slug = document.getElementById('categorySlug').value.trim();
+    
+    if (!name || !slug) {
+      showNotification('Please fill all required fields', 'error');
+      return;
+    }
+    
+    const url = id ? 
+      `/Biriyani_Bliss_Admin/api/categories/${id}/update/` : 
+      '/Biriyani_Bliss_Admin/api/categories/create/';
+    
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrftoken
+      },
+      body: JSON.stringify({ name, slug })
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          hideCategoryModal();
+          loadCategories();
+          showNotification(data.message || (id ? 'Category updated!' : 'Category created!'), 'success');
+        } else {
+          showNotification(data.error || 'Error saving category', 'error');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showNotification('Error saving category', 'error');
+      });
+  }
+
+  // ── View category details ──
+  function viewCategory(id) {
+    fetch(`/Biriyani_Bliss_Admin/api/categories/${id}/`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          displayCategoryDetails(data.category);
+        } else {
+          showNotification('Error loading category details', 'error');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showNotification('Error loading category details', 'error');
+      });
+  }
+
+  // ── Display category details in modal ──
+  function displayCategoryDetails(category) {
+    document.getElementById('viewModalTitle').textContent = escapeHtml(category.name);
+    
+    const detailsHtml = `
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">ID</p>
+          <p class="font-black text-lg text-primary mt-1">#${category.id}</p>
+        </div>
+        <div>
+          <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">Slug</p>
+          <p class="font-mono font-bold text-slate-900 mt-1 text-sm break-all">${escapeHtml(category.slug)}</p>
+        </div>
+        <div>
+          <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">Total Items</p>
+          <p class="font-black text-lg text-primary mt-1">${category.item_count}</p>
+        </div>
+        <div>
+          <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">Created</p>
+          <p class="font-bold text-slate-900 mt-1 text-sm">${new Date(category.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
+        </div>
+      </div>
+    `;
+    
+    document.getElementById('categoryDetails').innerHTML = detailsHtml;
+    
+    const menuItemsHtml = category.menu_items && category.menu_items.length > 0 ?
+      category.menu_items.map(item => `
+        <div class="flex justify-between items-center p-3 md:p-4 bg-white rounded-lg border border-primary/10 hover:border-primary/30 transition-all hover:shadow-md">
+          <div class="min-w-0 flex-1">
+            <p class="font-bold text-slate-900 truncate text-sm md:text-base">${escapeHtml(item.name)}</p>
+            <p class="text-xs md:text-sm text-slate-600 font-medium">₹${parseFloat(item.price).toFixed(2)}</p>
+          </div>
+          <span class="shrink-0 ml-2 px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${item.available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+            ${item.available ? '✓ Available' : '✗ Unavailable'}
+          </span>
+        </div>
+      `).join('') :
+      '<div class="text-center py-8 text-slate-500"><span class="material-symbols-outlined text-3xl mb-2 block opacity-40">restaurant</span><p class="text-sm">No menu items in this category yet</p></div>';
+    
+    document.getElementById('categoryMenuItems').innerHTML = menuItemsHtml;
+    
+    currentCategoryId = category.id;
+    document.getElementById('viewCategoryModal').classList.remove('hidden');
+    document.getElementById('viewCategoryModal').classList.add('flex');
+    closeNav();
+  }
+
+  // ── Edit from view modal ──
+  function editFromView() {
+    hideViewCategoryModal();
+    fetch(`/Biriyani_Bliss_Admin/api/categories/${currentCategoryId}/`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          editCategory(currentCategoryId, data.category.name, data.category.slug);
+        }
+      });
+  }
+
+  // ── Hide view category modal ──
+  function hideViewCategoryModal() {
+    document.getElementById('viewCategoryModal').classList.add('hidden');
+    document.getElementById('viewCategoryModal').classList.remove('flex');
+    currentCategoryId = null;
+  }
+
+  // ── Show delete confirmation modal ──
+  function showDeleteModal(id, name) {
+    currentCategoryId = id;
+    document.getElementById('deleteCategoryName').textContent = escapeHtml(name);
+    document.getElementById('deleteModal').classList.remove('hidden');
+    document.getElementById('deleteModal').classList.add('flex');
+    closeNav();
+  }
+
+  // ── Hide delete modal ──
+  function hideDeleteModal() {
+    document.getElementById('deleteModal').classList.add('hidden');
+    document.getElementById('deleteModal').classList.remove('flex');
+    currentCategoryId = null;
+  }
+
+  // ── Confirm delete ──
+  function confirmDelete() {
+    if (!currentCategoryId) return;
+    
+    fetch(`/Biriyani_Bliss_Admin/api/categories/${currentCategoryId}/delete/`, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': csrftoken
+      }
+    })
+      .then(response => response.json())
+      .then(data => {
+        hideDeleteModal();
+        if (data.success) {
+          loadCategories();
+          showNotification(data.message || 'Category deleted successfully!', 'success');
+        } else {
+          showNotification(data.error || 'Error deleting category', 'error');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showNotification('Error deleting category', 'error');
+      });
+  }
+
+  // ── Auto-generate slug from name ──
+  document.addEventListener('DOMContentLoaded', () => {
+    const nameInput = document.getElementById('categoryName');
+    const slugInput = document.getElementById('categorySlug');
+    
+    nameInput.addEventListener('input', function(e) {
+      if (!slugInput.value || slugInput.value === '') {
+        slugInput.value = e.target.value
+          .toLowerCase()
+          .trim()
+          .replace(/[^a-z0-9\s-]/g, '')
+          .replace(/\s+/g, '-')
+          .replace(/-+/g, '-')
+          .replace(/(^-|-$)/g, '');
+      }
+    });
+
+    // Close modals with Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (!document.getElementById('categoryModal').classList.contains('hidden')) {
+          hideCategoryModal();
+        }
+        if (!document.getElementById('viewCategoryModal').classList.contains('hidden')) {
+          hideViewCategoryModal();
+        }
+        if (!document.getElementById('deleteModal').classList.contains('hidden')) {
+          hideDeleteModal();
+        }
+      }
+    });
+
+    loadCategories();
+  });
+
+  // ── Refresh categories ──
+  function refreshCategories() {
+    showNotification('Refreshing categories...', 'info');
+    loadCategories();
+  }
+
+  // ── Notification system ──
+  function showNotification(message, type = 'info') {
+    const toast = document.getElementById('toast');
+    const icons = {
+      'success': 'check_circle',
+      'error': 'error',
+      'info': 'info'
+    };
+    const colors = {
+      'success': 'from-green-500 to-green-600',
+      'error': 'from-red-500 to-red-600',
+      'info': 'from-blue-500 to-blue-600'
+    };
+
+    toast.className = `fixed bottom-4 right-4 z-[200] bg-gradient-to-r ${colors[type]} text-white px-4 md:px-6 py-3 md:py-4 rounded-xl text-xs md:text-sm font-bold shadow-xl flex items-center gap-3 opacity-100 pointer-events-auto transition-all duration-300 ease-out animate-slide-up`;
+    toast.innerHTML = `
+      <span class="material-symbols-outlined text-lg md:text-xl shrink-0">${icons[type]}</span>
+      <span class="flex-1">${message}</span>
+    `;
+
+    setTimeout(() => {
+      toast.classList.remove('opacity-100', 'animate-slide-up');
+      toast.classList.add('opacity-0', 'translate-y-2');
+    }, 4000);
+  }
+
+  // Prevent body scroll when modal is open
+  function preventScroll(e) {
+    if (document.getElementById('categoryModal').classList.contains('flex') ||
+        document.getElementById('viewCategoryModal').classList.contains('flex') ||
+        document.getElementById('deleteModal').classList.contains('flex')) {
+      e.preventDefault();
+    }
+  }
+
+  document.addEventListener('touchmove', preventScroll, { passive: false });
+</script>
+
+</body>
+</html>

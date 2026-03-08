@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Biriyani Bliss | Savor the Spice</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,700;0,900;1,700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#ee862b",
+          "primary-dark": "#c96f1a",
+          "background-light": "#f8f7f6",
+          "background-dark": "#221810",
+        },
+        fontFamily: { "display": ["Be Vietnam Pro"] },
+        borderRadius: { "DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px" },
+        animation: {
+          "fade-up": "fadeUp 0.6s ease both",
+          "pulse-slow": "pulse 3s ease-in-out infinite",
+        },
+        keyframes: {
+          fadeUp: { "0%": { opacity: "0", transform: "translateY(24px)" }, "100%": { opacity: "1", transform: "translateY(0)" } },
+        }
+      },
+    },
+  }
+</script>
+<style>
+  .spice-texture {
+    background-image: radial-gradient(circle at 2px 2px, rgba(238,134,43,0.05) 1px, transparent 0);
+    background-size: 24px 24px;
+  }
+  .step-connector::after {
+    content: '';
+    position: absolute;
+    top: 2.5rem;
+    left: calc(50% + 2.5rem);
+    width: calc(100% - 5rem);
+    height: 2px;
+    background: repeating-linear-gradient(90deg, #ee862b 0, #ee862b 8px, transparent 8px, transparent 16px);
+  }
+  @media (max-width: 1023px) { .step-connector::after { display: none; } }
+
+  .discount-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+  .discount-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px rgba(238,134,43,0.2); }
+
+  .timeline-item { position: relative; padding-left: 3rem; }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: 1.1rem;
+    top: 2.5rem;
+    bottom: -1rem;
+    width: 2px;
+    background: linear-gradient(to bottom, #ee862b, transparent);
+  }
+  .timeline-item:last-child::before { display: none; }
+
+  .badge-pulse {
+    animation: badgePulse 2s ease-in-out infinite;
+  }
+  @keyframes badgePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+
+  
+  /* ---- Hamburger ---- */
+  .hamburger span {
+    display: block; width: 24px; height: 2px;
+    background: #ee862b; border-radius: 4px;
+    transition: all 0.3s ease;
+    transform-origin: center;
+  }
+  .hamburger.open span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+  .hamburger.open span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+  /* ---- Mobile nav ---- */
+  #mobile-nav {
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.4s ease, opacity 0.3s ease;
+    opacity: 0;
+  }
+  #mobile-nav.open { max-height: 600px; opacity: 1; }
+
+</style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 spice-texture">
+<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+<header class="fixed top-0 z-50 w-full border-b border-amber-500/10 bg-[#f8f7f6]/90 backdrop-blur-md">
+  <div class="max-w-7xl mx-auto px-4 md:px-8 lg:px-16 py-4 flex items-center justify-between gap-4">
+
+    <!-- Logo -->
+    <a href="{% url 'public_dashboard' %}" class="flex items-center gap-2 text-amber-500 shrink-0">
+      <span class="material-symbols-outlined text-4xl">restaurant</span>
+      <h2 class="text-xl font-black uppercase tracking-tight leading-none">Biriyani<br/><span class="text-slate-800 text-base font-bold tracking-widest">BLISS</span></h2>
+    </a>
+
+    <!-- Desktop Nav -->
+    <nav class="hidden lg:flex items-center gap-8">
+      <a href="{% url 'public_dashboard' %}" class="flex items-center gap-1 text-sm font-bold text-amber-500 border-b-2 border-amber-500 pb-1">
+        <span class="material-symbols-outlined text-lg">home</span> Home
+      </a>
+      <a href="{% url 'menu' %}" class="flex items-center gap-1 text-sm font-medium hover:text-amber-500 transition-colors">
+        <span class="material-symbols-outlined text-lg">menu_book</span> Menu
+      </a>
+      <a href="{% url 'public_dashboard' %}#how-to-order" class="flex items-center gap-1 text-sm font-medium hover:text-amber-500 transition-colors">
+        <span class="material-symbols-outlined text-lg">fact_check</span> How to Order
+      </a>
+      <a href="{% url 'public_dashboard' %}#offers" class="flex items-center gap-1 text-sm font-medium hover:text-amber-500 transition-colors">
+        <span class="material-symbols-outlined text-lg">local_offer</span> Offers
+      </a>
+      <a href="{% url 'order_list' %}" class="flex items-center gap-1 text-sm font-medium hover:text-amber-500 transition-colors">
+        <span class="material-symbols-outlined text-lg">receipt_long</span> My Orders
+      </a>
+      <a href="{% url 'logout' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-amber-500/10 font-medium transition-colors">
+        <span class="material-symbols-outlined text-amber-500">logout</span> Logout
+      </a>
+    </nav>
+
+    <!-- Right actions -->
+    <div class="flex items-center gap-3">
+      <!-- Cart (with count) -->
+      <button id="cart-btn" onclick="window.location.href='{% url 'menu' %}'" class="relative flex size-10 items-center justify-center rounded-full bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-white transition-all">
+        <span class="material-symbols-outlined">shopping_cart</span>
+        <span id="cart-count" class="absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full bg-red-500 text-[10px] text-white font-black">0</span>
+      </button>
+      <!-- Profile -->
+      <a href="#" class="hidden md:flex size-10 items-center justify-center rounded-full bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-white transition-all">
+        <span class="material-symbols-outlined">person</span>
+      </a>
+      <!-- Hamburger -->
+      <button id="hamburger" class="hamburger flex flex-col gap-[6px] items-center justify-center size-10 rounded-full bg-amber-500/10 lg:hidden" onclick="toggleNav()">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Mobile Nav Drawer -->
+  <div id="mobile-nav" class="lg:hidden bg-[#f8f7f6] border-t border-amber-500/10 px-4">
+    <div class="py-4 space-y-1">
+      <a href="{% url 'public_dashboard' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-amber-500/10 text-amber-600 font-bold transition-colors">
+        <span class="material-symbols-outlined text-amber-500">home</span> Home
+      </a>
+      <a href="{% url 'menu' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-amber-500/10 font-medium transition-colors">
+        <span class="material-symbols-outlined text-amber-500">menu_book</span> Menu
+      </a>
+      <a href="{% url 'public_dashboard' %}#how-to-order" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-amber-500/10 font-medium transition-colors">
+        <span class="material-symbols-outlined text-amber-500">fact_check</span> How to Order
+      </a>
+      <a href="{% url 'public_dashboard' %}#offers" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-amber-500/10 font-medium transition-colors">
+        <span class="material-symbols-outlined text-amber-500">local_offer</span> Offers
+      </a>
+      <a href="{% url 'order_list' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-amber-500/10 font-medium transition-colors">
+        <span class="material-symbols-outlined text-amber-500">receipt_long</span> My Orders
+      </a>
+      <div class="pt-2 border-t border-amber-500/10 mt-2">
+        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-amber-500/10 font-medium transition-colors" onclick="window.location.href='{% url "menu" %}'; return false;">
+          <span class="material-symbols-outlined text-amber-500">shopping_cart</span> Cart <span class="ml-auto bg-red-500 text-white text-xs font-black px-2 py-0.5 rounded-full" id="cart-count-mobile">0</span>
+        </a>
+      </div>
+      <a href="{% url 'logout' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-amber-500/10 font-medium transition-colors">
+        <span class="material-symbols-outlined text-amber-500">logout</span> Logout
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- ===== HERO SECTION ===== -->
+<section class="relative mt-[80px] h-[600px] w-full overflow-hidden">
+  <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" style='background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.7)), url("https://lh3.googleusercontent.com/aida-public/AB6AXuAPS_ZUjzstLm6UizZC8VMRNDPLbEHXP9JotYAlxX1maPOLR2W5G0_ho9mBl-WaH7rVUOBzCk5RwchjOHXzY0u4yuWhgwpUFGtRS2k1SI3uuGUWex_FQ__KYZHslqKMXODMq4uH1mycC9GJhdO9kSIZX-0ShwlAiEc1yOYTuHbdb6ROgY_vh23FI9vj7qQtY32DgqIpfIPh_oAW6D0XhdK_pdzR-dhBbR29Ej08RZSsBm_6z2Fs33Xy_WhUdWhhfAxtUfc29yz9aQ");'></div>
+  <div class="relative h-full flex flex-col items-center justify-center text-center px-4">
+    <div class="max-w-3xl space-y-6">
+      <span class="inline-block px-4 py-1 rounded-full bg-primary text-white text-xs font-bold uppercase tracking-widest badge-pulse">⚡ Delivered in Under 60 Minutes</span>
+      <h1 class="text-white text-5xl md:text-7xl font-black leading-tight drop-shadow-lg">
+        Savor the <span class="text-primary italic">Spice</span> of Biriyani
+      </h1>
+      <p class="text-slate-100 text-lg md:text-xl font-medium max-w-2xl mx-auto drop-shadow-md">
+        Experience authentic, aromatic, and steaming hot biriyani prepared with secret family recipes and premium saffron. Order now, eat in 60 min.
+      </p>
+      <div class="flex flex-wrap items-center justify-center gap-4">
+        <a href="#how-to-order" class="flex min-w-[180px] items-center justify-center gap-2 rounded-full h-14 px-8 bg-primary text-slate-900 text-lg font-black hover:scale-105 transition-transform">
+          Order Now <span class="material-symbols-outlined">arrow_forward</span>
+        </a>
+        <a href="{% url 'menu' %}" class="flex min-w-[180px] items-center justify-center gap-2 rounded-full h-14 px-8 bg-white/20 backdrop-blur-md text-white text-lg font-bold border border-white/30 hover:bg-white/30 transition-all">
+          View Menu
+        </a>
+      </div>
+      <!-- Quick Stats -->
+      <div class="flex flex-wrap justify-center gap-6 mt-4">
+        <div class="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full text-white text-sm font-semibold">
+          <span class="material-symbols-outlined text-primary text-lg">schedule</span> 45–60 min delivery
+        </div>
+        <div class="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full text-white text-sm font-semibold">
+          <span class="material-symbols-outlined text-primary text-lg">star</span> 4.9★ Rated
+        </div>
+        <div class="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full text-white text-sm font-semibold">
+          <span class="material-symbols-outlined text-primary text-lg">verified</span> 10,000+ Orders
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== HOW TO ORDER SECTION ===== -->
+<section id="how-to-order" class="max-w-7xl mx-auto w-full px-4 md:px-20 py-20">
+  <div class="text-center mb-16 space-y-3">
+    <span class="inline-block px-4 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest">Simple Process</span>
+    <h2 class="text-3xl md:text-4xl font-black">How to <span class="text-primary">Order</span> in 4 Easy Steps</h2>
+    <p class="text-slate-500 dark:text-slate-400 max-w-xl mx-auto">From craving to your doorstep — it's never been easier to enjoy authentic biriyani.</p>
+  </div>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+
+    <!-- Step 1 -->
+    <div class="relative step-connector flex flex-col items-center text-center group">
+      <div class="w-20 h-20 rounded-full bg-primary/10 border-2 border-primary/30 flex items-center justify-center mb-6 group-hover:bg-primary group-hover:border-primary transition-all duration-300">
+        <span class="material-symbols-outlined text-4xl text-primary group-hover:text-white transition-colors">menu_book</span>
+      </div>
+      <span class="absolute top-0 right-8 lg:right-auto lg:left-16 bg-primary text-white text-xs font-black w-6 h-6 rounded-full flex items-center justify-center">1</span>
+      <h3 class="text-lg font-black mb-2">Browse Menu</h3>
+      <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">Explore our wide range of biriyani varieties — chicken, mutton, veg, and special editions.</p>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="relative step-connector flex flex-col items-center text-center group">
+      <div class="w-20 h-20 rounded-full bg-primary/10 border-2 border-primary/30 flex items-center justify-center mb-6 group-hover:bg-primary group-hover:border-primary transition-all duration-300">
+        <span class="material-symbols-outlined text-4xl text-primary group-hover:text-white transition-colors">add_shopping_cart</span>
+      </div>
+      <span class="absolute top-0 right-8 lg:right-auto lg:left-16 bg-primary text-white text-xs font-black w-6 h-6 rounded-full flex items-center justify-center">2</span>
+      <h3 class="text-lg font-black mb-2">Add to Cart</h3>
+      <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">Select your favorites, choose quantity, and add them to your cart. Mix and match freely!</p>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="relative step-connector flex flex-col items-center text-center group">
+      <div class="w-20 h-20 rounded-full bg-primary/10 border-2 border-primary/30 flex items-center justify-center mb-6 group-hover:bg-primary group-hover:border-primary transition-all duration-300">
+        <span class="material-symbols-outlined text-4xl text-primary group-hover:text-white transition-colors">location_on</span>
+      </div>
+      <span class="absolute top-0 right-8 lg:right-auto lg:left-16 bg-primary text-white text-xs font-black w-6 h-6 rounded-full flex items-center justify-center">3</span>
+      <h3 class="text-lg font-black mb-2">Enter Address</h3>
+      <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">Provide your delivery address and phone number. We deliver within a 10km radius.</p>
+    </div>
+
+    <!-- Step 4 -->
+    <div class="flex flex-col items-center text-center group">
+      <div class="w-20 h-20 rounded-full bg-primary/10 border-2 border-primary/30 flex items-center justify-center mb-6 group-hover:bg-primary group-hover:border-primary transition-all duration-300">
+        <span class="material-symbols-outlined text-4xl text-primary group-hover:text-white transition-colors">payments</span>
+      </div>
+      <span class="absolute top-0 right-8 lg:right-auto bg-primary text-white text-xs font-black w-6 h-6 rounded-full flex items-center justify-center hidden">4</span>
+      <div class="relative">
+        <span class="absolute -top-14 -right-4 bg-primary text-white text-xs font-black w-6 h-6 rounded-full flex items-center justify-center">4</span>
+      </div>
+      <h3 class="text-lg font-black mb-2">Pay & Confirm</h3>
+      <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">Pay via UPI, card, or cash on delivery. Get instant confirmation with live order tracking!</p>
+    </div>
+
+  </div>
+
+  <!-- CTA below steps -->
+  <div class="mt-14 flex flex-col sm:flex-row items-center justify-center gap-4 p-8 bg-primary/5 rounded-2xl border border-primary/20">
+    <div class="text-center sm:text-left">
+      <p class="font-black text-xl">Ready to order? 🍛</p>
+      <p class="text-slate-500 text-sm">Takes less than 2 minutes to place your order.</p>
+    </div>
+    <a href="#menu" class="flex items-center gap-2 bg-primary text-slate-900 font-black px-8 py-4 rounded-full hover:scale-105 transition-transform whitespace-nowrap">
+      <span class="material-symbols-outlined">arrow_forward</span> Start Ordering
+    </a>
+  </div>
+</section>
+
+<!-- ===== DELIVERY PROCESS SECTION ===== -->
+<section class="bg-background-dark py-20 px-4 md:px-20">
+  <div class="max-w-7xl mx-auto">
+    <div class="grid lg:grid-cols-2 gap-16 items-center">
+
+      <!-- Left: Text & Timeline -->
+      <div>
+        <span class="inline-block px-4 py-1 rounded-full bg-primary/20 text-primary text-xs font-bold uppercase tracking-widest mb-4">Lightning Fast</span>
+        <h2 class="text-3xl md:text-4xl font-black text-white mb-4">
+          From Our Kitchen<br/>to Your Door in <span class="text-primary">Under 60 Min</span>
+        </h2>
+        <p class="text-slate-400 mb-10 leading-relaxed">
+          We've engineered our delivery pipeline to ensure your biriyani arrives piping hot, fragrant, and perfectly intact. Here's how it works:
+        </p>
+
+        <div class="space-y-8">
+
+          <div class="timeline-item">
+            <div class="absolute left-0 top-0 w-9 h-9 rounded-full bg-primary flex items-center justify-center">
+              <span class="material-symbols-outlined text-white text-lg">receipt_long</span>
+            </div>
+            <h4 class="font-bold text-white mb-1">Order Confirmed <span class="text-primary text-xs ml-2">0 min</span></h4>
+            <p class="text-slate-400 text-sm">Instant confirmation via SMS & email. Our kitchen receives your order immediately.</p>
+          </div>
+
+          <div class="timeline-item">
+            <div class="absolute left-0 top-0 w-9 h-9 rounded-full bg-primary flex items-center justify-center">
+              <span class="material-symbols-outlined text-white text-lg">soup_kitchen</span>
+            </div>
+            <h4 class="font-bold text-white mb-1">Preparation Begins <span class="text-primary text-xs ml-2">0–20 min</span></h4>
+            <p class="text-slate-400 text-sm">Our chefs start cooking fresh. No pre-cooked batches — every order is made to order.</p>
+          </div>
+
+          <div class="timeline-item">
+            <div class="absolute left-0 top-0 w-9 h-9 rounded-full bg-primary flex items-center justify-center">
+              <span class="material-symbols-outlined text-white text-lg">inventory_2</span>
+            </div>
+            <h4 class="font-bold text-white mb-1">Packed & Dispatched <span class="text-primary text-xs ml-2">20–25 min</span></h4>
+            <p class="text-slate-400 text-sm">Sealed in heat-retaining packs with tamper-proof lids. Assigned to your nearest delivery partner.</p>
+          </div>
+
+          <div class="timeline-item">
+            <div class="absolute left-0 top-0 w-9 h-9 rounded-full bg-primary flex items-center justify-center">
+              <span class="material-symbols-outlined text-white text-lg">delivery_dining</span>
+            </div>
+            <h4 class="font-bold text-white mb-1">Out for Delivery <span class="text-primary text-xs ml-2">25–55 min</span></h4>
+            <p class="text-slate-400 text-sm">Track your rider live on the map. Real-time GPS updates every 30 seconds.</p>
+          </div>
+
+          <div class="pl-12">
+            <div class="relative">
+              <div class="absolute -left-12 top-0 w-9 h-9 rounded-full bg-green-500 flex items-center justify-center">
+                <span class="material-symbols-outlined text-white text-lg">check_circle</span>
+              </div>
+            </div>
+            <h4 class="font-bold text-white mb-1">Delivered! 🎉 <span class="text-green-400 text-xs ml-2">&lt; 60 min</span></h4>
+            <p class="text-slate-400 text-sm">Rate your experience and earn loyalty points for your next order!</p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Right: Feature Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+
+        <div class="bg-white/5 rounded-2xl p-6 border border-white/10 hover:border-primary/40 transition-colors">
+          <div class="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center mb-4">
+            <span class="material-symbols-outlined text-primary text-2xl">gps_fixed</span>
+          </div>
+          <h4 class="font-bold text-white mb-2">Live GPS Tracking</h4>
+          <p class="text-slate-400 text-sm">Watch your order move in real time on an interactive map. Never wonder again.</p>
+        </div>
+
+        <div class="bg-white/5 rounded-2xl p-6 border border-white/10 hover:border-primary/40 transition-colors">
+          <div class="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center mb-4">
+            <span class="material-symbols-outlined text-primary text-2xl">notifications_active</span>
+          </div>
+          <h4 class="font-bold text-white mb-2">SMS Alerts</h4>
+          <p class="text-slate-400 text-sm">Get notified at every step — confirmed, preparing, dispatched, and delivered.</p>
+        </div>
+
+        <div class="bg-white/5 rounded-2xl p-6 border border-white/10 hover:border-primary/40 transition-colors">
+          <div class="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center mb-4">
+            <span class="material-symbols-outlined text-primary text-2xl">thermostat</span>
+          </div>
+          <h4 class="font-bold text-white mb-2">Hot Guarantee</h4>
+          <p class="text-slate-400 text-sm">Insulated packaging ensures your biriyani stays steaming hot on arrival.</p>
+        </div>
+
+        <div class="bg-white/5 rounded-2xl p-6 border border-white/10 hover:border-primary/40 transition-colors">
+          <div class="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center mb-4">
+            <span class="material-symbols-outlined text-primary text-2xl">support_agent</span>
+          </div>
+          <h4 class="font-bold text-white mb-2">24/7 Support</h4>
+          <p class="text-slate-400 text-sm">Issue with your order? Our support team responds in under 5 minutes, any time.</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SPECIAL DISCOUNTS SECTION ===== -->
+<section id="offers" class="max-w-7xl mx-auto w-full px-4 md:px-20 py-20">
+  <div class="text-center mb-16 space-y-3">
+    <span class="inline-block px-4 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest">Save Big</span>
+    <h2 class="text-3xl md:text-4xl font-black">🔥 Special <span class="text-primary">Discounts</span> & Offers</h2>
+    <p class="text-slate-500 dark:text-slate-400 max-w-xl mx-auto">Limited-time deals to make every bite even more satisfying. Use codes at checkout.</p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+    <!-- Offer 1: First Order -->
+    <div class="discount-card relative rounded-2xl overflow-hidden border-2 border-primary bg-gradient-to-br from-primary/10 to-orange-50 dark:to-orange-900/20 p-6">
+      <div class="absolute top-0 right-0 bg-primary text-white text-xs font-black px-4 py-2 rounded-bl-2xl">NEW USER</div>
+      <div class="w-14 h-14 rounded-2xl bg-primary/20 flex items-center justify-center mb-5">
+        <span class="material-symbols-outlined text-primary text-3xl">redeem</span>
+      </div>
+      <h3 class="text-2xl font-black mb-1">50% OFF</h3>
+      <p class="text-slate-600 dark:text-slate-300 text-sm mb-4">On your first order! Welcome to Biriyani Bliss. Min order ₹199.</p>
+      <div class="flex items-center gap-3 mb-4">
+        <span class="font-mono font-black text-lg bg-white dark:bg-background-dark border border-primary/30 px-4 py-2 rounded-xl tracking-widest text-primary">FIRST50</span>
+        <button onclick="navigator.clipboard.writeText('FIRST50')" class="text-xs text-primary font-bold hover:underline flex items-center gap-1">
+          <span class="material-symbols-outlined text-sm">content_copy</span> Copy
+        </button>
+      </div>
+      <p class="text-xs text-slate-400">Valid for new users only. One-time use.</p>
+    </div>
+
+    <!-- Offer 2: Weekend Special -->
+    <div class="discount-card relative rounded-2xl overflow-hidden border-2 border-yellow-400 bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 p-6">
+      <div class="absolute top-0 right-0 bg-yellow-400 text-slate-900 text-xs font-black px-4 py-2 rounded-bl-2xl">WEEKEND</div>
+      <div class="w-14 h-14 rounded-2xl bg-yellow-400/20 flex items-center justify-center mb-5">
+        <span class="material-symbols-outlined text-yellow-500 text-3xl">celebration</span>
+      </div>
+      <h3 class="text-2xl font-black mb-1">30% OFF</h3>
+      <p class="text-slate-600 dark:text-slate-300 text-sm mb-4">Every Saturday & Sunday on orders above ₹399. Feast with the family!</p>
+      <div class="flex items-center gap-3 mb-4">
+        <span class="font-mono font-black text-lg bg-white dark:bg-background-dark border border-yellow-400/50 px-4 py-2 rounded-xl tracking-widest text-yellow-600">WEEKEND30</span>
+        <button onclick="navigator.clipboard.writeText('WEEKEND30')" class="text-xs text-yellow-600 font-bold hover:underline flex items-center gap-1">
+          <span class="material-symbols-outlined text-sm">content_copy</span> Copy
+        </button>
+      </div>
+      <p class="text-xs text-slate-400">Valid Sat–Sun only. Cannot combine with other offers.</p>
+    </div>
+
+    <!-- Offer 3: Free Delivery -->
+    <div class="discount-card relative rounded-2xl overflow-hidden border-2 border-green-400 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-6">
+      <div class="absolute top-0 right-0 bg-green-400 text-slate-900 text-xs font-black px-4 py-2 rounded-bl-2xl">FREE DELIVERY</div>
+      <div class="w-14 h-14 rounded-2xl bg-green-400/20 flex items-center justify-center mb-5">
+        <span class="material-symbols-outlined text-green-500 text-3xl">delivery_dining</span>
+      </div>
+      <h3 class="text-2xl font-black mb-1">₹0 Delivery</h3>
+      <p class="text-slate-600 dark:text-slate-300 text-sm mb-4">Free delivery on orders above ₹299. No code needed — applied automatically!</p>
+      <div class="flex items-center gap-3 mb-4">
+        <span class="font-mono font-black text-lg bg-white dark:bg-background-dark border border-green-400/50 px-4 py-2 rounded-xl tracking-widest text-green-600">AUTO</span>
+        <span class="text-xs text-green-600 font-bold">Auto-applied 🎉</span>
+      </div>
+      <p class="text-xs text-slate-400">Valid on orders above ₹299 within delivery zone.</p>
+    </div>
+
+    <!-- Offer 4: Combo Deal -->
+    <div class="discount-card relative rounded-2xl overflow-hidden border-2 border-purple-400 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-6">
+      <div class="absolute top-0 right-0 bg-purple-400 text-white text-xs font-black px-4 py-2 rounded-bl-2xl">COMBO</div>
+      <div class="w-14 h-14 rounded-2xl bg-purple-400/20 flex items-center justify-center mb-5">
+        <span class="material-symbols-outlined text-purple-500 text-3xl">dining</span>
+      </div>
+      <h3 class="text-2xl font-black mb-1">Buy 2 Get 1</h3>
+      <p class="text-slate-600 dark:text-slate-300 text-sm mb-4">Order any 2 biriyani portions and get a free Raita or Briyani gravy!</p>
+      <div class="flex items-center gap-3 mb-4">
+        <span class="font-mono font-black text-lg bg-white dark:bg-background-dark border border-purple-400/50 px-4 py-2 rounded-xl tracking-widest text-purple-600">BUY2GET1</span>
+        <button onclick="navigator.clipboard.writeText('BUY2GET1')" class="text-xs text-purple-600 font-bold hover:underline flex items-center gap-1">
+          <span class="material-symbols-outlined text-sm">content_copy</span> Copy
+        </button>
+      </div>
+      <p class="text-xs text-slate-400">Valid Mon–Fri. Free item of equal or lesser value.</p>
+    </div>
+
+    <!-- Offer 5: Loyalty -->
+    <div class="discount-card relative rounded-2xl overflow-hidden border-2 border-rose-400 bg-gradient-to-br from-rose-50 to-red-50 dark:from-rose-900/20 dark:to-red-900/20 p-6">
+      <div class="absolute top-0 right-0 bg-rose-400 text-white text-xs font-black px-4 py-2 rounded-bl-2xl">LOYALTY</div>
+      <div class="w-14 h-14 rounded-2xl bg-rose-400/20 flex items-center justify-center mb-5">
+        <span class="material-symbols-outlined text-rose-500 text-3xl">favorite</span>
+      </div>
+      <h3 class="text-2xl font-black mb-1">Earn Points</h3>
+      <p class="text-slate-600 dark:text-slate-300 text-sm mb-4">Earn 10 Bliss Points for every ₹100 spent. Redeem 100 points = ₹50 off.</p>
+      <div class="flex items-center gap-3 mb-4">
+        <span class="font-mono font-black text-lg bg-white dark:bg-background-dark border border-rose-400/50 px-4 py-2 rounded-xl tracking-widest text-rose-500">MEMBER</span>
+        <span class="text-xs text-rose-500 font-bold">Sign up to join</span>
+      </div>
+      <p class="text-xs text-slate-400">Available to registered members only.</p>
+    </div>
+
+    <!-- Offer 6: Referral -->
+    <div class="discount-card relative rounded-2xl overflow-hidden border-2 border-sky-400 bg-gradient-to-br from-sky-50 to-blue-50 dark:from-sky-900/20 dark:to-blue-900/20 p-6">
+      <div class="absolute top-0 right-0 bg-sky-400 text-white text-xs font-black px-4 py-2 rounded-bl-2xl">REFERRAL</div>
+      <div class="w-14 h-14 rounded-2xl bg-sky-400/20 flex items-center justify-center mb-5">
+        <span class="material-symbols-outlined text-sky-500 text-3xl">share</span>
+      </div>
+      <h3 class="text-2xl font-black mb-1">₹100 Credit</h3>
+      <p class="text-slate-600 dark:text-slate-300 text-sm mb-4">Refer a friend and earn ₹100 wallet credit when they place their first order!</p>
+      <div class="flex items-center gap-3 mb-4">
+        <span class="font-mono font-black text-lg bg-white dark:bg-background-dark border border-sky-400/50 px-4 py-2 rounded-xl tracking-widest text-sky-500">REFERBLISS</span>
+        <button onclick="navigator.clipboard.writeText('REFERBLISS')" class="text-xs text-sky-500 font-bold hover:underline flex items-center gap-1">
+          <span class="material-symbols-outlined text-sm">content_copy</span> Copy
+        </button>
+      </div>
+      <p class="text-xs text-slate-400">Credit added after friend's first successful order.</p>
+    </div>
+
+  </div>
+
+  <!-- Terms note -->
+  <p class="text-center text-slate-400 text-xs mt-8">* All offers are subject to availability and cannot be combined unless stated. Biriyani Bliss reserves the right to modify or withdraw offers.</p>
+</section>
+
+<!-- ===== MENU SECTION ===== -->
+<div id="menu" class="max-w-7xl mx-auto w-full px-4 md:px-20 py-12">
+  <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+    <div class="space-y-2">
+      <h2 class="text-3xl font-black tracking-tight flex items-center gap-2">
+        Our <span class="text-primary">Biriyani</span> Collections
+      </h2>
+      <p class="text-slate-500 dark:text-slate-400">Hand-picked selections for every palate</p>
+    </div>
+    <div class="flex border-b border-primary/20 gap-4 md:gap-8 overflow-x-auto pb-1">
+      <button class="flex flex-col items-center justify-center border-b-[3px] border-primary text-primary pb-2 font-bold whitespace-nowrap">Chicken Biriyani</button>
+      <button class="flex flex-col items-center justify-center border-b-[3px] border-transparent text-slate-500 hover:text-primary transition-colors pb-2 font-bold whitespace-nowrap">Mutton Biriyani</button>
+      <button class="flex flex-col items-center justify-center border-b-[3px] border-transparent text-slate-500 hover:text-primary transition-colors pb-2 font-bold whitespace-nowrap">Veg Biriyani</button>
+      <button class="flex flex-col items-center justify-center border-b-[3px] border-transparent text-slate-500 hover:text-primary transition-colors pb-2 font-bold whitespace-nowrap">Specials</button>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+    <!-- Item 1 -->
+    <div class="group flex flex-col bg-white dark:bg-background-dark/50 rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-primary/5">
+      <div class="relative aspect-[4/3] overflow-hidden">
+        <div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDJunHSfpjEo5mdS_NqJph--XcgNCAWhbAsw3y_XkKo3w31uBWdgjrcwaWcRj-A2BvpZhFvP7mk05shXOkwDmjclKo5fXpmy_Dy5HOe7n6KwXKKJJftbZrYdcWOdW5yqXilNuPersSni8glmUfgMt2XffF3BG0btTZ0uNWjsGNBs8b-f2Lg6fn-RkiVUIU9x9uRvWg9iDsKSd_orpAYHbnCVQSTWqNjvNI2IMlRWbnpQli4Y5hw9GcWSHIjS7c84ti9GvKCgqOBvA");'></div>
+        <div class="absolute top-4 right-4 bg-primary text-slate-900 font-bold px-3 py-1 rounded-full text-sm">$12.99</div>
+        <div class="absolute top-4 left-4 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">BESTSELLER</div>
+      </div>
+      <div class="p-6 flex flex-col flex-1">
+        <div class="flex items-center gap-1 mb-2">
+          <span class="material-symbols-outlined text-yellow-400 text-sm">star</span>
+          <span class="text-xs font-bold">4.9 (200+ Reviews)</span>
+          <span class="ml-auto text-xs text-green-600 font-semibold">~45 min</span>
+        </div>
+        <h3 class="text-xl font-bold mb-1">Hyderabadi Chicken Biriyani</h3>
+        <p class="text-slate-500 dark:text-slate-400 text-sm mb-6 flex-1">A classic masterpiece of saffron-infused basmati rice, tender chicken, and authentic spices.</p>
+        <button class="w-full flex items-center justify-center gap-2 bg-primary/10 text-primary font-bold h-12 rounded-xl group-hover:bg-primary group-hover:text-slate-900 transition-all">
+                    <a href="{% url 'menu' %}"><span class="material-symbols-outlined">add_shopping_cart</span> Add to Cart</a>
+
+        </button>
+      </div>
+    </div>
+    <!-- Item 2 -->
+    <div class="group flex flex-col bg-white dark:bg-background-dark/50 rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-primary/5">
+      <div class="relative aspect-[4/3] overflow-hidden">
+        <div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBOSeOTkv1LYPYH33DH7QKaouCmfpCmiewfEdLueh6zZp6hI9cVW1pQKV874vHb9eMf6kUb9BsM-e2BgiDd3GDIyFgTx_zYaotCNO04ENHGXN6gAluS63bC0hTTL0fyfyUoxujGvE0LJ7AtSgBv2jkiLpv0kCFNzvArTHoF8t-9CNTtDdA4DB2uoW9wdNAAR6jj80Yh1QdMYncJRbgOzmFk9ktFmuqJ-lRQI_FX9YH9baczaB1bX-4uqgDhrFUD1JlscBzbuHY6-g");'></div>
+        <div class="absolute top-4 right-4 bg-primary text-slate-900 font-bold px-3 py-1 rounded-full text-sm">$15.99</div>
+      </div>
+      <div class="p-6 flex flex-col flex-1">
+        <div class="flex items-center gap-1 mb-2">
+          <span class="material-symbols-outlined text-yellow-400 text-sm">star</span>
+          <span class="text-xs font-bold">4.8 (150+ Reviews)</span>
+          <span class="ml-auto text-xs text-green-600 font-semibold">~50 min</span>
+        </div>
+        <h3 class="text-xl font-bold mb-1">Lucknowi Mutton Biriyani</h3>
+        <p class="text-slate-500 dark:text-slate-400 text-sm mb-6 flex-1">Slow-cooked Awadhi style biriyani with fall-off-the-bone tender mutton and delicate aromatics.</p>
+        <button class="w-full flex items-center justify-center gap-2 bg-primary/10 text-primary font-bold h-12 rounded-xl group-hover:bg-primary group-hover:text-slate-900 transition-all">
+          <a href="{% url 'menu' %}"><span class="material-symbols-outlined">add_shopping_cart</span> Add to Cart</a>
+        </button>
+      </div>
+    </div>
+    <!-- Item 3 -->
+    <div class="group flex flex-col bg-white dark:bg-background-dark/50 rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-primary/5">
+      <div class="relative aspect-[4/3] overflow-hidden">
+        <div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAzwWAoliZXm58rLbFXXZ9ViVhK07rM_VUPt5Eahtt5hFiG_F7DOw5NoZHFVOjRK7quKT166i6ekfCGulEhBH0QV7RvsZGp6fjF9TcLD4Dh4psFc4p8UQvyVLQ7vE_POShSUiaLFGpYoo709RPfO42wHNn29meAp8LGyLn6Rww3nEQZla3PD_7gqXeGhzWDnG9SqeraorrlORIV67xafn0f5O6leEWydMJw-QEqdpP5a23e2A9ZxdeAFmYjfalfNWzekM09vZ93Qw");'></div>
+        <div class="absolute top-4 right-4 bg-primary text-slate-900 font-bold px-3 py-1 rounded-full text-sm">$10.99</div>
+        <div class="absolute top-4 left-4 bg-purple-500 text-white text-xs font-bold px-2 py-1 rounded-full">PURE VEG</div>
+      </div>
+      <div class="p-6 flex flex-col flex-1">
+        <div class="flex items-center gap-1 mb-2">
+          <span class="material-symbols-outlined text-yellow-400 text-sm">star</span>
+          <span class="text-xs font-bold">4.7 (120+ Reviews)</span>
+          <span class="ml-auto text-xs text-green-600 font-semibold">~40 min</span>
+        </div>
+        <h3 class="text-xl font-bold mb-1">Malabar Veg Biriyani</h3>
+        <p class="text-slate-500 dark:text-slate-400 text-sm mb-6 flex-1">A fragrant mix of farm-fresh vegetables, nuts, and Jeerakasala rice from the Malabar coast.</p>
+        <button class="w-full flex items-center justify-center gap-2 bg-primary/10 text-primary font-bold h-12 rounded-xl group-hover:bg-primary group-hover:text-slate-900 transition-all">
+          <a href="{% url 'menu' %}"><span class="material-symbols-outlined">add_shopping_cart</span> Add to Cart</a>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TESTIMONIALS ===== -->
+<section class="bg-primary/5 py-20 px-4 md:px-20 overflow-hidden">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-16 space-y-4">
+      <h2 class="text-3xl md:text-4xl font-black">What Our <span class="text-primary">Foodies</span> Say</h2>
+      <p class="text-slate-500 max-w-lg mx-auto italic">"The spices, the aroma, and the delivery - everything was perfection."</p>
+    </div>
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div class="bg-white dark:bg-background-dark p-8 rounded-xl shadow-sm border border-primary/10">
+        <div class="flex gap-1 text-primary mb-4">
+          <span class="material-symbols-outlined">star</span><span class="material-symbols-outlined">star</span><span class="material-symbols-outlined">star</span><span class="material-symbols-outlined">star</span><span class="material-symbols-outlined">star</span>
+        </div>
+        <p class="text-slate-600 dark:text-slate-300 mb-6 italic">"The Hyderabadi Chicken Biriyani took me straight back home. The spice level was perfect!"</p>
+        <div class="flex items-center gap-4">
+          <div class="size-12 rounded-full bg-cover" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuA95l8MzQHDUI81TUUrQQ6bkoO1a-mZOS5wS6eX8A5iT97YaN4VMycRN1Ap-fP521c0DFoEq5WL-TRRvrXbqnXII3QN1lL3Nr36LOt7NMfUdf2GHmsoXmoo61SwIdDt1A0NKZXNhlpMH8kWjZIR23P0fgjY-005A9huZroWrIvlLKe90bIWeXQLGD44xNi0FUwmX2olMElWaRYyK2g007H_XFTS0JIxz1Qv5wAZ8Ic9_ILOz9k-vkrDj6ykR96wc_Nzc2BR9rCJ2g");'></div>
+          <div><p class="font-bold">Rahul Sharma</p><p class="text-xs text-slate-400">Software Engineer</p></div>
+        </div>
+      </div>
+      <div class="bg-white dark:bg-background-dark p-8 rounded-xl shadow-sm border border-primary/10">
+        <div class="flex gap-1 text-primary mb-4">
+          <span class="material-symbols-outlined">star</span><span class="material-symbols-outlined">star</span><span class="material-symbols-outlined">star</span><span class="material-symbols-outlined">star</span><span class="material-symbols-outlined">star</span>
+        </div>
+        <p class="text-slate-600 dark:text-slate-300 mb-6 italic">"Best mutton biriyani in the city. The meat was so tender it melted in my mouth."</p>
+        <div class="flex items-center gap-4">
+          <div class="size-12 rounded-full bg-cover" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCutKYwP_wdhkx08cDAkaUFwXEXa-ql2O_8-xK-kmyvrelpYamwnL5JaLEYQiF8aMs3F3UTNQfOdRyubdpYiazAgwzT9zzM4zGUK-nxzdR0IVHJVEsdERo7gkTiDwRfwizkEW4sqSHXziDO86NbNG7aRHbGhvXKNF5lsM-DJktX-_MguNShMI4R-fGHJVEE0FfjvW8OzFDLJiUsEpadkk5n_0sRviTxaSX4nRGxhkv0QYUeLbhurS7D7wgC57jddLKQ1uo3yNECZXtw");'></div>
+          <div><p class="font-bold">Priya Verma</p><p class="text-xs text-slate-400">Food Blogger</p></div>
+        </div>
+      </div>
+      <div class="bg-white dark:bg-background-dark p-8 rounded-xl shadow-sm border border-primary/10 hidden lg:block">
+        <div class="flex gap-1 text-primary mb-4">
+          <span class="material-symbols-outlined">star</span><span class="material-symbols-outlined">star</span><span class="material-symbols-outlined">star</span><span class="material-symbols-outlined">star</span><span class="material-symbols-outlined">star</span>
+        </div>
+        <p class="text-slate-600 dark:text-slate-300 mb-6 italic">"Delivery was surprisingly fast, and it arrived steaming hot. Love the spice profile!"</p>
+        <div class="flex items-center gap-4">
+          <div class="size-12 rounded-full bg-cover" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC8krbP7GzF06W6RVpI9_ustjRHdilRVRWKf0YWTWQWvw0X8v4WyQL4DjRDV0ZMAD7SXGPX5XBUuEJcw7AKU3WshPSlE47sMP0p2jc93T35_lZzRC0ZCtqHsFbus87aZLF9loSfcGNKsVkor4aMXAmiP2-ADy_ByuUSdsSRj2SSzzcc95xBpNfE0kWJfURRWBLk12T_NLyq58kFaj6tGvk2JuTjNSsgb5Djb4N4_I5-UL_1dVU_3r2YcfvL4uOQGDMpk7RI6xI3dQ");'></div>
+          <div><p class="font-bold">Arjun Nair</p><p class="text-xs text-slate-400">Marketing Head</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="bg-background-dark text-slate-300 py-16 px-4 md:px-20 border-t border-primary/20">
+  <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+    <div class="space-y-6">
+      <div class="flex items-center gap-2 text-primary">
+        <span class="material-symbols-outlined text-4xl">restaurant</span>
+        <h2 class="text-xl font-black leading-tight tracking-tight uppercase">Biriyani Bliss</h2>
+      </div>
+      <p class="text-sm leading-relaxed">Authentic culinary experience delivered to your home. We use only the finest ingredients and traditional spices to bring you the true taste of biriyani.</p>
+      <div class="flex gap-4">
+        <a class="size-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary hover:text-slate-900 transition-all" href="#"><span class="material-symbols-outlined text-lg">social_leaderboard</span></a>
+        <a class="size-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary hover:text-slate-900 transition-all" href="#"><span class="material-symbols-outlined text-lg">camera</span></a>
+        <a class="size-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary hover:text-slate-900 transition-all" href="#"><span class="material-symbols-outlined text-lg">share</span></a>
+      </div>
+    </div>
+    <div>
+      <h4 class="text-white font-bold mb-6">Quick Links</h4>
+      <ul class="space-y-4 text-sm">
+        <li><a class="hover:text-primary transition-colors" href="#">Home</a></li>
+        <li><a class="hover:text-primary transition-colors" href="#menu">Menu</a></li>
+        <li><a class="hover:text-primary transition-colors" href="#how-to-order">How to Order</a></li>
+        <li><a class="hover:text-primary transition-colors" href="#offers">Offers & Coupons</a></li>
+        <li><a class="hover:text-primary transition-colors" href="#">Contact Us</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="text-white font-bold mb-6">Support</h4>
+      <ul class="space-y-4 text-sm">
+        <li><a class="hover:text-primary transition-colors" href="#">Order Status</a></li>
+        <li><a class="hover:text-primary transition-colors" href="#">Delivery Areas</a></li>
+        <li><a class="hover:text-primary transition-colors" href="#">Refund Policy</a></li>
+        <li><a class="hover:text-primary transition-colors" href="#">Privacy Policy</a></li>
+        <li><a class="hover:text-primary transition-colors" href="#">Terms of Service</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="text-white font-bold mb-6">Subscribe</h4>
+      <p class="text-sm mb-4">Get the latest offers and spicy updates!</p>
+      <div class="relative">
+        <input class="w-full h-12 rounded-xl bg-white/5 border-white/10 px-4 text-sm focus:ring-primary focus:border-primary" placeholder="Email address" type="email"/>
+        <button class="absolute right-1 top-1 h-10 px-4 bg-primary rounded-lg text-slate-900 font-bold text-sm">Join</button>
+      </div>
+      <div class="mt-6 space-y-2">
+        <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">We Accept</p>
+        <div class="flex gap-2 flex-wrap">
+          <span class="px-3 py-1 bg-white/10 rounded-lg text-xs font-medium">UPI</span>
+          <span class="px-3 py-1 bg-white/10 rounded-lg text-xs font-medium">Visa</span>
+          <span class="px-3 py-1 bg-white/10 rounded-lg text-xs font-medium">Mastercard</span>
+          <span class="px-3 py-1 bg-white/10 rounded-lg text-xs font-medium">Cash</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="max-w-7xl mx-auto mt-16 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-xs">
+    <p>© 2024 Biriyani Bliss. All rights reserved.</p>
+    <div class="flex gap-6">
+      <p class="flex items-center gap-1"><span class="material-symbols-outlined text-xs">location_on</span> Yourlocation, India</p>
+      <p class="flex items-center gap-1"><span class="material-symbols-outlined text-xs">call</span> +91 9xyxxxxxx</p>
+    </div>
+  </div>
+</footer>
+
+</div>
+
+<!-- Copy code toast -->
+<div id="copy-toast" class="fixed bottom-6 right-6 bg-slate-900 text-white px-4 py-3 rounded-xl text-sm font-semibold opacity-0 pointer-events-none transition-opacity duration-300 z-50 flex items-center gap-2">
+  <span class="material-symbols-outlined text-primary text-sm">check_circle</span> Code copied!
+</div>
+
+<script>
+  // Copy coupon code with toast feedback
+  document.querySelectorAll('button[onclick]:not(#hamburger):not(#cart-btn)').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        // Double-check it's not hamburger or cart
+        if (btn.id === 'hamburger' || btn.id === 'cart-btn') return;
+        
+        const toast = document.getElementById('copy-toast');
+        if (toast) {
+            toast.style.opacity = '1';
+            setTimeout(() => {
+                toast.style.opacity = '0';
+            }, 2000);
+        }
+    });
+});
+
+
+  // Smooth scroll for anchor links
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
+    });
+  });
+</script>
+<script>
+  
+  // ── Hamburger ──
+  function toggleNav() {
+    const nav = document.getElementById('mobile-nav');
+    const btn = document.getElementById('hamburger');
+    if (nav) nav.classList.toggle('open');
+    if (btn) btn.classList.toggle('open');
+  }
+</script>
+
+</body>
+</html>

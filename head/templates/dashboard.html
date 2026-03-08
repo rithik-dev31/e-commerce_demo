@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biriyani Bliss | Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,700;0,900;1,700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#ee862b",
+              "primary-dark": "#c96f1a",
+              "secondary": "#f4a460",
+              "accent": "#d4691e",
+              "background-light": "#f8f7f6",
+              "background-dark": "#221810",
+              "spice-gold": "#f59e0b",
+              "spice-red": "#dc2626",
+              "spice-saffron": "#fbbf24",
+            },
+            fontFamily: { "display": ["Be Vietnam Pro"] },
+            borderRadius: { "DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px" },
+            animation: {
+              "fade-in": "fadeIn 0.5s ease both",
+              "slide-up": "slideUp 0.6s ease both",
+              "pulse-glow": "pulseGlow 2s ease-in-out infinite",
+              "float": "float 3s ease-in-out infinite",
+            },
+            keyframes: {
+              fadeIn: { "0%": { opacity: "0" }, "100%": { opacity: "1" } },
+              slideUp: { "0%": { opacity: "0", transform: "translateY(20px)" }, "100%": { opacity: "1", transform: "translateY(0)" } },
+              pulseGlow: { "0%, 100%": { boxShadow: "0 0 0 0 rgba(238,134,43,0.7)" }, "50%": { boxShadow: "0 0 0 10px rgba(238,134,43,0)" } },
+              float: { "0%, 100%": { transform: "translateY(0px)" }, "50%": { transform: "translateY(-8px)" } },
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font-family: "Be Vietnam Pro", sans-serif; background: linear-gradient(135deg, #f8f7f6 0%, #faf8f6 100%); }
+      
+      .spice-texture {
+        background-image: 
+          radial-gradient(circle at 2px 2px, rgba(238,134,43,0.03) 1px, transparent 0);
+        background-size: 24px 24px;
+      }
+
+      .glass-effect {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(238, 134, 43, 0.1);
+      }
+
+      .stat-card {
+        position: relative;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        animation: slideUp 0.6s ease both;
+      }
+
+      .stat-card::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        right: -2px;
+        width: 120px;
+        height: 120px;
+        background: radial-gradient(circle, rgba(238, 134, 43, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+        z-index: 0;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(238, 134, 43, 0.15);
+      }
+
+      .stat-card-content {
+        position: relative;
+        z-index: 1;
+      }
+
+      .icon-box {
+        background: linear-gradient(135deg, rgba(238, 134, 43, 0.15) 0%, rgba(244, 164, 96, 0.1) 100%);
+        border: 2px solid rgba(238, 134, 43, 0.2);
+      }
+
+      .icon-box:hover {
+        background: linear-gradient(135deg, rgba(238, 134, 43, 0.25) 0%, rgba(244, 164, 96, 0.2) 100%);
+        border-color: rgba(238, 134, 43, 0.4);
+      }
+
+      .header-gradient {
+        background: linear-gradient(135deg, #ee862b 0%, #f4a460 50%, #fbbf24 100%);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .header-gradient::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.15), transparent);
+        pointer-events: none;
+      }
+
+      .chart-container {
+        position: relative;
+        height: 300px;
+        margin-bottom: 1rem;
+        background: linear-gradient(180deg, rgba(238, 134, 43, 0.02) 0%, transparent 100%);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        border: 1px solid rgba(238, 134, 43, 0.1);
+      }
+
+      .table-row-hover {
+        transition: all 0.3s ease;
+      }
+
+      .table-row-hover:hover {
+        background-color: rgba(238, 134, 43, 0.05);
+        transform: scale(1.01);
+      }
+
+      .badge-pending { background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #7c2d12; }
+      .badge-confirmed { background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%); color: #fff; }
+      .badge-preparing { background: linear-gradient(135deg, #fb923c 0%, #f97316 100%); color: #fff; }
+      .badge-ready { background: linear-gradient(135deg, #34d399 0%, #10b981 100%); color: #fff; }
+      .badge-delivered { background: linear-gradient(135deg, #6ee7b7 0%, #14b8a6 100%); color: #fff; }
+      .badge-cancelled { background: linear-gradient(135deg, #fca5a5 0%, #ef4444 100%); color: #fff; }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #ee862b 0%, #f4a460 100%);
+        color: white;
+        transition: all 0.3s ease;
+        border: none;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.2);
+        transition: left 0.3s ease;
+      }
+
+      .btn-primary:hover::before { left: 100%; }
+      .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(238, 134, 43, 0.3); }
+
+      .divider-spice {
+        background: linear-gradient(90deg, transparent 0%, rgba(238, 134, 43, 0.3) 50%, transparent 100%);
+        height: 1px;
+      }
+
+      .number-ticker {
+        font-weight: 900;
+        font-size: 2.25rem;
+        background: linear-gradient(135deg, #ee862b 0%, #f4a460 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      [style*="animation-delay"] {
+        animation-fill-mode: both;
+      }
+
+      .scroll-smooth { scroll-behavior: smooth; }
+
+      @media (max-width: 768px) {
+        .stat-card { animation-delay: 0.1s; }
+      }
+    </style>
+</head>
+<body class="spice-texture">
+<div class="min-h-screen">
+  <!-- ===== HEADER ===== -->
+  <header class="header-gradient sticky top-0 z-50 shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 md:px-8 lg:px-12 py-6">
+      <div class="flex justify-between items-center gap-4">
+        <!-- Logo -->
+        <div class="flex items-center gap-3">
+          <div class="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30">
+            <span class="material-symbols-outlined text-3xl text-white">restaurant</span>
+          </div>
+          <div>
+            <h1 class="text-2xl md:text-3xl font-black text-white tracking-tight">Biriyani Bliss</h1>
+            <p class="text-xs md:text-sm text-white/80 font-semibold tracking-widest uppercase">Admin Dashboard</p>
+          </div>
+        </div>
+
+        <!-- Status & Refresh -->
+        <div class="flex items-center gap-3">
+          <div class="hidden sm:flex items-center gap-2 bg-white/20 backdrop-blur-md px-4 py-2 rounded-full border border-white/30">
+            <span class="material-symbols-outlined text-sm text-white animate-pulse">circle</span>
+            <span class="text-sm text-white font-semibold">Live</span>
+          </div>
+          <button onclick="refreshAll()" class="btn-primary px-6 py-3 rounded-full font-bold flex items-center gap-2 text-sm md:text-base">
+            <span class="material-symbols-outlined text-lg">refresh</span>
+            <span class="hidden sm:inline">Refresh</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="max-w-7xl mx-auto px-4 md:px-8 lg:px-12 py-8 md:py-12">
+    
+    <!-- ===== STATS CARDS ===== -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+      
+      <!-- Categories Card -->
+      <div class="stat-card bg-white rounded-2xl shadow-lg p-6 border border-primary/10" style="animation-delay: 0.1s" onclick="window.location.href='/Biriyani_Bliss_Admin/categories/'">
+        <div class="stat-card-content">
+          <div class="flex items-center justify-between mb-4">
+            <div class="icon-box p-4 rounded-xl">
+              <span class="material-symbols-outlined text-3xl text-primary">category</span>
+            </div>
+            <span class="material-symbols-outlined text-primary text-2xl opacity-20">trending_up</span>
+          </div>
+          <p class="text-slate-600 text-sm font-semibold uppercase tracking-wide mb-1">Categories</p>
+          <p class="number-ticker" id="total-categories">0</p>
+          <p class="text-xs text-slate-400 mt-3 flex items-center gap-1">
+            <span class="material-symbols-outlined text-xs">arrow_upward</span>
+            Active collections
+          </p>
+        </div>
+      </div>
+
+      <!-- Menu Items Card -->
+      <div class="stat-card bg-white rounded-2xl shadow-lg p-6 border border-primary/10" style="animation-delay: 0.2s" onclick="window.location.href='/Biriyani_Bliss_Admin/menu-items/'">
+        <div class="stat-card-content">
+          <div class="flex items-center justify-between mb-4">
+            <div class="icon-box p-4 rounded-xl">
+              <span class="material-symbols-outlined text-3xl text-primary">dining</span>
+            </div>
+            <span class="material-symbols-outlined text-primary text-2xl opacity-20">trending_up</span>
+          </div>
+          <p class="text-slate-600 text-sm font-semibold uppercase tracking-wide mb-1">Menu Items</p>
+          <p class="number-ticker" id="total-menu-items">0</p>
+          <p class="text-xs text-slate-400 mt-3 flex items-center gap-1">
+            <span class="material-symbols-outlined text-xs">restaurant</span>
+            Biriyani varieties
+          </p>
+        </div>
+      </div>
+
+      <!-- Total Orders Card -->
+      <div class="stat-card bg-white rounded-2xl shadow-lg p-6 border border-primary/10" style="animation-delay: 0.3s" onclick="window.location.href='/Biriyani_Bliss_Admin/orders/'">
+        <div class="stat-card-content">
+          <div class="flex items-center justify-between mb-4">
+            <div class="icon-box p-4 rounded-xl">
+              <span class="material-symbols-outlined text-3xl text-primary">shopping_cart</span>
+            </div>
+            <span class="material-symbols-outlined text-primary text-2xl opacity-20">trending_up</span>
+          </div>
+          <p class="text-slate-600 text-sm font-semibold uppercase tracking-wide mb-1">Total Orders</p>
+          <p class="number-ticker" id="total-orders">0</p>
+          <p class="text-xs text-slate-400 mt-3 flex items-center gap-1">
+            <span class="material-symbols-outlined text-xs">receipt_long</span>
+            All time
+          </p>
+        </div>
+      </div>
+
+      <!-- Pending Orders Card -->
+      <div class="stat-card bg-white rounded-2xl shadow-lg p-6 border border-primary/10" style="animation-delay: 0.4s" onclick="window.location.href='/Biriyani_Bliss_Admin/orders/?status=pending'">
+        <div class="stat-card-content">
+          <div class="flex items-center justify-between mb-4">
+            <div class="icon-box p-4 rounded-xl">
+              <span class="material-symbols-outlined text-3xl text-primary">schedule</span>
+            </div>
+            <span class="material-symbols-outlined text-spice-red text-2xl opacity-40 animate-pulse">priority_high</span>
+          </div>
+          <p class="text-slate-600 text-sm font-semibold uppercase tracking-wide mb-1">Pending Orders</p>
+          <p class="number-ticker text-spice-red" id="pending-orders">0</p>
+          <p class="text-xs text-slate-400 mt-3 flex items-center gap-1">
+            <span class="material-symbols-outlined text-xs text-spice-red">warning</span>
+            Awaiting confirmation
+          </p>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ===== REVENUE & ACTIONS ===== -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+      
+      <!-- Revenue Chart -->
+      <div class="lg:col-span-2 bg-white rounded-2xl shadow-lg p-6 md:p-8 border border-primary/10 animate-fade-in">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h2 class="text-2xl md:text-3xl font-black text-slate-900 flex items-center gap-3">
+              <span class="material-symbols-outlined text-primary text-3xl">trending_up</span>
+              Revenue Overview
+            </h2>
+            <p class="text-slate-500 text-sm mt-1">Weekly earnings from delivered orders</p>
+          </div>
+          <div class="hidden sm:block text-right">
+            <p class="text-xs text-slate-400 uppercase tracking-widest font-semibold">Total Revenue</p>
+            <p class="text-3xl font-black text-primary" id="total-revenue">₹0</p>
+          </div>
+        </div>
+        
+        <div class="divider-spice mb-6"></div>
+        
+        <div class="chart-container">
+          <canvas id="revenueChart"></canvas>
+        </div>
+        
+        <div class="grid grid-cols-3 gap-4 mt-6">
+          <div class="text-center p-4 bg-primary/5 rounded-xl border border-primary/10">
+            <p class="text-xs text-slate-500 uppercase tracking-widest font-semibold mb-1">Avg Daily</p>
+            <p class="text-xl font-black text-primary" id="avg-revenue">₹0</p>
+          </div>
+          <div class="text-center p-4 bg-primary/5 rounded-xl border border-primary/10">
+            <p class="text-xs text-slate-500 uppercase tracking-widest font-semibold mb-1">Peak Day</p>
+            <p class="text-xl font-black text-primary" id="peak-revenue">₹0</p>
+          </div>
+          <div class="text-center p-4 bg-primary/5 rounded-xl border border-primary/10">
+            <p class="text-xs text-slate-500 uppercase tracking-widest font-semibold mb-1">Orders</p>
+            <p class="text-xl font-black text-primary" id="order-count">0</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8 border border-primary/10 animate-fade-in" style="animation-delay: 0.2s">
+        <h3 class="text-2xl font-black text-slate-900 mb-6 flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary">flash_on</span>
+          Quick Actions
+        </h3>
+        
+        <div class="space-y-3">
+          <button onclick="window.location.href='/Biriyani_Bliss_Admin/categories/'" class="w-full btn-primary py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 group">
+            <span class="material-symbols-outlined group-hover:scale-110 transition-transform">category</span>
+            Manage Categories
+          </button>
+          
+          <button onclick="window.location.href='/Biriyani_Bliss_Admin/menu-items/'" class="w-full btn-primary py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 group">
+            <span class="material-symbols-outlined group-hover:scale-110 transition-transform">dining</span>
+            Manage Menu Items
+          </button>
+          
+          <button onclick="window.location.href='/Biriyani_Bliss_Admin/orders/'" class="w-full btn-primary py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 group">
+            <span class="material-symbols-outlined group-hover:scale-110 transition-transform">shopping_cart</span>
+            View All Orders
+          </button>
+          
+          <button onclick="window.location.href='/Biriyani_Bliss_Admin/orders/statistics/'" class="w-full btn-primary py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 group">
+            <span class="material-symbols-outlined group-hover:scale-110 transition-transform">analytics</span>
+            View Statistics
+          </button>
+          <a href="{% url 'logout' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-amber-500/10 font-medium transition-colors">
+        <span class="material-symbols-outlined text-amber-500">logout</span> Logout
+      </a>
+        </div>
+
+        <div class="divider-spice my-6"></div>
+
+        <div class="p-4 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-xl border border-primary/20">
+          <p class="text-xs text-slate-500 uppercase tracking-widest font-semibold mb-2">Status</p>
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+            <p class="text-sm font-bold text-slate-700">System Online</p>
+          </div>
+          <p class="text-xs text-slate-500 mt-2">All systems operational</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ===== RECENT ORDERS TABLE ===== -->
+    <section class="bg-white rounded-2xl shadow-lg border border-primary/10 overflow-hidden animate-fade-in" style="animation-delay: 0.3s">
+      <div class="p-6 md:p-8 border-b border-primary/10">
+        <div class="flex justify-between items-center">
+          <div>
+            <h2 class="text-2xl md:text-3xl font-black text-slate-900 flex items-center gap-3">
+              <span class="material-symbols-outlined text-primary text-3xl">schedule</span>
+              Recent Orders
+            </h2>
+            <p class="text-slate-500 text-sm mt-1">Latest transactions and statuses</p>
+          </div>
+          <button onclick="window.location.href='/Biriyani_Bliss_Admin/orders/'" class="btn-primary px-4 md:px-6 py-2 md:py-3 rounded-full font-bold text-sm hidden sm:block">
+            <span class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-lg">arrow_forward</span>
+              View All
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="bg-gradient-to-r from-primary/5 to-secondary/5 border-b border-primary/10">
+              <th class="text-left p-4 md:p-6 font-black text-slate-700 uppercase text-xs tracking-widest">Order ID</th>
+              <th class="text-left p-4 md:p-6 font-black text-slate-700 uppercase text-xs tracking-widest">Customer</th>
+              <th class="text-left p-4 md:p-6 font-black text-slate-700 uppercase text-xs tracking-widest">Amount</th>
+              <th class="text-left p-4 md:p-6 font-black text-slate-700 uppercase text-xs tracking-widest">Status</th>
+              <th class="text-left p-4 md:p-6 font-black text-slate-700 uppercase text-xs tracking-widest">Date</th>
+              <th class="text-left p-4 md:p-6 font-black text-slate-700 uppercase text-xs tracking-widest">Action</th>
+            </tr>
+          </thead>
+          <tbody id="recent-orders-table">
+            <tr>
+              <td colspan="6" class="text-center py-12 text-slate-500">
+                <span class="material-symbols-outlined text-4xl animate-spin mb-3 block opacity-50">loading</span>
+                <p class="font-semibold">Loading recent orders...</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="mt-20 border-t border-primary/10 bg-gradient-to-b from-white to-primary/5 py-12 px-4 md:px-8">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center">
+        <p class="text-slate-600 text-sm">© 2024 Biriyani Bliss. All rights reserved. | Admin Dashboard v1.0</p>
+        <p class="text-slate-400 text-xs mt-2">Last updated: <span id="last-updated">Just now</span></p>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  // ===== CSRF TOKEN HELPER =====
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  const csrftoken = getCookie('csrftoken');
+
+  // ===== ANIMATE NUMBER TICKER =====
+  function animateNumber(element, target) {
+    const duration = 1000;
+    const increment = target / (duration / 16);
+    let current = 0;
+
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= target) {
+        element.textContent = target.toLocaleString('en-IN');
+        clearInterval(timer);
+      } else {
+        element.textContent = Math.floor(current).toLocaleString('en-IN');
+      }
+    }, 16);
+  }
+
+  // ===== LOAD DASHBOARD DATA =====
+  function loadDashboard() {
+    loadStats();
+    loadRecentOrders();
+    updateLastUpdated();
+  }
+
+  // ===== FETCH STATS =====
+  function loadStats() {
+    // Fetch order status counts
+    fetch('/Biriyani_Bliss_Admin/api/order-status-counts/')
+      .then(response => response.json())
+      .then(data => {
+        const totalOrders = Object.values(data).reduce((a, b) => a + b, 0);
+        const totalOrdersEl = document.getElementById('total-orders');
+        const pendingOrdersEl = document.getElementById('pending-orders');
+        
+        animateNumber(totalOrdersEl, totalOrders);
+        animateNumber(pendingOrdersEl, data.pending || 0);
+      })
+      .catch(error => console.error('Error loading order stats:', error));
+
+    // Fetch categories
+    fetch('/Biriyani_Bliss_Admin/api/categories/')
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          const el = document.getElementById('total-categories');
+          animateNumber(el, data.categories.length);
+        }
+      })
+      .catch(error => console.error('Error loading categories:', error));
+
+    // Fetch menu items count
+    fetch('/Biriyani_Bliss_Admin/api/menu-items/?page=1&page_size=1')
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          const el = document.getElementById('total-menu-items');
+          animateNumber(el, data.total_count);
+        }
+      })
+      .catch(error => console.error('Error loading menu items:', error));
+  }
+
+  // ===== LOAD RECENT ORDERS =====
+  function loadRecentOrders() {
+    const tbody = document.getElementById('recent-orders-table');
+    
+    fetch('/Biriyani_Bliss_Admin/api/orders/recent/')
+      .then(response => {
+        if (!response.ok) throw new Error('API Error');
+        return response.json();
+      })
+      .then(data => {
+        if (!data.success || !data.orders || data.orders.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="6" class="text-center py-12 text-slate-500">
+                <span class="material-symbols-outlined text-4xl mb-3 block opacity-50">inbox</span>
+                <p class="font-semibold">No orders found</p>
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        const statusBadgeMap = {
+          'pending': 'badge-pending',
+          'confirmed': 'badge-confirmed',
+          'preparing': 'badge-preparing',
+          'ready': 'badge-ready',
+          'out_for_delivery': 'badge-ready',
+          'delivered': 'badge-delivered',
+          'cancelled': 'badge-cancelled'
+        };
+
+        tbody.innerHTML = data.orders.map(order => {
+          const statusClass = statusBadgeMap[order.status] || 'bg-gray-100 text-gray-800';
+          const dateObj = new Date(order.created_at);
+          const formattedDate = dateObj.toLocaleDateString('en-IN') + ' ' + dateObj.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+          
+          return `
+            <tr class="table-row-hover border-b border-primary/5">
+              <td class="p-4 md:p-6">
+                <span class="font-black text-primary text-sm">#BB-${order.id}</span>
+              </td>
+              <td class="p-4 md:p-6">
+                <p class="font-semibold text-slate-900">${order.user__username || 'Unknown'}</p>
+              </td>
+              <td class="p-4 md:p-6">
+                <span class="font-black text-primary">₹${parseFloat(order.total_amount).toLocaleString('en-IN')}</span>
+              </td>
+              <td class="p-4 md:p-6">
+                <span class="px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest ${statusClass}">
+                  ${order.status_display}
+                </span>
+              </td>
+              <td class="p-4 md:p-6 text-slate-500 text-sm">${formattedDate}</td>
+              <td class="p-4 md:p-6">
+                <a href="/Biriyani_Bliss_Admin/orders/${order.id}/" class="btn-primary px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1 hover:scale-110 transition-transform">
+                  <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                  <span class="hidden sm:inline">View</span>
+                </a>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      })
+      .catch(error => {
+        console.error('Error loading orders:', error);
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="text-center py-12 text-slate-500">
+              <span class="material-symbols-outlined text-4xl mb-3 block opacity-50">error</span>
+              <p class="font-semibold">Failed to load orders</p>
+            </td>
+          </tr>
+        `;
+      });
+  }
+
+  // ===== VIEW ORDER =====
+  function viewOrder(orderId) {
+    const cleanId = orderId.replace('#BB-', '');
+    window.location.href = `/Biriyani_Bliss_Admin/orders/${cleanId}/`;
+  }
+
+  // ===== REVENUE CHART =====
+  let revenueChart;
+  function updateRevenueChart() {
+    const canvas = document.getElementById('revenueChart');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    const revenueData = {
+      labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+      datasets: [{
+        label: 'Daily Revenue',
+        data: [12000, 19000, 15000, 21000, 28000, 32000, 25000],
+        fill: true,
+        backgroundColor: 'rgba(238, 134, 43, 0.1)',
+        borderColor: '#ee862b',
+        borderWidth: 3,
+        tension: 0.4,
+        pointRadius: 5,
+        pointBackgroundColor: '#ee862b',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        pointHoverRadius: 7,
+      }]
+    };
+
+    if (revenueChart) revenueChart.destroy();
+
+    revenueChart = new Chart(ctx, {
+      type: 'line',
+      data: revenueData,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: 'rgba(238, 134, 43, 0.9)',
+            padding: 12,
+            titleFont: { size: 14, weight: 'bold' },
+            bodyFont: { size: 13 },
+            cornerRadius: 8,
+            displayColors: false,
+            callbacks: {
+              label: function(context) {
+                return '₹' + context.parsed.y.toLocaleString('en-IN');
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: { color: 'rgba(238, 134, 43, 0.05)', drawBorder: false },
+            ticks: {
+              color: '#94a3b8',
+              callback: function(value) {
+                return '₹' + (value / 1000) + 'k';
+              },
+              font: { weight: 'bold', size: 12 }
+            }
+          },
+          x: {
+            grid: { display: false },
+            ticks: {
+              color: '#94a3b8',
+              font: { weight: 'bold', size: 12 }
+            }
+          }
+        }
+      }
+    });
+
+    // Update revenue stats
+    const data = revenueData.datasets[0].data;
+    const total = data.reduce((a, b) => a + b, 0);
+    const avg = Math.floor(total / data.length);
+    const peak = Math.max(...data);
+
+    document.getElementById('total-revenue').textContent = '₹' + total.toLocaleString('en-IN');
+    document.getElementById('avg-revenue').textContent = '₹' + avg.toLocaleString('en-IN');
+    document.getElementById('peak-revenue').textContent = '₹' + peak.toLocaleString('en-IN');
+    document.getElementById('order-count').textContent = (data.length * 5).toString(); // Sample calculation
+  }
+
+  // ===== UPDATE LAST UPDATED TIME =====
+  function updateLastUpdated() {
+    const now = new Date();
+    const timeString = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('last-updated').textContent = timeString;
+  }
+
+  // ===== REFRESH ALL =====
+  function refreshAll() {
+    const btn = event.target.closest('button');
+    btn.style.animation = 'spin 0.6s ease-in-out';
+    setTimeout(() => btn.style.animation = '', 600);
+    
+    loadDashboard();
+    updateRevenueChart();
+  }
+
+  // ===== INITIALIZE ON PAGE LOAD =====
+  document.addEventListener('DOMContentLoaded', function() {
+    loadDashboard();
+    updateRevenueChart();
+    
+    // Auto-refresh every 30 seconds
+    setInterval(() => {
+      loadStats();
+    }, 30000);
+  });
+
+  // Add spin animation
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  `;
+  document.head.appendChild(style);
+</script>
+
+</body>
+</html>

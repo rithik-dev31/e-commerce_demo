@@ -1,0 +1,1169 @@
+<!-- head/templates/head/order_statistics.html -->
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Order Statistics - Biriyani Bliss Admin</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,700;0,900;1,700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#ee862b",
+              "primary-dark": "#c96f1a",
+              "secondary": "#f4a460",
+              "accent": "#d4691e",
+              "background-light": "#f8f7f6",
+              "background-dark": "#221810",
+              "spice-gold": "#f59e0b",
+              "spice-red": "#dc2626",
+            },
+            fontFamily: { "display": ["Be Vietnam Pro"] },
+            borderRadius: { "DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px" },
+            animation: {
+              "fade-in": "fadeIn 0.5s ease both",
+              "slide-up": "slideUp 0.6s ease both",
+              "pulse-glow": "pulseGlow 2s ease-in-out infinite",
+              "scale-in": "scaleIn 0.3s ease both",
+            },
+            keyframes: {
+              fadeIn: { 
+                "0%": { opacity: "0" }, 
+                "100%": { opacity: "1" } 
+              },
+              slideUp: { 
+                "0%": { opacity: "0", transform: "translateY(20px)" }, 
+                "100%": { opacity: "1", transform: "translateY(0)" } 
+              },
+              pulseGlow: { 
+                "0%, 100%": { boxShadow: "0 0 0 0 rgba(238,134,43,0.7)" }, 
+                "50%": { boxShadow: "0 0 0 10px rgba(238,134,43,0)" } 
+              },
+              scaleIn: {
+                "0%": { transform: "scale(0.9)", opacity: "0" },
+                "100%": { transform: "scale(1)", opacity: "1" }
+              }
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font-family: "Be Vietnam Pro", sans-serif; background: linear-gradient(135deg, #f8f7f6 0%, #faf8f6 100%); }
+      
+      .spice-texture {
+        background-image: radial-gradient(circle at 2px 2px, rgba(238,134,43,0.03) 1px, transparent 0);
+        background-size: 24px 24px;
+      }
+
+      .header-gradient {
+        background: linear-gradient(135deg, #ee862b 0%, #f4a460 50%, #fbbf24 100%);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .header-gradient::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.15), transparent);
+        pointer-events: none;
+      }
+
+      .nav-link {
+        position: relative;
+        transition: all 0.3s ease;
+      }
+
+      .nav-link::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.8);
+        transition: width 0.3s ease;
+      }
+
+      .nav-link:hover::after {
+        width: 100%;
+      }
+
+      /* ---- Hamburger ---- */
+      .hamburger span {
+        display: block;
+        width: 24px;
+        height: 2px;
+        background: white;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+        transform-origin: center;
+      }
+
+      .hamburger.open span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+      .hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+      .hamburger.open span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+      /* ---- Mobile nav ---- */
+      #mobile-nav {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s ease, opacity 0.3s ease;
+        opacity: 0;
+      }
+
+      #mobile-nav.open {
+        max-height: 500px;
+        opacity: 1;
+      }
+
+      .status-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.75rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        transition: all 0.3s ease;
+      }
+
+      .badge-pending { background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #7c2d12; }
+      .badge-confirmed { background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%); color: #fff; }
+      .badge-preparing { background: linear-gradient(135deg, #fb923c 0%, #f97316 100%); color: #fff; }
+      .badge-ready { background: linear-gradient(135deg, #34d399 0%, #10b981 100%); color: #fff; }
+      .badge-out-for-delivery { background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%); color: #fff; }
+      .badge-delivered { background: linear-gradient(135deg, #6ee7b7 0%, #14b8a6 100%); color: #fff; }
+      .badge-cancelled { background: linear-gradient(135deg, #fca5a5 0%, #ef4444 100%); color: #fff; }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #ee862b 0%, #f4a460 100%);
+        color: white;
+        transition: all 0.3s ease;
+        border: none;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.2);
+        transition: left 0.3s ease;
+      }
+
+      .btn-primary:hover::before { left: 100%; }
+      .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(238, 134, 43, 0.3); }
+
+      .divider-spice {
+        background: linear-gradient(90deg, transparent 0%, rgba(238, 134, 43, 0.3) 50%, transparent 100%);
+        height: 1px;
+      }
+
+      .stat-card {
+        background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 100%);
+        border: 1px solid rgba(238, 134, 43, 0.15);
+        transition: all 0.3s ease;
+        backdrop-filter: blur(4px);
+      }
+
+      .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(238, 134, 43, 0.15);
+      }
+
+      .modal-overlay {
+        backdrop-filter: blur(5px);
+        background: rgba(0, 0, 0, 0.5);
+        animation: fadeIn 0.3s ease;
+      }
+
+      .chart-container {
+        min-height: 250px;
+        width: 100%;
+        position: relative;
+      }
+
+      .chart-container canvas {
+        max-height: 100%;
+        width: 100% !important;
+        height: auto !important;
+      }
+
+      /* Loading skeleton animation */
+      @keyframes skeleton-loading {
+        0% { background-color: #f3f4f6; }
+        50% { background-color: #e5e7eb; }
+        100% { background-color: #f3f4f6; }
+      }
+      
+      .skeleton {
+        animation: skeleton-loading 1.5s infinite ease-in-out;
+        border-radius: 0.5rem;
+      }
+
+      /* Responsive table */
+      @media (max-width: 640px) {
+        .responsive-table {
+          border: 0;
+        }
+        .responsive-table thead {
+          display: none;
+        }
+        .responsive-table tr {
+          margin-bottom: 1rem;
+          display: block;
+          border: 1px solid #e5e7eb;
+          border-radius: 0.5rem;
+          overflow: hidden;
+        }
+        .responsive-table td {
+          display: block;
+          text-align: right;
+          padding: 0.75rem 1rem;
+          border-bottom: 1px solid #e5e7eb;
+          position: relative;
+        }
+        .responsive-table td:last-child {
+          border-bottom: 0;
+        }
+        .responsive-table td::before {
+          content: attr(data-label);
+          float: left;
+          font-weight: 700;
+          color: #4b5563;
+          text-transform: uppercase;
+          font-size: 0.75rem;
+        }
+      }
+
+      [style*="animation-delay"] {
+        animation-fill-mode: both;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      @keyframes slideUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      /* Extra small devices */
+      @media (max-width: 480px) {
+        .xs\:grid-cols-2 {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .text-4xl {
+          font-size: 1.875rem;
+        }
+        .text-3xl {
+          font-size: 1.5rem;
+        }
+      }
+    </style>
+</head>
+<body class="spice-texture min-h-screen">
+<div class="min-h-screen">
+  <!-- ===== HEADER ===== -->
+  <header class="header-gradient sticky top-0 z-50 shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 md:px-8 lg:px-12 py-4">
+      <div class="flex justify-between items-center gap-4">
+        <!-- Logo & Brand -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30">
+            <span class="material-symbols-outlined text-xl md:text-2xl text-white">monitoring</span>
+          </div>
+          <div class="hidden xs:block">
+            <h1 class="text-base md:text-lg lg:text-xl font-black text-white tracking-tight leading-none">Biriyani Bliss</h1>
+            <p class="text-[10px] md:text-xs text-white/80 font-semibold">Analytics</p>
+          </div>
+        </div>
+
+        <!-- Desktop Nav -->
+        <nav class="hidden lg:flex items-center gap-1">
+          <a href="{% url 'head:admin_dashboard' %}" class="nav-link text-white/90 hover:text-white px-3 py-2 text-sm font-bold flex items-center gap-1 transition-colors">
+            <span class="material-symbols-outlined text-lg">home</span>
+            Dashboard
+          </a>
+          <a href="{% url 'head:order_list' %}" class="nav-link text-white/90 hover:text-white px-3 py-2 text-sm font-bold flex items-center gap-1 transition-colors">
+            <span class="material-symbols-outlined text-lg">shopping_cart</span>
+            Orders
+          </a>
+          <a href="{% url 'head:category_management' %}" class="nav-link text-white/90 hover:text-white px-3 py-2 text-sm font-bold flex items-center gap-1 transition-colors">
+            <span class="material-symbols-outlined text-lg">category</span>
+            Categories
+          </a>
+          <a href="{% url 'head:menu_item_management' %}" class="nav-link text-white/90 hover:text-white px-3 py-2 text-sm font-bold flex items-center gap-1 transition-colors">
+            <span class="material-symbols-outlined text-lg">dining</span>
+            Menu Items
+          </a>
+          <a href="{% url 'head:order_statistics' %}" class="nav-link text-white px-3 py-2 text-sm font-bold flex items-center gap-1 bg-white/20 rounded-lg">
+            <span class="material-symbols-outlined text-lg">analytics</span>
+            Statistics
+          </a>
+          <a href="{% url 'logout' %}" 
+   class="flex items-center gap-2 px-5 py-2.5 rounded-full bg-red-50 hover:bg-red-500 text-red-600 hover:text-white font-bold text-sm transition-all duration-300 shadow-sm hover:shadow-md group">
+  <span class="material-symbols-outlined text-red-500 group-hover:text-white transition-all duration-300">logout</span>
+  <span>Logout</span>
+</a>
+
+        </nav>
+
+        <!-- Right Actions -->
+        <div class="flex items-center gap-2 md:gap-3">
+          <div class="hidden sm:flex items-center gap-2 bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/30">
+            <span class="material-symbols-outlined text-sm text-white animate-pulse">circle</span>
+            <span class="text-xs text-white font-bold">Live</span>
+          </div>
+          <button onclick="refreshStatistics()" class="btn-primary px-3 md:px-4 py-2 rounded-full font-bold text-xs md:text-sm flex items-center gap-1 md:gap-2 hover:scale-105 transition-transform whitespace-nowrap">
+            <span class="material-symbols-outlined text-base md:text-lg">refresh</span>
+            <span class="hidden md:inline">Refresh</span>
+          </button>
+          <!-- Hamburger Menu -->
+          <button id="hamburger" class="hamburger lg:hidden flex flex-col gap-1.5 items-center justify-center w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 hover:bg-white/30 transition-all" onclick="toggleNav()">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Nav Drawer -->
+      <div id="mobile-nav" class="lg:hidden bg-white/10 backdrop-blur-md border-t border-white/20 mt-4 rounded-2xl overflow-hidden">
+        <nav class="py-4 space-y-2 px-4">
+          <a href="{% url 'head:admin_dashboard' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/20 text-white font-bold transition-all hover:translate-x-1">
+            <span class="material-symbols-outlined text-white">home</span>
+            Dashboard
+          </a>
+          <a href="{% url 'head:order_list' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/20 text-white font-bold transition-all hover:translate-x-1">
+            <span class="material-symbols-outlined text-white">shopping_cart</span>
+            Orders
+          </a>
+          <a href="{% url 'head:category_management' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/20 text-white font-bold transition-all hover:translate-x-1">
+            <span class="material-symbols-outlined text-white">category</span>
+            Categories
+          </a>
+          <a href="{% url 'head:menu_item_management' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/20 text-white font-bold transition-all hover:translate-x-1">
+            <span class="material-symbols-outlined text-white">dining</span>
+            Menu Items
+          </a>
+          <a href="{% url 'head:order_statistics' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/20 text-white font-bold">
+            <span class="material-symbols-outlined text-white">analytics</span>
+            Statistics
+          </a>
+          <a href="{% url 'logout' %}" 
+   class="flex items-center gap-2 px-5 py-2.5 rounded-full bg-red-50 hover:bg-red-500 text-red-600 hover:text-white font-bold text-sm transition-all duration-300 shadow-sm hover:shadow-md group">
+  <span class="material-symbols-outlined text-red-500 group-hover:text-white transition-all duration-300">logout</span>
+  <span>Logout</span>
+</a>
+
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="max-w-7xl mx-auto px-3 sm:px-4 md:px-8 lg:px-12 py-6 md:py-8">
+    
+    <!-- ===== PAGE HEADER ===== -->
+    <div class="mb-6 md:mb-8 animate-fade-in">
+      <div class="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4 md:mb-6">
+        <div>
+          <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-slate-900 flex items-center gap-2 md:gap-3">
+            <span class="material-symbols-outlined text-primary text-2xl md:text-3xl lg:text-4xl">monitoring</span>
+            <span class="line-clamp-1">Order Analytics</span>
+          </h1>
+          <p class="text-slate-600 mt-1 text-xs md:text-sm lg:text-base">Track performance and gain insights into your business</p>
+        </div>
+        
+        <!-- Period Selector -->
+        <div class="w-full sm:w-auto flex bg-white rounded-full shadow-lg p-1 border border-primary/20">
+          <button onclick="changePeriod('week')" class="flex-1 sm:flex-none px-4 md:px-6 py-2 rounded-full text-xs md:text-sm font-black transition-all duration-300 period-btn whitespace-nowrap {% if period == 'week' %}btn-primary{% else %}text-slate-600 hover:text-primary{% endif %}">
+            Week
+          </button>
+          <button onclick="changePeriod('month')" class="flex-1 sm:flex-none px-4 md:px-6 py-2 rounded-full text-xs md:text-sm font-black transition-all duration-300 period-btn whitespace-nowrap {% if period == 'month' %}btn-primary{% else %}text-slate-600 hover:text-primary{% endif %}">
+            Month
+          </button>
+          <button onclick="changePeriod('year')" class="flex-1 sm:flex-none px-4 md:px-6 py-2 rounded-full text-xs md:text-sm font-black transition-all duration-300 period-btn whitespace-nowrap {% if period == 'year' %}btn-primary{% else %}text-slate-600 hover:text-primary{% endif %}">
+            Year
+          </button>
+        </div>
+      </div>
+
+      <div class="divider-spice w-full"></div>
+    </div>
+
+    <!-- ===== KEY METRICS ===== -->
+    <div class="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
+      <div class="stat-card rounded-xl md:rounded-2xl p-4 md:p-6 shadow-md hover:shadow-lg transition-all animate-fade-in" style="animation-delay: 0.1s">
+        <div class="flex items-center justify-between mb-2 md:mb-4">
+          <div class="p-2 md:p-3 bg-blue-100 rounded-lg md:rounded-xl">
+            <span class="material-symbols-outlined text-lg md:text-2xl text-blue-600">shopping_cart</span>
+          </div>
+          <span class="text-xs md:text-sm text-slate-500 font-bold uppercase tracking-wider">Total Orders</span>
+        </div>
+        <p class="text-2xl md:text-3xl lg:text-4xl font-black text-slate-900" id="totalOrders">0</p>
+        <p class="text-xs md:text-sm text-slate-500 mt-1 md:mt-2 font-medium">All time</p>
+      </div>
+
+      <div class="stat-card rounded-xl md:rounded-2xl p-4 md:p-6 shadow-md hover:shadow-lg transition-all animate-fade-in" style="animation-delay: 0.15s">
+        <div class="flex items-center justify-between mb-2 md:mb-4">
+          <div class="p-2 md:p-3 bg-green-100 rounded-lg md:rounded-xl">
+            <span class="material-symbols-outlined text-lg md:text-2xl text-green-600">payments</span>
+          </div>
+          <span class="text-xs md:text-sm text-slate-500 font-bold uppercase tracking-wider">Total Revenue</span>
+        </div>
+        <p class="text-2xl md:text-3xl lg:text-4xl font-black text-slate-900" id="totalRevenue">₹0</p>
+        <p class="text-xs md:text-sm text-slate-500 mt-1 md:mt-2 font-medium">From delivered orders</p>
+      </div>
+
+      <div class="stat-card rounded-xl md:rounded-2xl p-4 md:p-6 shadow-md hover:shadow-lg transition-all animate-fade-in" style="animation-delay: 0.2s">
+        <div class="flex items-center justify-between mb-2 md:mb-4">
+          <div class="p-2 md:p-3 bg-purple-100 rounded-lg md:rounded-xl">
+            <span class="material-symbols-outlined text-lg md:text-2xl text-purple-600">trending_up</span>
+          </div>
+          <span class="text-xs md:text-sm text-slate-500 font-bold uppercase tracking-wider">Avg. Order Value</span>
+        </div>
+        <p class="text-2xl md:text-3xl lg:text-4xl font-black text-slate-900" id="avgOrderValue">₹0</p>
+        <p class="text-xs md:text-sm text-slate-500 mt-1 md:mt-2 font-medium">Per order</p>
+      </div>
+
+      <div class="stat-card rounded-xl md:rounded-2xl p-4 md:p-6 shadow-md hover:shadow-lg transition-all animate-fade-in" style="animation-delay: 0.25s">
+        <div class="flex items-center justify-between mb-2 md:mb-4">
+          <div class="p-2 md:p-3 bg-orange-100 rounded-lg md:rounded-xl">
+            <span class="material-symbols-outlined text-lg md:text-2xl text-orange-600">group</span>
+          </div>
+          <span class="text-xs md:text-sm text-slate-500 font-bold uppercase tracking-wider">Total Customers</span>
+        </div>
+        <p class="text-2xl md:text-3xl lg:text-4xl font-black text-slate-900" id="totalCustomers">0</p>
+        <p class="text-xs md:text-sm text-slate-500 mt-1 md:mt-2 font-medium">Unique customers</p>
+      </div>
+    </div>
+
+    <!-- ===== CHARTS ROW ===== -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 mb-6 md:mb-8">
+      <!-- Orders Over Time Chart -->
+      <div class="bg-white rounded-xl md:rounded-2xl shadow-lg p-4 md:p-6 border border-primary/10 animate-fade-in" style="animation-delay: 0.3s">
+        <h3 class="text-base md:text-lg lg:text-xl font-black text-slate-900 mb-3 md:mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary text-xl md:text-2xl">show_chart</span>
+          Orders Over Time
+        </h3>
+        <div class="chart-container" style="min-height: 250px;">
+          <canvas id="ordersChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Revenue Over Time Chart -->
+      <div class="bg-white rounded-xl md:rounded-2xl shadow-lg p-4 md:p-6 border border-primary/10 animate-fade-in" style="animation-delay: 0.35s">
+        <h3 class="text-base md:text-lg lg:text-xl font-black text-slate-900 mb-3 md:mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary text-xl md:text-2xl">bar_chart</span>
+          Revenue Over Time
+        </h3>
+        <div class="chart-container" style="min-height: 250px;">
+          <canvas id="revenueChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SECOND ROW ===== -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 mb-6 md:mb-8">
+      <!-- Status Distribution -->
+      <div class="bg-white rounded-xl md:rounded-2xl shadow-lg p-4 md:p-6 border border-primary/10 animate-fade-in" style="animation-delay: 0.4s">
+        <h3 class="text-base md:text-lg lg:text-xl font-black text-slate-900 mb-3 md:mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary text-xl md:text-2xl">pie_chart</span>
+          Order Status Distribution
+        </h3>
+        <div class="chart-container" style="min-height: 250px;">
+          <canvas id="statusChart"></canvas>
+        </div>
+        
+        <!-- Status Legend -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 md:gap-4 mt-4 md:mt-6" id="statusLegend">
+          <!-- Will be populated by JavaScript -->
+        </div>
+      </div>
+
+      <!-- Peak Hours -->
+      <div class="bg-white rounded-xl md:rounded-2xl shadow-lg p-4 md:p-6 border border-primary/10 animate-fade-in" style="animation-delay: 0.45s">
+        <h3 class="text-base md:text-lg lg:text-xl font-black text-slate-900 mb-3 md:mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary text-xl md:text-2xl">schedule</span>
+          Peak Order Hours
+        </h3>
+        <div class="chart-container" style="min-height: 250px;">
+          <canvas id="peakHoursChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TOP CUSTOMERS TABLE ===== -->
+    <div class="bg-white rounded-xl md:rounded-2xl shadow-lg p-4 md:p-6 mb-6 md:mb-8 border border-primary/10 animate-fade-in" style="animation-delay: 0.5s">
+      <h3 class="text-base md:text-lg lg:text-xl font-black text-slate-900 mb-4 md:mb-6 flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary text-xl md:text-2xl">military_tech</span>
+        Top Customers
+      </h3>
+      
+      <div class="overflow-x-auto -mx-4 md:mx-0">
+        <div class="inline-block min-w-full align-middle">
+          <table class="responsive-table min-w-full divide-y divide-gray-200">
+            <thead class="bg-gradient-to-r from-primary/10 to-secondary/10">
+              <tr>
+                <th class="p-3 md:p-4 text-left text-xs md:text-sm font-black text-slate-700 uppercase tracking-widest">Rank</th>
+                <th class="p-3 md:p-4 text-left text-xs md:text-sm font-black text-slate-700 uppercase tracking-widest">Customer</th>
+                <th class="p-3 md:p-4 text-left text-xs md:text-sm font-black text-slate-700 uppercase tracking-widest hidden md:table-cell">Email</th>
+                <th class="p-3 md:p-4 text-left text-xs md:text-sm font-black text-slate-700 uppercase tracking-widest">Orders</th>
+                <th class="p-3 md:p-4 text-left text-xs md:text-sm font-black text-slate-700 uppercase tracking-widest">Total Spent</th>
+              </tr>
+            </thead>
+            <tbody id="topCustomersTable" class="divide-y divide-primary/5">
+              <tr>
+                <td colspan="5" class="text-center py-12 md:py-16 text-slate-500">
+                  <div class="inline-flex flex-col items-center">
+                    <div class="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-3 md:mb-4">
+                      <span class="material-symbols-outlined text-3xl md:text-4xl text-primary animate-spin">progress_activity</span>
+                    </div>
+                    <p class="text-base md:text-lg font-black text-slate-900">Loading customer data...</p>
+                    <p class="text-xs md:text-sm text-slate-500 mt-1">Please wait</p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ADDITIONAL STATS ===== -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 animate-fade-in" style="animation-delay: 0.55s">
+      <div class="stat-card rounded-xl md:rounded-2xl shadow-lg p-4 md:p-6">
+        <div class="flex items-center justify-between mb-3">
+          <h4 class="font-black text-slate-900 text-sm md:text-base">📦 Order Completion</h4>
+          <span class="material-symbols-outlined text-green-600">check_circle</span>
+        </div>
+        <p class="text-3xl md:text-4xl font-black text-green-600" id="completionRate">0%</p>
+        <p class="text-xs md:text-sm text-slate-500 mt-2 font-medium">Orders delivered successfully</p>
+        <div class="w-full bg-gray-200 rounded-full h-2 mt-3">
+          <div class="bg-green-600 h-2 rounded-full transition-all duration-500" id="completionBar" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <div class="stat-card rounded-xl md:rounded-2xl shadow-lg p-4 md:p-6">
+        <div class="flex items-center justify-between mb-3">
+          <h4 class="font-black text-slate-900 text-sm md:text-base">❌ Cancellation Rate</h4>
+          <span class="material-symbols-outlined text-red-600">cancel</span>
+        </div>
+        <p class="text-3xl md:text-4xl font-black text-red-600" id="cancellationRate">0%</p>
+        <p class="text-xs md:text-sm text-slate-500 mt-2 font-medium">Orders cancelled</p>
+        <div class="w-full bg-gray-200 rounded-full h-2 mt-3">
+          <div class="bg-red-600 h-2 rounded-full transition-all duration-500" id="cancellationBar" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <div class="stat-card rounded-xl md:rounded-2xl shadow-lg p-4 md:p-6 sm:col-span-2 lg:col-span-1">
+        <div class="flex items-center justify-between mb-3">
+          <h4 class="font-black text-slate-900 text-sm md:text-base">⏱️ Avg. Prep Time</h4>
+          <span class="material-symbols-outlined text-primary">timer</span>
+        </div>
+        <p class="text-3xl md:text-4xl font-black text-primary" id="avgPrepTime">0 min</p>
+        <p class="text-xs md:text-sm text-slate-500 mt-2 font-medium">From order to ready</p>
+        <div class="flex items-center gap-2 mt-3">
+          <span class="material-symbols-outlined text-primary text-sm">trending_up</span>
+          <span class="text-xs text-slate-600">vs last period</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== NOTIFICATION TOAST ===== -->
+  <div id="toast" class="fixed bottom-4 right-4 left-4 md:left-auto md:right-4 bg-gradient-to-r text-white px-4 md:px-6 py-3 md:py-4 rounded-xl text-xs md:text-sm font-bold opacity-0 pointer-events-none transition-all duration-300 z-50 flex items-center gap-2 shadow-lg max-w-sm mx-auto md:mx-0"></div>
+</div>
+
+<script>
+  // ===== HAMBURGER MENU =====
+  function toggleNav() {
+    const nav = document.getElementById('mobile-nav');
+    const btn = document.getElementById('hamburger');
+    if (nav) nav.classList.toggle('open');
+    if (btn) btn.classList.toggle('open');
+  }
+
+  // Close menu when clicking nav links
+  document.querySelectorAll('#mobile-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+      document.getElementById('mobile-nav')?.classList.remove('open');
+      document.getElementById('hamburger')?.classList.remove('open');
+    });
+  });
+
+  // Close mobile menu on window resize
+  window.addEventListener('resize', function() {
+    if (window.innerWidth >= 1024) {
+      document.getElementById('mobile-nav')?.classList.remove('open');
+      document.getElementById('hamburger')?.classList.remove('open');
+    }
+  });
+
+  // ===== CSRF TOKEN =====
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  const csrftoken = getCookie('csrftoken');
+  let currentPeriod = '{{ period|default:"month" }}';
+  
+  // Chart instances
+  let ordersChart, revenueChart, statusChart, peakHoursChart;
+
+  // ===== LOAD ALL STATISTICS =====
+  function loadStatistics() {
+    showLoadingStates();
+    
+    // Fetch order status counts
+    fetch('/Biriyani_Bliss_Admin/api/order-status-counts/')
+      .then(response => response.json())
+      .then(data => {
+        const totalOrders = Object.values(data).reduce((a, b) => a + b, 0);
+        document.getElementById('totalOrders').textContent = totalOrders;
+        
+        const delivered = data.delivered || 0;
+        const cancelled = data.cancelled || 0;
+        
+        const completionRate = totalOrders > 0 ? ((delivered / totalOrders) * 100).toFixed(1) : 0;
+        const cancellationRate = totalOrders > 0 ? ((cancelled / totalOrders) * 100).toFixed(1) : 0;
+        
+        document.getElementById('completionRate').textContent = completionRate + '%';
+        document.getElementById('completionBar').style.width = completionRate + '%';
+        
+        document.getElementById('cancellationRate').textContent = cancellationRate + '%';
+        document.getElementById('cancellationBar').style.width = cancellationRate + '%';
+      })
+      .catch(error => {
+        console.error('Error loading status counts:', error);
+        showNotification('Error loading statistics', 'error');
+      });
+
+    fetchOrdersOverTime();
+    fetchStatusDistribution();
+    fetchPeakHours();
+    fetchTopCustomers();
+    calculateRevenueMetrics();
+    calculateUniqueCustomers();
+  }
+
+  // ===== SHOW LOADING STATES =====
+  function showLoadingStates() {
+    const elements = ['totalOrders', 'totalRevenue', 'avgOrderValue', 'totalCustomers'];
+    elements.forEach(id => {
+      const element = document.getElementById(id);
+      if (element && element.textContent === '0') {
+        element.innerHTML = '<span class="skeleton inline-block w-20 h-8 rounded"></span>';
+      }
+    });
+  }
+
+  // ===== FETCH ORDERS OVER TIME =====
+  function fetchOrdersOverTime() {
+    try {
+      const ordersData = {{ orders_over_time|safe }};
+      updateOrdersChart(ordersData);
+      updateRevenueChart(ordersData);
+    } catch (error) {
+      console.error('Error updating charts:', error);
+    }
+  }
+
+  // ===== UPDATE ORDERS CHART =====
+  function updateOrdersChart(data) {
+    const ctx = document.getElementById('ordersChart').getContext('2d');
+    const isMobile = window.innerWidth < 640;
+    
+    const labels = data.map(item => item.date);
+    const counts = data.map(item => item.count);
+    
+    if (ordersChart) ordersChart.destroy();
+    
+    ordersChart = new Chart(ctx, {
+      type: isMobile ? 'bar' : 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Number of Orders',
+          data: counts,
+          borderColor: '#ee862b',
+          backgroundColor: 'rgba(238, 134, 43, 0.1)',
+          borderWidth: isMobile ? 2 : 3,
+          tension: 0.4,
+          fill: true,
+          pointBackgroundColor: '#ee862b',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: isMobile ? 2 : 4,
+          pointHoverRadius: isMobile ? 4 : 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1e293b',
+            titleColor: '#fff',
+            bodyColor: '#fff',
+            callbacks: {
+              label: function(context) {
+                return ` Orders: ${context.raw}`;
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: { color: 'rgba(238, 134, 43, 0.1)' },
+            ticks: {
+              font: { size: isMobile ? 10 : 12 }
+            }
+          },
+          x: {
+            grid: { display: false },
+            ticks: {
+              maxRotation: isMobile ? 45 : 0,
+              font: { size: isMobile ? 9 : 11 }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // ===== UPDATE REVENUE CHART =====
+  function updateRevenueChart(data) {
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    const isMobile = window.innerWidth < 640;
+    
+    const labels = data.map(item => item.date);
+    const revenues = data.map(item => parseFloat(item.revenue || 0));
+    
+    if (revenueChart) revenueChart.destroy();
+    
+    revenueChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Revenue (₹)',
+          data: revenues,
+          backgroundColor: '#10b981',
+          borderRadius: isMobile ? 4 : 6,
+          barPercentage: 0.6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1e293b',
+            titleColor: '#fff',
+            bodyColor: '#fff',
+            callbacks: {
+              label: function(context) {
+                return ` Revenue: ₹${context.raw.toLocaleString('en-IN')}`;
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: { color: 'rgba(16, 185, 129, 0.1)' },
+            ticks: {
+              callback: function(value) {
+                if (isMobile && value > 1000) {
+                  return '₹' + (value/1000).toFixed(0) + 'k';
+                }
+                return '₹' + value.toLocaleString('en-IN');
+              },
+              font: { size: isMobile ? 10 : 12 }
+            }
+          },
+          x: {
+            grid: { display: false },
+            ticks: {
+              maxRotation: isMobile ? 45 : 0,
+              font: { size: isMobile ? 9 : 11 }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // ===== FETCH STATUS DISTRIBUTION =====
+  function fetchStatusDistribution() {
+    fetch('/Biriyani_Bliss_Admin/api/order-status-counts/')
+      .then(response => response.json())
+      .then(data => updateStatusChart(data))
+      .catch(error => console.error('Error fetching status distribution:', error));
+  }
+
+  // ===== UPDATE STATUS CHART =====
+  function updateStatusChart(data) {
+    const ctx = document.getElementById('statusChart').getContext('2d');
+    const isMobile = window.innerWidth < 640;
+    
+    const statusLabels = {
+      'pending': 'Pending',
+      'confirmed': 'Confirmed',
+      'preparing': 'Preparing',
+      'ready': 'Ready',
+      'out_for_delivery': 'Out for Delivery',
+      'delivered': 'Delivered',
+      'cancelled': 'Cancelled'
+    };
+    
+    const statusColors = {
+      'pending': '#f59e0b',
+      'confirmed': '#3b82f6',
+      'preparing': '#f97316',
+      'ready': '#10b981',
+      'out_for_delivery': '#8b5cf6',
+      'delivered': '#14b8a6',
+      'cancelled': '#ef4444'
+    };
+    
+    const labels = [];
+    const values = [];
+    const backgroundColors = [];
+    
+    // Create legend
+    const legendHtml = [];
+    
+    for (const [key, value] of Object.entries(data)) {
+      if (value > 0) {
+        labels.push(statusLabels[key] || key);
+        values.push(value);
+        backgroundColors.push(statusColors[key] || '#94a3b8');
+        
+        legendHtml.push(`
+          <div class="flex items-center gap-1 md:gap-2 bg-slate-50 rounded-lg p-2">
+            <div class="w-2 h-2 md:w-3 md:h-3 rounded-full" style="background-color: ${statusColors[key] || '#94a3b8'}"></div>
+            <span class="text-xs md:text-sm font-bold text-slate-700">${statusLabels[key] || key}:</span>
+            <span class="text-xs md:text-sm font-black text-slate-900">${value}</span>
+          </div>
+        `);
+      }
+    }
+    
+    document.getElementById('statusLegend').innerHTML = legendHtml.join('');
+    
+    if (statusChart) statusChart.destroy();
+    
+    statusChart = new Chart(ctx, {
+      type: isMobile ? 'pie' : 'doughnut',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: values,
+          backgroundColor: backgroundColors,
+          borderWidth: 0,
+          hoverOffset: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: isMobile ? '0%' : '60%',
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1e293b',
+            titleColor: '#fff',
+            bodyColor: '#fff',
+            callbacks: {
+              label: function(context) {
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const percentage = ((context.raw / total) * 100).toFixed(1);
+                return ` ${context.label}: ${context.raw} (${percentage}%)`;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // ===== FETCH PEAK HOURS =====
+  function fetchPeakHours() {
+    try {
+      const peakHoursData = {{ peak_hours|safe }};
+      updatePeakHoursChart(peakHoursData);
+    } catch (error) {
+      console.error('Error fetching peak hours:', error);
+    }
+  }
+
+  // ===== UPDATE PEAK HOURS CHART =====
+  function updatePeakHoursChart(data) {
+    const ctx = document.getElementById('peakHoursChart').getContext('2d');
+    const isMobile = window.innerWidth < 640;
+    
+    const hours = data.map(item => `${item.hour}:00`);
+    const counts = data.map(item => item.count);
+    
+    if (peakHoursChart) peakHoursChart.destroy();
+    
+    peakHoursChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: hours,
+        datasets: [{
+          label: 'Number of Orders',
+          data: counts,
+          backgroundColor: '#ee862b',
+          borderRadius: isMobile ? 4 : 6,
+          barPercentage: 0.7
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1e293b',
+            titleColor: '#fff',
+            bodyColor: '#fff'
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: { color: 'rgba(238, 134, 43, 0.1)' },
+            ticks: {
+              font: { size: isMobile ? 10 : 12 }
+            }
+          },
+          x: {
+            grid: { display: false },
+            ticks: {
+              maxRotation: isMobile ? 45 : 0,
+              font: { size: isMobile ? 9 : 11 }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // ===== FETCH TOP CUSTOMERS =====
+  function fetchTopCustomers() {
+    try {
+      const topCustomers = {{ top_customers|safe }};
+      
+      const tbody = document.getElementById('topCustomersTable');
+      
+      if (topCustomers.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="text-center py-12 md:py-16 text-slate-500">
+              <div class="inline-flex flex-col items-center">
+                <div class="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-3 md:mb-4">
+                  <span class="material-symbols-outlined text-3xl md:text-4xl text-primary">people</span>
+                </div>
+                <p class="text-base md:text-lg font-black text-slate-900">No customer data available</p>
+                <p class="text-xs md:text-sm text-slate-500 mt-1">Waiting for orders...</p>
+              </div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+      
+      tbody.innerHTML = topCustomers.map((customer, index) => {
+        const isMobile = window.innerWidth < 768;
+        return `
+          <tr class="hover:bg-primary/5 transition-colors">
+            <td class="p-3 md:p-4 text-xs md:text-sm" data-label="Rank">
+              <div class="flex items-center gap-2">
+                ${index === 0 ? '<span class="material-symbols-outlined text-yellow-500 text-base md:text-lg">military_tech</span>' : ''}
+                <span class="font-black text-slate-900">#${index + 1}</span>
+              </div>
+            </td>
+            <td class="p-3 md:p-4 font-bold text-slate-900 text-xs md:text-sm" data-label="Customer">${customer.user__username}</td>
+            ${!isMobile ? `<td class="p-3 md:p-4 text-slate-600 text-xs md:text-sm" data-label="Email">${customer.user__email}</td>` : ''}
+            <td class="p-3 md:p-4" data-label="Orders">
+              <span class="bg-primary/10 text-primary px-2 md:px-3 py-1 rounded-full text-xs font-black">
+                ${customer.order_count} order${customer.order_count > 1 ? 's' : ''}
+              </span>
+            </td>
+            <td class="p-3 md:p-4 font-black text-green-600 text-xs md:text-sm" data-label="Total Spent">₹${parseFloat(customer.total_spent).toLocaleString('en-IN')}</td>
+          </tr>
+        `;
+      }).join('');
+    } catch (error) {
+      console.error('Error fetching top customers:', error);
+    }
+  }
+
+  // ===== CALCULATE REVENUE METRICS =====
+  function calculateRevenueMetrics() {
+    try {
+      const totalRevenue = {{ total_revenue|default:0 }};
+      const totalOrders = {{ total_orders|default:0 }};
+      
+      document.getElementById('totalRevenue').textContent = '₹' + totalRevenue.toLocaleString('en-IN');
+      
+      const avgOrderValue = totalOrders > 0 ? (totalRevenue / totalOrders).toFixed(2) : 0;
+      document.getElementById('avgOrderValue').textContent = '₹' + parseFloat(avgOrderValue).toLocaleString('en-IN');
+    } catch (error) {
+      console.error('Error calculating revenue metrics:', error);
+    }
+  }
+
+  // ===== CALCULATE UNIQUE CUSTOMERS =====
+  function calculateUniqueCustomers() {
+    try {
+      const uniqueCustomers = {{ top_customers|length|default:0 }};
+      document.getElementById('totalCustomers').textContent = uniqueCustomers;
+    } catch (error) {
+      console.error('Error calculating unique customers:', error);
+    }
+  }
+
+  // ===== CALCULATE AVERAGE PREP TIME =====
+  function calculateAvgPrepTime() {
+    document.getElementById('avgPrepTime').textContent = '25 min';
+  }
+
+  // ===== CHANGE PERIOD =====
+  function changePeriod(period) {
+    currentPeriod = period;
+    
+    // Update button styles
+    document.querySelectorAll('.period-btn').forEach(btn => {
+      btn.classList.remove('btn-primary');
+      btn.classList.add('text-slate-600', 'hover:text-primary');
+    });
+    
+    event.target.classList.add('btn-primary');
+    event.target.classList.remove('text-slate-600', 'hover:text-primary');
+    
+    showNotification(`Loading ${period} data...`, 'info');
+    
+    setTimeout(() => {
+      window.location.href = `?period=${period}`;
+    }, 300);
+  }
+
+  // ===== REFRESH STATISTICS =====
+  function refreshStatistics() {
+    showNotification('Refreshing statistics...', 'info');
+    loadStatistics();
+    setTimeout(() => {
+      showNotification('Statistics refreshed!', 'success');
+    }, 1000);
+  }
+
+  // ===== NOTIFICATION SYSTEM =====
+  function showNotification(message, type = 'info') {
+    const toast = document.getElementById('toast');
+    const icons = {
+      'success': 'check_circle',
+      'error': 'error',
+      'warning': 'warning',
+      'info': 'info'
+    };
+    const colors = {
+      'success': 'from-green-500 to-green-600',
+      'error': 'from-red-500 to-red-600',
+      'warning': 'from-yellow-500 to-yellow-600',
+      'info': 'from-blue-500 to-blue-600'
+    };
+
+    toast.className = `fixed bottom-4 right-4 left-4 md:left-auto md:right-4 bg-gradient-to-r ${colors[type]} text-white px-4 md:px-6 py-3 md:py-4 rounded-xl text-xs md:text-sm font-bold transition-all duration-300 z-50 flex items-center gap-2 shadow-lg max-w-sm mx-auto md:mx-0`;
+    toast.innerHTML = `
+      <span class="material-symbols-outlined text-sm md:text-base">${icons[type]}</span>
+      <span>${message}</span>
+    `;
+    toast.style.opacity = '1';
+    toast.style.pointerEvents = 'auto';
+    toast.style.transform = 'translateY(0)';
+
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.pointerEvents = 'none';
+      toast.style.transform = 'translateY(10px)';
+    }, 3000);
+  }
+
+  // ===== HANDLE WINDOW RESIZE =====
+  let resizeTimeout;
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(function() {
+      if (ordersChart) {
+        const ordersData = {{ orders_over_time|safe }};
+        updateOrdersChart(ordersData);
+      }
+      if (revenueChart) {
+        const ordersData = {{ orders_over_time|safe }};
+        updateRevenueChart(ordersData);
+      }
+      if (statusChart) {
+        fetchStatusDistribution();
+      }
+      if (peakHoursChart) {
+        fetchPeakHours();
+      }
+      fetchTopCustomers();
+    }, 250);
+  });
+
+  // ===== AUTO-REFRESH =====
+  setInterval(loadStatistics, 60000);
+
+  // ===== INIT =====
+  document.addEventListener('DOMContentLoaded', () => {
+    loadStatistics();
+    calculateAvgPrepTime();
+    
+    // Add animation delays to stat cards
+    document.querySelectorAll('.stat-card').forEach((card, index) => {
+      card.style.animationDelay = `${(index + 1) * 0.1}s`;
+    });
+  });
+</script>
+
+</body>
+</html>

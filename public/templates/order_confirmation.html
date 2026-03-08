@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Order Confirmation | Biriyani Bliss</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,700;0,900;1,700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+{% load custom_filters %}
+<script>
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          primary: "#ee862b",
+          "primary-dark": "#c96f1a",
+          "bg-light": "#f8f7f6",
+          "bg-dark": "#221810",
+        },
+        fontFamily: { display: ["Be Vietnam Pro"] },
+        borderRadius: { DEFAULT: "1rem", lg: "2rem", xl: "3rem", full: "9999px" },
+      },
+    },
+  };
+</script>
+<style>
+  * { scroll-behavior: smooth; }
+
+  body {
+    background-color: #f8f7f6;
+    font-family: "Be Vietnam Pro", sans-serif;
+    background-image: radial-gradient(circle at 2px 2px, rgba(238,134,43,0.05) 1px, transparent 0);
+    background-size: 24px 24px;
+  }
+
+  /* ---- Hamburger ---- */
+  .hamburger span {
+    display: block; width: 24px; height: 2px;
+    background: #ee862b; border-radius: 4px;
+    transition: all 0.3s ease;
+    transform-origin: center;
+  }
+  .hamburger.open span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+  .hamburger.open span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+  /* ---- Mobile nav ---- */
+  #mobile-nav {
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.4s ease, opacity 0.3s ease;
+    opacity: 0;
+  }
+  #mobile-nav.open { max-height: 600px; opacity: 1; }
+
+  /* ---- Order timeline ---- */
+  .timeline-dot {
+    width: 40px; height: 40px;
+    background: white;
+    border: 2px solid #ee862b;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ee862b;
+    font-weight: 900;
+    position: relative;
+    z-index: 10;
+  }
+  .timeline-dot.completed {
+    background: #ee862b;
+    color: white;
+    border-color: #ee862b;
+  }
+  .timeline-line {
+    position: absolute;
+    left: 20px;
+    top: 40px;
+    width: 2px;
+    height: calc(100% - 40px);
+    background: #ee862b30;
+  }
+  .timeline-item:last-child .timeline-line { display: none; }
+
+  /* ---- Progress bar animation ---- */
+  @keyframes progressPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+  .status-progress {
+    animation: progressPulse 2s ease-in-out infinite;
+  }
+
+  /* ---- Section fade-in ---- */
+  .section-block { animation: fadeUp 0.5s ease both; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---- Scrollbar ---- */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #ee862b55; border-radius: 99px; }
+
+  /* ---- Loading spinner ---- */
+  .spinner { animation: spin 1s linear infinite; }
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  /* ---- Print styles ---- */
+  @media print {
+    .no-print { display: none; }
+    body { background: white; }
+    .print-break-inside { break-inside: avoid; }
+  }
+</style>
+</head>
+<body class="text-slate-900 min-h-screen">
+
+<!-- ======================================================
+     HEADER / NAV
+====================================================== -->
+<header class="sticky top-0 z-50 w-full border-b border-amber-500/10 bg-[#f8f7f6]/90 backdrop-blur-md no-print">
+  <div class="max-w-7xl mx-auto px-4 md:px-8 lg:px-16 py-4 flex items-center justify-between gap-4">
+
+    <!-- Logo -->
+    <a href="{% url 'public_dashboard' %}" class="flex items-center gap-2 text-amber-500 shrink-0">
+      <span class="material-symbols-outlined text-4xl">restaurant</span>
+      <h2 class="text-xl font-black uppercase tracking-tight leading-none">Biriyani<br/><span class="text-slate-800 text-base font-bold tracking-widest">BLISS</span></h2>
+    </a>
+
+    <!-- Desktop Nav -->
+    <nav class="hidden lg:flex items-center gap-8">
+      <a href="{% url 'public_dashboard' %}" class="flex items-center gap-1 text-sm font-medium hover:text-amber-500 transition-colors">
+        <span class="material-symbols-outlined text-lg">home</span> Home
+      </a>
+      <a href="{% url 'menu' %}" class="flex items-center gap-1 text-sm font-medium hover:text-amber-500 transition-colors">
+        <span class="material-symbols-outlined text-lg">menu_book</span> Menu
+      </a>
+      <a href="{% url 'public_dashboard' %}#how-to-order" class="flex items-center gap-1 text-sm font-medium hover:text-amber-500 transition-colors">
+        <span class="material-symbols-outlined text-lg">fact_check</span> How to Order
+      </a>
+      <a href="{% url 'public_dashboard' %}#offers" class="flex items-center gap-1 text-sm font-medium hover:text-amber-500 transition-colors">
+        <span class="material-symbols-outlined text-lg">local_offer</span> Offers
+      </a>
+      <a href="{% url 'order_list' %}" class="flex items-center gap-1 text-sm font-bold text-amber-500 border-b-2 border-amber-500 pb-1">
+        <span class="material-symbols-outlined text-lg">receipt_long</span> My Orders
+      </a>
+      <a href="{% url 'logout' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-amber-500/10 font-medium transition-colors">
+        <span class="material-symbols-outlined text-amber-500">logout</span> Logout
+      </a>
+    </nav>
+
+    <!-- Right actions -->
+    <div class="flex items-center gap-3">
+      <!-- Cart (with count) -->
+      <button id="cart-btn" onclick="window.location.href='{% url 'menu' %}'" class="relative flex size-10 items-center justify-center rounded-full bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-white transition-all">
+        <span class="material-symbols-outlined">shopping_cart</span>
+        <span id="cart-count" class="absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full bg-red-500 text-[10px] text-white font-black">0</span>
+      </button>
+      <!-- Profile -->
+      <a href="#" class="hidden md:flex size-10 items-center justify-center rounded-full bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-white transition-all">
+        <span class="material-symbols-outlined">person</span>
+      </a>
+      <!-- Hamburger -->
+      <button id="hamburger" class="hamburger flex flex-col gap-[6px] items-center justify-center size-10 rounded-full bg-amber-500/10 lg:hidden" onclick="toggleNav()">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Mobile Nav Drawer -->
+  <div id="mobile-nav" class="lg:hidden bg-[#f8f7f6] border-t border-amber-500/10 px-4">
+    <div class="py-4 space-y-1">
+      <a href="{% url 'public_dashboard' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-amber-500/10 font-medium transition-colors">
+        <span class="material-symbols-outlined text-amber-500">home</span> Home
+      </a>
+      <a href="{% url 'menu' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-amber-500/10 font-medium transition-colors">
+        <span class="material-symbols-outlined text-amber-500">menu_book</span> Menu
+      </a>
+      <a href="{% url 'public_dashboard' %}#how-to-order" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-amber-500/10 font-medium transition-colors">
+        <span class="material-symbols-outlined text-amber-500">fact_check</span> How to Order
+      </a>
+      <a href="{% url 'public_dashboard' %}#offers" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-amber-500/10 font-medium transition-colors">
+        <span class="material-symbols-outlined text-amber-500">local_offer</span> Offers
+      </a>
+      <a href="{% url 'order_list' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-amber-500/10 text-amber-600 font-bold transition-colors">
+        <span class="material-symbols-outlined text-amber-500">receipt_long</span> My Orders
+      </a>
+      <div class="pt-2 border-t border-amber-500/10 mt-2">
+        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-amber-500/10 font-medium transition-colors" onclick="window.location.href='{% url 'menu' %}'; return false;">
+          <span class="material-symbols-outlined text-amber-500">shopping_cart</span> Cart <span class="ml-auto bg-red-500 text-white text-xs font-black px-2 py-0.5 rounded-full" id="cart-count-mobile">0</span>
+        </a>
+      </div>
+      <a href="{% url 'logout' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-amber-500/10 font-medium transition-colors">
+        <span class="material-symbols-outlined text-amber-500">logout</span> Logout
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- ======================================================
+     ORDER CONFIRMATION HERO
+====================================================== -->
+<section class="relative overflow-hidden bg-gradient-to-br from-[#221810] to-[#3a2a1a] py-16 px-4 md:px-16 text-white no-print">
+  <div class="absolute inset-0 opacity-10" style="background-image: url('data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5 L55 30 L30 55 L5 30 Z' fill='%23ee862b' fill-opacity='0.3'/%3E%3C/svg%3E'); background-size: 60px 60px;"></div>
+  <div class="relative max-w-4xl mx-auto text-center">
+    <!-- Success Icon -->
+    <div class="inline-flex items-center justify-center size-24 rounded-full bg-green-500/20 mb-6">
+      <div class="size-16 rounded-full bg-green-500 flex items-center justify-center">
+        <span class="material-symbols-outlined text-4xl text-white">check</span>
+      </div>
+    </div>
+    
+    <h1 class="text-4xl md:text-5xl font-black mb-4">
+      Thank You, <span class="text-amber-400">{{ order.user.get_full_name|default:order.user.username }}</span>!
+    </h1>
+    <p class="text-xl text-slate-300 mb-4">Your order has been placed successfully</p>
+    
+    <!-- Order ID Card -->
+    <div class="inline-flex items-center gap-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-8 py-4 mt-4">
+      <span class="material-symbols-outlined text-amber-400 text-3xl">receipt</span>
+      <div class="text-left">
+        <p class="text-xs text-slate-400 uppercase tracking-wider">Order Number</p>
+        <p class="text-2xl font-black text-amber-400">#{{ order.id }}</p>
+      </div>
+      <div class="h-10 w-px bg-white/20 mx-2"></div>
+      <div class="text-left">
+        <p class="text-xs text-slate-400 uppercase tracking-wider">Placed on</p>
+        <p class="text-lg font-bold">{{ order.created_at|date:"d M Y, h:i A" }}</p>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex flex-wrap gap-4 justify-center mt-8">
+      <button onclick="window.print()" class="inline-flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-full text-white font-bold transition-all">
+        <span class="material-symbols-outlined">print</span> Print Receipt
+      </button>
+      <a href="{% url 'menu' %}" class="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 hover:bg-amber-600 text-slate-900 rounded-full font-bold transition-all">
+        <span class="material-symbols-outlined">restaurant_menu</span> Order More
+      </a>
+      <a href="{% url 'order_list' %}" class="inline-flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-full text-white font-bold transition-all">
+        <span class="material-symbols-outlined">history</span> View All Orders
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================
+     MAIN CONTENT
+====================================================== -->
+<main class="max-w-6xl mx-auto px-4 md:px-8 lg:px-16 py-12">
+  
+  <!-- Order Status Timeline (printable) -->
+  <div class="section-block bg-white rounded-3xl border border-amber-500/10 shadow-lg p-6 md:p-8 mb-8 print-break-inside">
+    <h2 class="text-2xl font-black mb-6 flex items-center gap-2">
+      <span class="material-symbols-outlined text-amber-500">timeline</span> Order Status
+    </h2>
+    
+    <!-- Status Badge -->
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+      <div class="flex items-center gap-3">
+        <span class="text-lg font-bold">Current Status:</span>
+        {% if order.status == 'pending' %}
+          <span class="px-4 py-2 bg-yellow-100 text-yellow-700 rounded-full font-bold flex items-center gap-2">
+            <span class="material-symbols-outlined text-lg">pending</span> Pending
+          </span>
+        {% elif order.status == 'confirmed' %}
+          <span class="px-4 py-2 bg-blue-100 text-blue-700 rounded-full font-bold flex items-center gap-2">
+            <span class="material-symbols-outlined text-lg">check_circle</span> Confirmed
+          </span>
+        {% elif order.status == 'preparing' %}
+          <span class="px-4 py-2 bg-purple-100 text-purple-700 rounded-full font-bold flex items-center gap-2">
+            <span class="material-symbols-outlined text-lg">cooking</span> Preparing
+          </span>
+        {% elif order.status == 'ready' %}
+          <span class="px-4 py-2 bg-green-100 text-green-700 rounded-full font-bold flex items-center gap-2">
+            <span class="material-symbols-outlined text-lg">delivery_dining</span> Ready for Pickup
+          </span>
+        {% elif order.status == 'out_for_delivery' %}
+          <span class="px-4 py-2 bg-orange-100 text-orange-700 rounded-full font-bold flex items-center gap-2">
+            <span class="material-symbols-outlined text-lg">motorcycle</span> Out for Delivery
+          </span>
+        {% elif order.status == 'delivered' %}
+          <span class="px-4 py-2 bg-green-100 text-green-700 rounded-full font-bold flex items-center gap-2">
+            <span class="material-symbols-outlined text-lg">checklist</span> Delivered
+          </span>
+        {% elif order.status == 'cancelled' %}
+          <span class="px-4 py-2 bg-red-100 text-red-700 rounded-full font-bold flex items-center gap-2">
+            <span class="material-symbols-outlined text-lg">cancel</span> Cancelled
+          </span>
+        {% endif %}
+      </div>
+      
+      <!-- Estimated Delivery -->
+      <div class="flex items-center gap-2 text-slate-600">
+        <span class="material-symbols-outlined text-amber-500">schedule</span>
+        <span class="font-bold">Est. Delivery:</span>
+        <span>45-60 min</span>
+      </div>
+    </div>
+    
+    <!-- Timeline Progress -->
+    <div class="relative mt-10">
+      <!-- Progress Bar Background -->
+      <div class="absolute top-5 left-0 w-full h-1 bg-slate-200 rounded-full"></div>
+      
+      <!-- Active Progress (dynamic based on status) -->
+      {% with status_progress=order|get_status_progress %}
+      <div class="absolute top-5 left-0 h-1 bg-amber-500 rounded-full transition-all duration-500 status-progress" style="width: {{ status_progress }}%"></div>
+      {% endwith %}
+      
+      <!-- Timeline Steps -->
+      <div class="relative flex justify-between">
+        <!-- Step 1: Order Placed -->
+        <div class="text-center flex-1">
+          <div class="timeline-dot mx-auto completed">
+            <span class="material-symbols-outlined text-sm">check</span>
+          </div>
+          <p class="text-xs font-bold mt-2 text-slate-500">ORDER PLACED</p>
+          <p class="text-[10px] text-slate-400">{{ order.created_at|date:"h:i A" }}</p>
+        </div>
+        
+        <!-- Step 2: Confirmed -->
+        <div class="text-center flex-1">
+          <div class="timeline-dot mx-auto {% if order.status != 'pending' %}completed{% endif %}">
+            <span class="material-symbols-outlined text-sm">check</span>
+          </div>
+          <p class="text-xs font-bold mt-2 text-slate-500">CONFIRMED</p>
+          <p class="text-[10px] text-slate-400">-</p>
+        </div>
+        
+        <!-- Step 3: Preparing -->
+        <div class="text-center flex-1">
+          <div class="timeline-dot mx-auto {% if order.status == 'preparing' or order.status == 'ready' or order.status == 'out_for_delivery' or order.status == 'delivered' %}completed{% endif %}">
+            <span class="material-symbols-outlined text-sm">cooking</span>
+          </div>
+          <p class="text-xs font-bold mt-2 text-slate-500">PREPARING</p>
+          <p class="text-[10px] text-slate-400">-</p>
+        </div>
+        
+        <!-- Step 4: Out for Delivery -->
+        <div class="text-center flex-1">
+          <div class="timeline-dot mx-auto {% if order.status == 'out_for_delivery' or order.status == 'delivered' %}completed{% endif %}">
+            <span class="material-symbols-outlined text-sm">motorcycle</span>
+          </div>
+          <p class="text-xs font-bold mt-2 text-slate-500">OUT FOR DELIVERY</p>
+          <p class="text-[10px] text-slate-400">-</p>
+        </div>
+        
+        <!-- Step 5: Delivered -->
+        <div class="text-center flex-1">
+          <div class="timeline-dot mx-auto {% if order.status == 'delivered' %}completed{% endif %}">
+            <span class="material-symbols-outlined text-sm">checklist</span>
+          </div>
+          <p class="text-xs font-bold mt-2 text-slate-500">DELIVERED</p>
+          <p class="text-[10px] text-slate-400">-</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Tracking Updates -->
+    {% if tracking %}
+    <div class="mt-8 pt-6 border-t border-amber-500/10">
+      <h3 class="font-bold text-sm mb-4 flex items-center gap-2">
+        <span class="material-symbols-outlined text-amber-500 text-base">update</span> Live Updates
+      </h3>
+      <div class="space-y-3">
+        {% for track in tracking %}
+        <div class="flex items-start gap-3 text-sm">
+          <span class="material-symbols-outlined text-amber-500 text-base mt-0.5">circle</span>
+          <div>
+            <p class="font-medium">{{ track.get_status_display }}</p>
+            <p class="text-xs text-slate-500">{{ track.timestamp|date:"h:i A, d M" }}</p>
+            {% if track.notes %}
+            <p class="text-xs text-slate-600 mt-1">{{ track.notes }}</p>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Order Details Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    
+    <!-- Left Column: Order Items -->
+    <div class="lg:col-span-2 space-y-6">
+      
+      <!-- Order Items Card -->
+      <div class="section-block bg-white rounded-3xl border border-amber-500/10 shadow-lg p-6 md:p-8 print-break-inside">
+        <h2 class="text-2xl font-black mb-6 flex items-center gap-2">
+          <span class="material-symbols-outlined text-amber-500">shopping_bag</span> Order Items
+        </h2>
+        
+        <div class="space-y-4">
+          {% for item in order_items %}
+          <div class="flex items-center gap-4 p-4 bg-amber-50/50 rounded-xl border border-amber-100">
+            <!-- Item Image Placeholder - Using first letter of item name as fallback -->
+            <div class="size-16 rounded-xl bg-amber-200/30 flex items-center justify-center text-amber-500 shrink-0">
+              {% if item.name %}
+                <span class="text-2xl font-black">{{ item.name|first }}</span>
+              {% else %}
+                <span class="material-symbols-outlined text-3xl">restaurant</span>
+              {% endif %}
+            </div>
+            
+            <div class="flex-1 min-w-0">
+              <!-- FIXED: Check both name fields safely -->
+              <h3 class="font-black text-base">
+                {% if item.name %}
+                  {{ item.name }}
+                {% elif item.menu_item and item.menu_item.name %}
+                  {{ item.menu_item.name }}
+                {% else %}
+                  Biriyani Item
+                {% endif %}
+              </h3>
+              <p class="text-xs text-slate-500">Qty: {{ item.quantity }}</p>
+              {% if item.menu_item and item.menu_item.is_vegetarian %}
+              <span class="inline-block mt-1 text-[10px] px-2 py-0.5 bg-green-100 text-green-700 rounded-full">Pure Veg</span>
+              {% endif %}
+            </div>
+            
+            <div class="text-right">
+              <p class="font-black text-amber-600">₹{{ item.price|floatformat:2 }}</p>
+              <p class="text-xs text-slate-500">₹{{ item.price|floatformat:2 }} each</p>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        
+        <!-- Order Summary -->
+        {% with subtotal=order.total_amount gst=order.total_amount|multiply:0.05 total=order.total_amount|add:order.total_amount|multiply:0.05 %}
+        <div class="mt-6 pt-6 border-t border-amber-500/10">
+          <div class="flex justify-between items-center text-sm mb-2">
+            <span class="text-slate-500">Subtotal</span>
+            <span class="font-bold">₹{{ order.total_amount|floatformat:2 }}</span>
+          </div>
+          <div class="flex justify-between items-center text-sm mb-2">
+            <span class="text-slate-500">Delivery Fee</span>
+            <span class="text-green-600 font-bold">FREE</span>
+          </div>
+          <div class="flex justify-between items-center text-sm mb-2">
+            <span class="text-slate-500">GST (5%)</span>
+            <span class="font-bold">₹{{ gst|floatformat:2 }}</span>
+          </div>
+          <div class="flex justify-between items-center text-base font-black mt-4 pt-4 border-t border-dashed border-amber-500/20">
+            <span>Total Amount</span>
+            <span class="text-amber-500 text-xl">₹{{ total }}</span>
+          </div>
+        </div>
+        {% endwith %}
+      </div>
+      
+      <!-- Special Instructions Card -->
+      {% if order.order_notes %}
+      <div class="section-block bg-white rounded-3xl border border-amber-500/10 shadow-lg p-6 md:p-8 print-break-inside">
+        <h2 class="text-xl font-black mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-amber-500">edit_note</span> Special Instructions
+        </h2>
+        <div class="bg-amber-50/50 rounded-xl p-4">
+          <p class="text-slate-700 italic">"{{ order.order_notes }}"</p>
+        </div>
+      </div>
+      {% endif %}
+      
+    </div>
+    
+    <!-- Right Column: Delivery Info -->
+    <div class="space-y-6">
+      
+      <!-- Delivery Address Card -->
+      <div class="section-block bg-white rounded-3xl border border-amber-500/10 shadow-lg p-6 md:p-8">
+        <h2 class="text-xl font-black mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-amber-500">location_on</span> Delivery Address
+        </h2>
+        <div class="space-y-3">
+          <div class="flex items-start gap-3">
+            <span class="material-symbols-outlined text-amber-500 text-base mt-1">home</span>
+            <div>
+              <p class="font-medium">{{ order.delivery_address|linebreaksbr }}</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <span class="material-symbols-outlined text-amber-500 text-base mt-1">phone</span>
+            <div>
+              <p class="font-medium">{{ order.phone_number }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Payment Info Card -->
+      <div class="section-block bg-white rounded-3xl border border-amber-500/10 shadow-lg p-6 md:p-8">
+        <h2 class="text-xl font-black mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-amber-500">payments</span> Payment
+        </h2>
+        <div class="space-y-3">
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-slate-500">Payment Method</span>
+            <span class="font-medium flex items-center gap-1">
+              <span class="material-symbols-outlined text-amber-500 text-base">credit_card</span> Cash on Delivery
+            </span>
+          </div>
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-slate-500">Payment Status</span>
+            <span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-bold">Pending</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Restaurant Info Card -->
+      <div class="section-block bg-gradient-to-br from-amber-50 to-orange-50 rounded-3xl border border-amber-500/20 shadow-lg p-6 md:p-8">
+        <h2 class="text-xl font-black mb-4 flex items-center gap-2 text-slate-800">
+          <span class="material-symbols-outlined text-amber-500">store</span> Restaurant Info
+        </h2>
+        <div class="space-y-3">
+          <div class="flex items-center gap-3">
+            <div class="size-10 rounded-full bg-amber-500/20 flex items-center justify-center">
+              <span class="material-symbols-outlined text-amber-600">restaurant</span>
+            </div>
+            <div>
+              <p class="font-black">Biriyani Bliss</p>
+              <p class="text-xs text-slate-500">Since 2018</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3 text-sm">
+            <span class="material-symbols-outlined text-amber-500 text-base mt-1">call</span>
+            <span>+91 98765 43210</span>
+          </div>
+          <div class="flex items-start gap-3 text-sm">
+            <span class="material-symbols-outlined text-amber-500 text-base mt-1">location_on</span>
+            <span>123, Food Street, <br/>Gourmet City, 560001</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Need Help Card -->
+      <div class="section-block bg-white rounded-3xl border border-amber-500/10 shadow-lg p-6 md:p-8 no-print">
+        <h2 class="text-xl font-black mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-amber-500">help</span> Need Help?
+        </h2>
+        <div class="space-y-3">
+          <a href="tel:+919876543210" class="flex items-center gap-3 p-3 rounded-xl hover:bg-amber-50 transition-colors">
+            <span class="material-symbols-outlined text-amber-500">call</span>
+            <div>
+              <p class="font-bold text-sm">Call Us</p>
+              <p class="text-xs text-slate-500">+91 98765 43210</p>
+            </div>
+          </a>
+          <a href="#" class="flex items-center gap-3 p-3 rounded-xl hover:bg-amber-50 transition-colors">
+            <span class="material-symbols-outlined text-amber-500">chat</span>
+            <div>
+              <p class="font-bold text-sm">Live Chat</p>
+              <p class="text-xs text-slate-500">Available 9 AM - 11 PM</p>
+            </div>
+          </a>
+          <a href="#" class="flex items-center gap-3 p-3 rounded-xl hover:bg-amber-50 transition-colors">
+            <span class="material-symbols-outlined text-amber-500">support_agent</span>
+            <div>
+              <p class="font-bold text-sm">FAQs</p>
+              <p class="text-xs text-slate-500">Quick answers to common questions</p>
+            </div>
+          </a>
+        </div>
+      </div>
+      
+    </div>
+    
+  </div>
+  
+  <!-- Reorder / Share Buttons -->
+  <div class="section-block flex flex-wrap gap-4 justify-center mt-8 no-print">
+    <button onclick="reorderItems()" class="inline-flex items-center gap-2 px-8 py-4 bg-amber-500 hover:bg-amber-600 text-slate-900 rounded-full font-black transition-all shadow-lg">
+      <span class="material-symbols-outlined">repeat</span> Reorder Same Items
+    </button>
+    <button onclick="shareOrder()" class="inline-flex items-center gap-2 px-8 py-4 bg-white hover:bg-slate-50 text-slate-800 rounded-full font-black transition-all shadow-lg border border-amber-500/20">
+      <span class="material-symbols-outlined">share</span> Share Order
+    </button>
+  </div>
+  
+  <!-- Similar Recommendations -->
+  <div class="section-block mt-12 no-print">
+    <h2 class="text-2xl font-black mb-6 flex items-center gap-2">
+      <span class="material-symbols-outlined text-amber-500">recommend</span> You Might Also Like
+    </h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      
+      <!-- Recommendation 1 -->
+      <div class="bg-white rounded-2xl overflow-hidden border border-amber-500/10 shadow-sm hover:shadow-lg transition-all">
+        <div class="aspect-[4/3] bg-amber-100/30 relative">
+          <div class="absolute inset-0 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1599043513900-ed6fe01d3833?w=400&q=80')"></div>
+        </div>
+        <div class="p-4">
+          <h3 class="font-black text-sm mb-1">Double Egg Biriyani</h3>
+          <p class="text-xs text-slate-500 mb-2">2 eggs + extra masala</p>
+          <div class="flex items-center justify-between">
+            <span class="font-black text-amber-600">₹189</span>
+            <a href="{% url 'menu' %}" class="text-xs font-bold text-amber-500 hover:text-amber-600">Order Now →</a>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Recommendation 2 -->
+      <div class="bg-white rounded-2xl overflow-hidden border border-amber-500/10 shadow-sm hover:shadow-lg transition-all">
+        <div class="aspect-[4/3] bg-amber-100/30 relative">
+          <div class="absolute inset-0 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1633945274405-b6c8069047b0?w=400&q=80')"></div>
+        </div>
+        <div class="p-4">
+          <h3 class="font-black text-sm mb-1">Chicken 65 Biriyani</h3>
+          <p class="text-xs text-slate-500 mb-2">Spicy chicken 65 on top</p>
+          <div class="flex items-center justify-between">
+            <span class="font-black text-amber-600">₹289</span>
+            <a href="{% url 'menu' %}" class="text-xs font-bold text-amber-500 hover:text-amber-600">Order Now →</a>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Recommendation 3 -->
+      <div class="bg-white rounded-2xl overflow-hidden border border-amber-500/10 shadow-sm hover:shadow-lg transition-all">
+        <div class="aspect-[4/3] bg-amber-100/30 relative">
+          <div class="absolute inset-0 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1563379926898-05f4575a45d8?w=400&q=80')"></div>
+        </div>
+        <div class="p-4">
+          <h3 class="font-black text-sm mb-1">Family Pack Mutton</h3>
+          <p class="text-xs text-slate-500 mb-2">Serves 4, 6 pieces mutton</p>
+          <div class="flex items-center justify-between">
+            <span class="font-black text-amber-600">₹799</span>
+            <a href="{% url 'menu' %}" class="text-xs font-bold text-amber-500 hover:text-amber-600">Order Now →</a>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Recommendation 4 -->
+      <div class="bg-white rounded-2xl overflow-hidden border border-amber-500/10 shadow-sm hover:shadow-lg transition-all">
+        <div class="aspect-[4/3] bg-amber-100/30 relative">
+          <div class="absolute inset-0 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=400&q=80')"></div>
+        </div>
+        <div class="p-4">
+          <h3 class="font-black text-sm mb-1">Ghee Rice + Raita</h3>
+          <p class="text-xs text-slate-500 mb-2">Perfect side combo</p>
+          <div class="flex items-center justify-between">
+            <span class="font-black text-amber-600">₹99</span>
+            <a href="{% url 'menu' %}" class="text-xs font-bold text-amber-500 hover:text-amber-600">Order Now →</a>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+  
+</main>
+
+<!-- ======================================================
+     PRINT-ONLY RECEIPT (hidden on screen)
+====================================================== -->
+<div class="hidden print:block p-8">
+  <div class="text-center mb-6">
+    <h1 class="text-3xl font-black">Biriyani Bliss</h1>
+    <p class="text-sm">123, Food Street, Gourmet City - 560001</p>
+    <p class="text-sm">Phone: +91 98765 43210</p>
+  </div>
+  
+  <div class="border-t border-b border-black py-4 my-4">
+    <p><strong>Order #:</strong> {{ order.id }}</p>
+    <p><strong>Date:</strong> {{ order.created_at|date:"d M Y, h:i A" }}</p>
+    <p><strong>Customer:</strong> {{ order.user.get_full_name|default:order.user.username }}</p>
+    <p><strong>Phone:</strong> {{ order.phone_number }}</p>
+    <p><strong>Delivery Address:</strong> {{ order.delivery_address }}</p>
+  </div>
+  
+  <table class="w-full text-left">
+    <thead>
+      <tr>
+        <th class="border-b border-black py-2">Item</th>
+        <th class="border-b border-black py-2">Qty</th>
+        <th class="border-b border-black py-2">Price</th>
+        <th class="border-b border-black py-2">Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in order_items %}
+      <tr>
+        <td class="py-2">
+          {% if item.name %}
+            {{ item.name }}
+          {% elif item.menu_item and item.menu_item.name %}
+            {{ item.menu_item.name }}
+          {% else %}
+            Biriyani Item
+          {% endif %}
+        </td>
+        <td class="py-2">{{ item.quantity }}</td>
+        <td class="py-2">₹{{ item.price|floatformat:2 }}</td>
+        <td class="py-2">₹{{ item.quantity|multiply:item.price|floatformat:2 }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  
+  {% with subtotal=order.total_amount gst=order.total_amount|multiply:0.05 total=order.total_amount|add:order.total_amount|multiply:0.05 %}
+  <div class="text-right mt-4">
+    <p><strong>Subtotal:</strong> ₹{{ order.total_amount|floatformat:2 }}</p>
+    <p><strong>Delivery Fee:</strong> FREE</p>
+    <p><strong>GST (5%):</strong> ₹{{ gst|floatformat:2 }}</p>
+    <p class="text-xl font-bold"><strong>Total:</strong> ₹{{ total|floatformat:2 }}</p>
+  </div>
+  {% endwith %}
+  
+  <div class="text-center mt-8 text-sm">
+    <p>Thank you for ordering with Biriyani Bliss!</p>
+    <p>For any queries, call +91 98765 43210</p>
+  </div>
+</div>
+
+<!-- ======================================================
+     FOOTER
+====================================================== -->
+<footer class="bg-[#221810] text-slate-300 py-12 px-4 md:px-16 border-t border-amber-500/20 mt-8 no-print">
+  <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+    <div class="flex items-center gap-2 text-amber-500">
+      <span class="material-symbols-outlined text-3xl">restaurant</span>
+      <h2 class="text-lg font-black uppercase tracking-tight">Biriyani Bliss</h2>
+    </div>
+    <div class="flex flex-wrap gap-6 text-sm justify-center">
+      <a href="{% url 'public_dashboard' %}" class="hover:text-amber-400 transition-colors">Home</a>
+      <a href="{% url 'menu' %}" class="hover:text-amber-400 transition-colors">Menu</a>
+      <a href="{% url 'public_dashboard' %}#how-to-order" class="hover:text-amber-400 transition-colors">How to Order</a>
+      <a href="{% url 'public_dashboard' %}#offers" class="hover:text-amber-400 transition-colors">Offers</a>
+      <a href="{% url 'order_list' %}" class="text-amber-400 font-bold">My Orders</a>
+    </div>
+    <p class="text-xs text-slate-500">© 2024 Biriyani Bliss. All rights reserved.</p>
+  </div>
+</footer>
+
+<script>
+  // ── CSRF Token ──
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+  const csrftoken = getCookie('csrftoken');
+
+  // ── Hamburger ──
+  function toggleNav() {
+    const nav = document.getElementById('mobile-nav');
+    const btn = document.getElementById('hamburger');
+    if (nav) nav.classList.toggle('open');
+    if (btn) btn.classList.toggle('open');
+  }
+
+  // ── Update Cart Count from localStorage ──
+  function updateCartCount() {
+    const cart = JSON.parse(localStorage.getItem('cartItems') || '[]');
+    const count = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+    document.getElementById('cart-count').textContent = count;
+    const mobileCount = document.getElementById('cart-count-mobile');
+    if (mobileCount) mobileCount.textContent = count;
+  }
+
+  // ── Reorder Items ──
+  function reorderItems() {
+    const orderItems = [
+      {% for item in order_items %}
+      {
+        id: {% if item.menu_item %}{{ item.menu_item.id }}{% else %}0{% endif %},
+        name: "{% if item.name %}{{ item.name|escapejs }}{% elif item.menu_item and item.menu_item.name %}{{ item.menu_item.name|escapejs }}{% else %}Biriyani Item{% endif %}",
+        price: {{ item.price }},
+        quantity: {{ item.quantity }}
+      },
+      {% endfor %}
+    ];
+    
+    // Get existing cart
+    let cart = JSON.parse(localStorage.getItem('cartItems') || '[]');
+    
+    // Add items to cart
+    orderItems.forEach(item => {
+      if (item.id === 0) {
+        // For items without ID, use name as key
+        const existing = cart.find(i => i.name === item.name);
+        if (existing) {
+          existing.quantity += item.quantity;
+        } else {
+          cart.push(item);
+        }
+      } else {
+        const existing = cart.find(i => i.id === item.id);
+        if (existing) {
+          existing.quantity += item.quantity;
+        } else {
+          cart.push(item);
+        }
+      }
+    });
+    
+    localStorage.setItem('cartItems', JSON.stringify(cart));
+    updateCartCount();
+    
+    // Show success message
+    alert('Items added to cart!');
+    window.location.href = '{% url 'menu' %}';
+  }
+
+  // ── Share Order ──
+  function shareOrder() {
+    if (navigator.share) {
+      navigator.share({
+        title: 'My Biriyani Bliss Order',
+        text: `I just ordered from Biriyani Bliss! Order #{{ order.id }} for ₹{{ order.total_amount }}`,
+        url: window.location.href,
+      });
+    } else {
+      // Fallback - copy to clipboard
+      navigator.clipboard.writeText(window.location.href);
+      alert('Order link copied to clipboard!');
+    }
+  }
+
+  // ── Poll for Order Status Updates ──
+  function pollOrderStatus() {
+    const orderId = {{ order.id }};
+    
+    setInterval(async () => {
+      try {
+        const response = await fetch(`/User/api/order/${orderId}/status/`);
+        const data = await response.json();
+        
+        // Update status display if element exists
+        const statusBadge = document.querySelector('.current-status-badge');
+        if (statusBadge && data.status_display) {
+          statusBadge.textContent = data.status_display;
+        }
+        
+      } catch (error) {
+        console.error('Error polling status:', error);
+      }
+    }, 30000); // Poll every 30 seconds
+  }
+
+  // ── Initialize on Load ──
+  document.addEventListener('DOMContentLoaded', () => {
+    updateCartCount();
+    
+    // Start polling for status updates (if order not delivered/cancelled)
+    {% if order.status not in 'delivered,cancelled' %}
+    pollOrderStatus();
+    {% endif %}
+  });
+</script>
+
+</body>
+</html>
