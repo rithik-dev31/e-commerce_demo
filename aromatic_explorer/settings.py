@@ -77,15 +77,15 @@ WSGI_APPLICATION = 'aromatic_explorer.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 import dj_database_url
+import dj_database_url
+import os
 
 DATABASES = {
-    'default': dj_database_url.config(
-        default='postgresql://user:password@localhost/dbname',
-        conn_max_age=600,
-        conn_health_checks=True,
+    "default": dj_database_url.config(
+        default=os.environ.get("DATABASE_URL"),
+        conn_max_age=600
     )
 }
-
 
 # DATABASES = { 
 #    "default": { 
